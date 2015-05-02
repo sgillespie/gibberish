@@ -1,3 +1,4 @@
+### Haskell
 dist
 cabal-dev
 *.o
@@ -14,3 +15,7 @@ cabal.sandbox.config
 *.prof
 *.aux
 *.hp
+
+### Idea
+.idea
+*.iml
