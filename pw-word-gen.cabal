@@ -1,0 +1,21 @@
+name:                pw-word-gen
+version:             0.1.0
+synopsis:            A library that creates pronounceable passwords
+homepage:            https://www.github.com/sgillespie/pw-word-gen
+license:             OtherLicense
+license-file:        LICENSE
+author:              Sean Gillespie
+maintainer:          sean@mistersg.net
+copyright:           Copywright: (c) 2015 Sean Gillespie
+category:            Cryptography
+build-type:          Simple
+extra-source-files:  README.md
+cabal-version:       >=1.10
+
+library
+  -- exposed-modules:     
+  -- other-modules:       
+  -- other-extensions:    
+  build-depends:       base >=4.8 && <4.9
+  hs-source-dirs:      src/lib
+  default-language:    Haskell2010
