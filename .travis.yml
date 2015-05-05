@@ -1,4 +1,5 @@
 language: haskell
 ghc:
-  - '7.10'
+  # Not yet!
+  # - '7.10'
   - 7.8
