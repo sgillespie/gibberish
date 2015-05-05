@@ -1,5 +1,11 @@
-# pw-word-gen
+# Elocrypt
+[![Build Status](https://travis-ci.org/sgillespie/elocrypt.svg?branch=master)](https://travis-ci.org/sgillespie/elocrypt)
+
 A Haskell library that generates pronounceable passwords
+
+## Project Goals
+* Generate pronounceable passwords
+* Generate hard-to-guess passwords: harder than Vince Carter's knee cartilage is
 
 This is based on Tom Van Vleck's javascript generator @ http://www.multicians.org/thvv/gpw-js.html
 
@@ -9,7 +15,4 @@ You can use this for any reason, provided that you:
  * Share your source freely
  * Give Tom Van Vleck, and all the other pioneers, if you use the data or algorithms. (A link to http://www.multicians.org/thvv/gpw-js.html is sufficient
 
-## Project Goals
 
-* Generate pronounceable passwords
-* Generate hard-to-guess passwords: harder than Vince Carter's knee cartilage is
