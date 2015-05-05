@@ -1,4 +1,5 @@
 language: haskell
 ghc:
-  - 7.10.1
+  # Not ready yet...
+  # - 7.10.1
   - 7.8
