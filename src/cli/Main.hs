@@ -1,6 +1,6 @@
 module Main where
 
-import PwWordGen.Password
+import Elocrypt.Password
 
 main :: IO ()
 main = putStrLn generate
