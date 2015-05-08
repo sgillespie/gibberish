@@ -3,4 +3,4 @@ module Main where
 import Elocrypt.Password
 
 main :: IO ()
-main = putStrLn generate
+main = putStrLn (generate getStdGen)
