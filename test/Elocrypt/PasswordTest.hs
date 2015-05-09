@@ -39,3 +39,7 @@ prop_generateShouldBeSameLength :: GenPassword -> Bool
 prop_generateShouldBeSameLength (GenPassword (pass, gen))
   = len == (length . fst . generate gen $ len)
   where len = length pass
+
+prop_generateShouldConsistOfAlphabet :: GenPassword -> Bool
+prop_generateShouldConsistOfAlphabet (GenPassword (p, _))
+  = all ((flip elem) alphabet) p
