@@ -6,4 +6,5 @@ import System.Random
 import Elocrypt.Password
 
 main :: IO ()
-main = (fst . generate) `liftM` getStdGen >>= putStrLn
+main = (fst . (flip generate) 6) `liftM` getStdGen >>= putStrLn
+
