@@ -30,7 +30,12 @@ tests = $(testGroupGenerator)
 
 prop_generateShouldBeUnique :: GenPassword -> Bool
 prop_generateShouldBeUnique (GenPassword (p, g))
-  = p /= fst (generate g (length p))
+  = p /= (fst . generate g . length $ p)
 
 prop_generateShouldBeLong :: GenPassword -> Bool
 prop_generateShouldBeLong (GenPassword p) = length (fst p) >= 6
+
+prop_generateShouldBeSameLength :: GenPassword -> Bool
+prop_generateShouldBeSameLength (GenPassword (pass, gen))
+  = len == (length . fst . generate gen $ len)
+  where len = length pass
