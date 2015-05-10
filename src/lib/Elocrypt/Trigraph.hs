@@ -3,10 +3,10 @@ module Elocrypt.Trigraph where
 import Control.Monad
 import Data.List
 
-findFrequency :: String -> Maybe [Int]
+findFrequency :: String -> Maybe [Rational]
 findFrequency s = snd `liftM` find ((==) s . fst) frequencies
 
-frequencies :: [(String, [Int])]
+frequencies :: [(String, [Rational])]
 frequencies = [("aa", [2,0,3,0,0,0,1,0,0,0,0,1,1,1,0,0,0,3,2,0,0,0,0,0,0,0]),
                ("ab", [37,25,2,5,38,0,0,2,46,1,0,304,0,2,49,0,0,24,24,0,19,0,0,0,14,0]),
                ("ac", [26,1,64,2,107,0,1,94,67,0,173,13,5,1,35,1,13,32,3,114,23,0,0,0,45,0]),
