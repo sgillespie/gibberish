@@ -16,7 +16,7 @@ Build elocrypt:
 cabal configure
 cabal build
 ```
-If desired, install:
+Then, install (if desired):
 ```
 cabal install
 ```
@@ -27,9 +27,11 @@ Running elocrypt is as simple as...
 elocrypt [length]
 ```
 
-## Credits
+## Authors
+Sean Gillespie <sean@mistersg.net>
 
-This is based on Tom Van Vleck's javascript generator @ http://www.multicians.org/thvv/gpw-js.html
+## Credits
+Thanks to Tom Van Vleck for creating a 3rd order english approximation password generator.  Elocrypt is based on his javascript generator @ http://www.multicians.org/thvv/gpw-js.html
 
 ## Copying
 You can use this source for any reason, provided that you:
