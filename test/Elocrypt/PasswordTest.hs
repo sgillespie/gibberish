@@ -2,12 +2,16 @@
 module Elocrypt.PasswordTest where
 
 import Control.Monad
-import System.Random
+import Control.Monad.Random hiding (next)
+import Data.Maybe
+import System.Random hiding (next)
 import Test.QuickCheck hiding (generate)
 import Test.Tasty.QuickCheck (testProperty)
 import Test.Tasty.TH
 
 import Elocrypt.Password
+import Elocrypt.Trigraph
+import Elocrypt.TrigraphTest
 
 newtype GenPassword = GenPassword (String, StdGen)
 
@@ -25,7 +29,7 @@ instance Arbitrary GenPassword where
     gen <- arbitrary
     len <- suchThat arbitrary (>=6)
     return . GenPassword . generate gen $ len
- 
+
 tests = $(testGroupGenerator)
 
 prop_generateShouldBeUnique :: GenPassword -> Bool
@@ -43,3 +47,12 @@ prop_generateShouldBeSameLength (GenPassword (pass, gen))
 prop_generateShouldConsistOfAlphabet :: GenPassword -> Bool
 prop_generateShouldConsistOfAlphabet (GenPassword (p, _))
   = all ((flip elem) alphabet) p
+
+prop_first2ShouldHaveLength2 :: StdGen -> Bool
+prop_first2ShouldHaveLength2 g = length (evalRand first2 g) == 2
+
+prop_nextShouldSkip0Weights :: TrigraphChar -> TrigraphChar -> StdGen -> Property
+prop_nextShouldSkip0Weights (T c1) (T c2) gen
+  = not (null frequency) ==> evalRand (next . reverse $ f2) gen `elem` (map fst frequency)
+  where f2 = [c1, c2]
+        frequency = filter ((/=0) . snd) . zip ['a'..'z'] . fromJust . findFrequency $ f2
