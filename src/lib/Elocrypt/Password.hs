@@ -7,11 +7,6 @@ import Control.Monad.Random hiding (next)
 import Data.Maybe
 import System.Random hiding (next)
 
-generate' :: RandomGen g => g -> Int -> (String, g)
-generate' gen len = runRand m gen
-  where weights = zip alphabet (repeat 1)
-        m = sequence . take len . repeat . fromList $ weights
-
 generate :: RandomGen g => g -> Int -> (String, g)
 generate g len = runRand (mkPassword len) g
 
