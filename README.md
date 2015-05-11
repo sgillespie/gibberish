@@ -41,4 +41,4 @@ You can use this source for any reason, provided that you:
  * Give Tom Van Vleck, and all the other pioneers, if you use the data or algorithms. (A link to http://www.multicians.org/thvv/gpw-js.html is sufficient
  * Use a compatible license
 
-Please see LICENSE all details
+Please see LICENSE for all details
