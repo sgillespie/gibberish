@@ -1,18 +1,42 @@
 # Elocrypt
 [![Build Status](https://travis-ci.org/sgillespie/elocrypt.svg?branch=master)](https://travis-ci.org/sgillespie/elocrypt)
 
-A Haskell library that generates pronounceable passwords
+Elocrypt is a Haskell library that generates pronounceable, hard-to-guess passwords.. like, harder than Vince Carter's need cartilage. Elocrypt includes a library and program.
 
-## Project Goals
-* Generate pronounceable passwords
-* Generate hard-to-guess passwords: harder than Vince Carter's knee cartilage is
+## Downloading
+Elocrypt sources can be found @ https://github.com/sgillespie/elocrypt
+
+## Building
+In order to build or install you will need
+ * GHC (tested on 7.10 and 7.8)
+ * cabal-install (tested on 1.20 and 1.22)
+
+Build elocrypt:
+```
+cabal configure
+cabal build
+```
+If desired, install:
+```
+cabal install
+```
+
+## Running
+Running elocrypt is as simple as...
+```
+elocrypt [length]
+```
+
+## Credits
 
 This is based on Tom Van Vleck's javascript generator @ http://www.multicians.org/thvv/gpw-js.html
 
-You can use this for any reason, provided that you:
+## Copying
+You can use this source for any reason, provided that you:
 
  * Let Tom Van Vleck know you are using it: http://www.multicians.org/cgi-sys/cgiwrap/thvv/squirnet.cgi
  * Share your source freely
  * Give Tom Van Vleck, and all the other pioneers, if you use the data or algorithms. (A link to http://www.multicians.org/thvv/gpw-js.html is sufficient
+ * Use a compatible license
 
-
+Please see LICENSE all details
