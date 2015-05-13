@@ -32,7 +32,7 @@ main = do
   putStrLn (password opts gen)
 
 password :: RandomGen g => Options -> g -> String
-password opts gen = fst . generate gen $ (optSize opts)
+password opts gen = newPassword (optSize opts) gen
 
 data Options
   = Options { optSize    :: Int,

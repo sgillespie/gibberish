@@ -5,40 +5,37 @@ import Control.Monad
 import Control.Monad.Random hiding (next)
 import Data.Maybe
 import System.Random hiding (next)
-import Test.QuickCheck hiding (generate)
+import Test.QuickCheck
 import Test.Tasty.QuickCheck (testProperty)
 import Test.Tasty.TH
 
 import Elocrypt.Password
+import Elocrypt.Test.Instances
 import Elocrypt.Trigraph
-import Elocrypt.TrigraphTest -- TODO: Extract useful instances into common module
-
-instance Arbitrary StdGen where
-  arbitrary = mkStdGen `liftM` arbitrary
 
 tests = $(testGroupGenerator)
 
-prop_genPasswordShouldBeUnique :: Int -> StdGen -> Property
-prop_genPasswordShouldBeUnique len gen
-  = len >= 3 ==> p /= fst (genPassword len gen')
+prop_genPasswordShouldBeUnique :: GreaterThan2 Int -> StdGen -> Bool
+prop_genPasswordShouldBeUnique (GT2 len) gen
+  = p /= fst (genPassword len gen')
   where (p, gen') = genPassword len gen
 
-prop_newPasswordShouldBeLength :: Int -> StdGen -> Property
-prop_newPasswordShouldBeLength len gen = len >= 3 ==> length (newPassword len gen) == len
+prop_newPasswordShouldBeLength :: GreaterThan2 Int -> StdGen -> Bool
+prop_newPasswordShouldBeLength (GT2 len) gen = length (newPassword len gen) == len
 
-prop_newPasswordShouldConsistOfAlphabet :: Int -> StdGen -> Property
-prop_newPasswordShouldConsistOfAlphabet len gen
-  = len >= 3 ==> all ((flip elem) alphabet) (newPassword len gen)
+prop_newPasswordShouldConsistOfAlphabet :: GreaterThan2 Int -> StdGen -> Bool
+prop_newPasswordShouldConsistOfAlphabet (GT2 len) gen
+  = all ((flip elem) alphabet) (newPassword len gen)
 
 prop_first2ShouldHaveLength2 :: StdGen -> Bool
 prop_first2ShouldHaveLength2 g = length (evalRand first2 g) == 2
 
-prop_nextShouldSkip0Weights :: TrigraphChar -> TrigraphChar -> StdGen -> Property
-prop_nextShouldSkip0Weights (T c1) (T c2) gen = isCandidate next' [c1, c2]
+prop_nextShouldSkip0Weights :: AlphaChar -> AlphaChar -> StdGen -> Property
+prop_nextShouldSkip0Weights (Alpha c1) (Alpha c2) gen = isCandidate next' [c1, c2]
   where next' = evalRand (next . reverse $ [c1, c2]) gen
 
-prop_lastNShouldSkip0Weights :: TrigraphChar -> TrigraphChar -> Int -> StdGen -> Property
-prop_lastNShouldSkip0Weights (T c1) (T c2) len gen
+prop_lastNShouldSkip0Weights :: AlphaChar -> AlphaChar -> Int -> StdGen -> Property
+prop_lastNShouldSkip0Weights (Alpha c1) (Alpha c2) len gen
   = len > 0 ==> lastNShouldSkip0Weights' lastN'
   where f2 = [c1, c2]
         lastN' = evalRand (lastN (reverse [c1, c2]) len) gen

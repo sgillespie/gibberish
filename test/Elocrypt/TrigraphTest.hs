@@ -6,18 +6,13 @@ import Test.QuickCheck
 import Test.Tasty.QuickCheck (testProperty)
 import Test.Tasty.TH
 
+import Elocrypt.Test.Instances
 import Elocrypt.Trigraph
 
 tests = $(testGroupGenerator)
 
-newtype TrigraphChar = T Char
-                     deriving (Eq, Show)
-
-instance Arbitrary TrigraphChar where
-  arbitrary = T `liftM` elements ['a'..'z']
-
-prop_findFrequencyShouldSucceedWith2Chars :: TrigraphChar -> TrigraphChar -> Bool
-prop_findFrequencyShouldSucceedWith2Chars (T c1) (T c2)
+prop_findFrequencyShouldSucceedWith2Chars :: AlphaChar -> AlphaChar -> Bool
+prop_findFrequencyShouldSucceedWith2Chars (Alpha c1) (Alpha c2)
   = fromJust (findFrequency [c1, c2])
   where fromJust (Just _) = True
         fromJust Nothing  = False
