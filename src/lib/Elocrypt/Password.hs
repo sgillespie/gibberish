@@ -7,8 +7,11 @@ import Control.Monad.Random hiding (next)
 import Data.Maybe
 import System.Random hiding (next)
 
-generate :: RandomGen g => g -> Int -> (String, g)
-generate g len = runRand (mkPassword len) g
+genPassword :: RandomGen g => Int -> g -> (String, g)
+genPassword len gen = runRand (mkPassword len) gen
+
+newPassword :: RandomGen g => Int -> g -> String
+newPassword len gen = evalRand (mkPassword len) gen
 
 mkPassword :: MonadRandom m => Int -> m String
 mkPassword len = reverse `liftM` first2 >>= (flip lastN) (len - 2) >>= return . reverse
