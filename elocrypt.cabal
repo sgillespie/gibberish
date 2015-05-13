@@ -1,6 +1,6 @@
 name:                elocrypt
 version:             0.2.0
-synopsis:            A library that creates pronounceable passwords
+synopsis:            Generate easy-to-remember, hard-to-guess passwords
 homepage:            https://www.github.com/sgillespie/elocrypt
 license:             OtherLicense
 license-file:        LICENSE

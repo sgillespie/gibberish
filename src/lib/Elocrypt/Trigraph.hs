@@ -1,11 +1,28 @@
+{-|
+Module:      Elocrypt.Trigraph
+Description: Generate a frequency trigraph based on an english dictionary
+Copyright:   (c) Sean Gillespie, 2015
+License:     OtherLicense
+Maintainer:  Sean Gillespie <sean@mistersg.net>
+Stability:   Experimental
+
+Generate a letter frequency trigraph, based on a dictionary
+-}
 module Elocrypt.Trigraph where
 
 import Control.Monad
 import Data.List
 
+-- |Search for the character frequencies based on the first a two-letter string
 findFrequency :: String -> Maybe [Rational]
 findFrequency s = snd `liftM` find ((==) s . fst) frequencies
 
+-- | A map of character frequencies, based on a dictionary.  The key is a two-letter
+--   string, and the value is a list of probabilities (a-z). It's form is:
+--
+-- > [("aa", [2,0,3,0,0,0,1,0,0,0,0,1,1,1,0,0,0,3,2,0,0,0,0,0,0,0]),
+-- > ...
+-- >  ("zz", [7,0,0,0,1,0,0,0,7,0,0,17,0,0,2,0,0,0,0,0,0,0,1,0,5,0])]
 frequencies :: [(String, [Rational])]
 frequencies = [("aa", [2,0,3,0,0,0,1,0,0,0,0,1,1,1,0,0,0,3,2,0,0,0,0,0,0,0]),
                ("ab", [37,25,2,5,38,0,0,2,46,1,0,304,0,2,49,0,0,24,24,0,19,0,0,0,14,0]),
