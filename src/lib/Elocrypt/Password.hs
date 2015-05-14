@@ -33,6 +33,20 @@ genPassword :: RandomGen g
                -> (String, g)
 genPassword = runRand . mkPassword
 
+-- |Plural version of genPassword.  Generates an infinite list of passwords
+--  using the generator g, returning the result and the updated generator.
+--
+-- @
+-- -- Generate 10 passwords of length 10 using the system generator
+-- myGenPasswords :: IO ([String], StdGen)
+-- myGenPasswords = (\(ls, g) -> (take 10 ls, g) `liftM` genPasswords 10 `liftM` getStdGen
+-- @
+genPasswords :: RandomGen g
+                => Int -- ^ password length
+                -> g   -- ^ random generator
+                -> ([String], g)
+genPasswords = runRand . mkPasswords
+
 -- |Generate a password using the generator g, returning the result.
 --
 --  @
@@ -42,23 +56,50 @@ genPassword = runRand . mkPassword
 --  @
 newPassword :: RandomGen g
                => Int -- ^ password length
-               -> g   -- ^  random generator
+               -> g   -- ^ random generator
                -> String
 newPassword = evalRand . mkPassword
+
+-- |Plural version of newPassword.  Generates an infinite list of passwords
+--  using the generator g, returning the result
+--
+-- @
+-- -- Generate 10 passwords of length 10 using the system generator
+-- myNewPasswords :: IO [String]
+-- myNewPasswords = (take 10 . genPasswords 10) `liftM` getStdGen
+-- @
+newPasswords :: RandomGen g
+                => Int -- ^ password length
+                -> g   -- ^ random generator
+                -> [String]
+newPasswords = evalRand . mkPasswords
 
 -- |Generate a password using the MonadRandom m. MonadRandom is exposed here
 --  for extra control.
 --
 --  @
---  -- Generate an infinite list of passwords of length 10 using the system generator
---  myPasswords :: IO [String]
---  myPasswords = evalRand (sequence . repeat . mkPassword $ 10) \`liftM\` getStdGen
+--  -- Generate a password of length 10 using the system generator
+--  myPasswords :: IO String
+--  myPasswords = evalRand (mkPassword 10) \`liftM\` getStdGen
 --  @
 mkPassword :: MonadRandom m
-              => Int
+              => Int -- ^ password length
               -> m String
 mkPassword len = reverse `liftM` first2 >>= (flip lastN) (len - 2) >>= return . reverse
 
+-- |Plural version of mkPassword.  Generate an infinite list of passwords using
+--  the MonadRandom m.  MonadRandom is exposed here for extra control.
+--
+-- @
+-- -- Generate an infinite list of passwords of length 10 using the system generator
+-- myMkPasswords :: IO [String]
+-- myMkPasswords = evalRand (mkPasswords 10) \`liftM\` getStdGen
+-- @
+mkPasswords :: MonadRandom m
+               => Int -- ^ password length
+               -> m [String]
+mkPasswords = sequence . repeat . mkPassword
+               
 -- |The alphabet we sample random values from
 alphabet :: [Char]
 alphabet = ['a'..'z']

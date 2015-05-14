@@ -20,12 +20,22 @@ prop_genPasswordShouldBeUnique (GT2 len) gen
   = p /= fst (genPassword len gen')
   where (p, gen') = genPassword len gen
 
+prop_genPasswordsShouldBeUnique :: GreaterThan2 Int -> StdGen -> Bool
+prop_genPasswordsShouldBeUnique (GT2 len) gen
+  = p /= ps
+  where (p:ps:_) = fst (genPasswords len gen)
+
 prop_newPasswordShouldBeLength :: GreaterThan2 Int -> StdGen -> Bool
 prop_newPasswordShouldBeLength (GT2 len) gen = length (newPassword len gen) == len
 
 prop_newPasswordShouldConsistOfAlphabet :: GreaterThan2 Int -> StdGen -> Bool
 prop_newPasswordShouldConsistOfAlphabet (GT2 len) gen
   = all ((flip elem) alphabet) (newPassword len gen)
+
+prop_newPasswordsShouldBeUnique :: GreaterThan2 Int -> StdGen -> Bool
+prop_newPasswordsShouldBeUnique (GT2 len) gen
+  = p /= ps
+  where (p:ps:_) = newPasswords len gen
 
 prop_first2ShouldHaveLength2 :: StdGen -> Bool
 prop_first2ShouldHaveLength2 g = length (evalRand first2 g) == 2
