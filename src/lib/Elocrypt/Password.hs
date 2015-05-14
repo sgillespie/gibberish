@@ -31,7 +31,7 @@ genPassword :: RandomGen g
                => Int -- ^ password length
                -> g   -- ^ random generator
                -> (String, g)
-genPassword len gen = runRand (mkPassword len) gen
+genPassword = runRand . mkPassword
 
 -- |Generate a password using the generator g, returning the result.
 --
@@ -44,7 +44,7 @@ newPassword :: RandomGen g
                => Int -- ^ password length
                -> g   -- ^  random generator
                -> String
-newPassword len gen = evalRand (mkPassword len) gen
+newPassword = evalRand . mkPassword
 
 -- |Generate a password using the MonadRandom m. MonadRandom is exposed here
 --  for extra control.
