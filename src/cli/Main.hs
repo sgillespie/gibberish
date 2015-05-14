@@ -10,7 +10,7 @@ import System.Random
 
 import Elocrypt.Password
 
-version = "elocrypt 0.2.0"
+version = "elocrypt 0.3.0"
 
 main :: IO ()
 main = do
