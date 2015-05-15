@@ -27,8 +27,8 @@ source-repository this
   tag: v0.2.0
                   
 library
-  exposed-modules:     Elocrypt.Password,
-                       Elocrypt.Trigraph
+  exposed-modules:     Data.Elocrypt,
+                       Data.Elocrypt.Trigraph
   -- other-modules:       
   -- other-extensions:    
   build-depends:       base >=4.7 && <4.9,

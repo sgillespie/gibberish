@@ -8,9 +8,9 @@ Stability:   Experimental
 
 Generate easy-to-remember, hard-to-guess passwords
 -}
-module Elocrypt.Password where
+module Data.Elocrypt where
 
-import Elocrypt.Trigraph
+import Data.Elocrypt.Trigraph
 
 import Control.Monad
 import Control.Monad.Random hiding (next)

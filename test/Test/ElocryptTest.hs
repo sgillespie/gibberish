@@ -1,5 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Elocrypt.PasswordTest where
+module Test.ElocryptTest where
 
 import Control.Monad
 import Control.Monad.Random hiding (next)
@@ -9,9 +9,9 @@ import Test.QuickCheck
 import Test.Tasty.QuickCheck (testProperty)
 import Test.Tasty.TH
 
-import Elocrypt.Password
-import Elocrypt.Test.Instances
-import Elocrypt.Trigraph
+import Data.Elocrypt
+import Data.Elocrypt.Trigraph
+import Test.Elocrypt.Instances
 
 tests = $(testGroupGenerator)
 

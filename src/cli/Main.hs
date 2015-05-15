@@ -8,7 +8,7 @@ import System.Exit
 import System.IO
 import System.Random
 
-import Elocrypt.Password
+import Data.Elocrypt
 
 version = "elocrypt 0.3.0"
 

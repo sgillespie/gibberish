@@ -8,7 +8,7 @@ Stability:   Experimental
 
 Generate a letter frequency trigraph, based on a dictionary
 -}
-module Elocrypt.Trigraph where
+module Data.Elocrypt.Trigraph where
 
 import Control.Monad
 import Data.List

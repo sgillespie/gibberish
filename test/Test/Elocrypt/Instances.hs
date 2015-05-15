@@ -1,4 +1,4 @@
-module Elocrypt.Test.Instances where
+module Test.Elocrypt.Instances where
 
 import Control.Monad
 import System.Random

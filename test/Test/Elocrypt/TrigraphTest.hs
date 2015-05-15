@@ -1,13 +1,13 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Elocrypt.TrigraphTest where
+module Test.Elocrypt.TrigraphTest where
 
 import Control.Monad
 import Test.QuickCheck
 import Test.Tasty.QuickCheck (testProperty)
 import Test.Tasty.TH
 
-import Elocrypt.Test.Instances
-import Elocrypt.Trigraph
+import Test.Elocrypt.Instances
+import Data.Elocrypt.Trigraph
 
 tests = $(testGroupGenerator)
 
