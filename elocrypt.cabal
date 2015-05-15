@@ -6,16 +6,15 @@ license:             OtherLicense
 license-file:        LICENSE
 author:              Sean Gillespie
 maintainer:          sean@mistersg.net
-copyright:           Copywright: (c) 2015 Sean Gillespie
+copyright:           Copyright: (c) 2015 Sean Gillespie
 category:            Cryptography
 build-type:          Simple
 extra-source-files:  README.md
 cabal-version:       >=1.10
 
 description:
-  Elocrypt is a Haskell library that generates pronounceable, hard-to-guess passwords..
-  like, harder than Vince Carter's need cartilage. Elocrypt includes a library and
-  program.
+  Generates pronounceable, hard-to-guess passwords.. like, harder than
+  Vince Carter's need cartilage. Elocrypt includes a library and program.
 
 source-repository head
   type: git
@@ -24,7 +23,7 @@ source-repository head
 source-repository this
   type: git
   location: https://github.com/sgillespie/elocrypt.git
-  tag: v0.2.0
+  tag: v0.3.0
                   
 library
   exposed-modules:     Data.Elocrypt,
