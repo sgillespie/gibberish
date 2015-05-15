@@ -14,7 +14,7 @@ cabal-version:       >=1.10
 
 description:
   Generates pronounceable, hard-to-guess passwords.. like, harder than
-  Vince Carter's need cartilage. Elocrypt includes a library and program.
+  Vince Carter's need cartilage.
 
 source-repository head
   type: git
