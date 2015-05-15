@@ -12,6 +12,20 @@ build-type:          Simple
 extra-source-files:  README.md
 cabal-version:       >=1.10
 
+description:
+  Elocrypt is a Haskell library that generates pronounceable, hard-to-guess passwords..
+  like, harder than Vince Carter's need cartilage. Elocrypt includes a library and
+  program.
+
+source-repository head
+  type: git
+  location: https://github.com/sgillespie/elocrypt.git
+
+source-repository this
+  type: git
+  location: https://github.com/sgillespie/elocrypt.git
+  tag: v0.2.0
+                  
 library
   exposed-modules:     Elocrypt.Password,
                        Elocrypt.Trigraph
