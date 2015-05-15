@@ -1,5 +1,5 @@
 name:                elocrypt
-version:             0.3.0
+version:             0.3.1
 synopsis:            Generate easy-to-remember, hard-to-guess passwords
 homepage:            https://www.github.com/sgillespie/elocrypt
 license:             OtherLicense
@@ -13,8 +13,8 @@ extra-source-files:  README.md
 cabal-version:       >=1.10
 
 description:
-  Generates pronounceable, hard-to-guess passwords.. like, harder than
-  Vince Carter's need cartilage.
+  Generates pronounceable, hard-to-guess passwords.. as hard as
+  Vince Carter's knee cartilage is.
 
 source-repository head
   type: git

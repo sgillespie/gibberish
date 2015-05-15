@@ -10,7 +10,7 @@ import System.Random
 
 import Data.Elocrypt
 
-version = "elocrypt 0.3.0"
+version = "elocrypt 0.3.1"
 
 main :: IO ()
 main = do

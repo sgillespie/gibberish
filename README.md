@@ -1,7 +1,7 @@
 # Elocrypt
 [![Build Status](https://travis-ci.org/sgillespie/elocrypt.svg?branch=master)](https://travis-ci.org/sgillespie/elocrypt)
 
-Elocrypt is a Haskell library that generates pronounceable, hard-to-guess passwords.. like, harder than Vince Carter's need cartilage. Elocrypt includes a library and program.
+Elocrypt is a Haskell library that generates pronounceable, hard-to-guess passwords.. as hard as Vince Carter's knee cartilage is. Elocrypt includes a library and program.
 
 ## Downloading
 Elocrypt sources can be found @ https://github.com/sgillespie/elocrypt
