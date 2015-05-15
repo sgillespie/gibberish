@@ -40,7 +40,7 @@ import Elocrypt.Password
 ...
 -- Generate a word of length 10
 fooGen :: IO String
-fooGen = getStdGen >>= (flip generate) 10 
+fooGen = newPassword 10 `liftM` getStdGen
 ```
 
 Alternatively, you can use Elocrypt.Password.mkPassword if you want to complete control of the random monad
@@ -49,8 +49,8 @@ import Elocrypt.Password
 import Control.Monad.Random
 ...
 -- Generate a word of length 10
-fooGen :: IO String
-fooGen' = getStdGen >>= execRand mkPassword
+fooGen' :: IO String
+fooGen' = execRand mkPassword `liftM` getStdGen
 ```
 
 ## Authors
