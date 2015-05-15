@@ -50,7 +50,7 @@ import Control.Monad.Random
 ...
 -- Generate a word of length 10
 fooGen' :: IO String
-fooGen' = execRand mkPassword `liftM` getStdGen
+fooGen' = evalRand (mkPassword 10) `liftM` getStdGen
 ```
 
 ## Authors
