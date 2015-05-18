@@ -10,11 +10,14 @@ import Test.Proctest.Assertions
 import Test.QuickCheck
 import Test.QuickCheck.Property
 import Test.Tasty hiding (Timeout)
-import Test.Tasty.QuickCheck (testProperty)
+import Test.Tasty.QuickCheck (QuickCheckTests(..), testProperty)
 import Test.Tasty.TH
 
 main :: IO ()
-main = defaultMain tests
+main = defaultMain (options tests)
+
+options :: TestTree -> TestTree
+options = localOption (QuickCheckTests 10)
 
 tests :: TestTree
 tests = testGroup "CLI Tests" [testGroup']
@@ -78,4 +81,4 @@ assertExitedFailure :: Timeout -> ProcessHandle -> IO Bool
 assertExitedFailure t = liftM not . assertExitedSuccess t
 
 sleep' :: IO ()
-sleep' = sleep (seconds 0.005)
+sleep' = sleep (seconds 0.1)
