@@ -1,5 +1,5 @@
 name:                elocrypt
-version:             0.3.1
+version:             0.3.2
 synopsis:            Generate easy-to-remember, hard-to-guess passwords
 homepage:            https://www.github.com/sgillespie/elocrypt
 license:             OtherLicense
@@ -9,7 +9,10 @@ maintainer:          sean@mistersg.net
 copyright:           Copyright: (c) 2015 Sean Gillespie
 category:            Cryptography
 build-type:          Simple
-extra-source-files:  README.md
+extra-source-files:  README.md,
+                     test/*.hs,
+                     test/Test/*.hs,
+                     test/Test/Elocrypt/*.hs
 cabal-version:       >=1.10
 
 description:
