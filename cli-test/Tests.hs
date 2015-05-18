@@ -1,6 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Main where
 
+import Data.Functor
 import Data.List
 import Control.Monad
 
@@ -58,6 +59,7 @@ prop_helpShouldExitSuccess (CliArg arg)
   = arg == "-h" || arg == "--help" ==>
     ioProperty $ do
       (in', out', err', p) <- run "dist/build/elocrypt/elocrypt" [arg]
+      sleep'
       assertExitedSuccess (seconds 2) p
 
 prop_versionShouldExitSuccess :: CliArg -> Property
@@ -65,6 +67,7 @@ prop_versionShouldExitSuccess (CliArg arg)
   = arg == "-v" || arg == "--version" ==>
     ioProperty $ do
       (in', out', err', p) <- run "dist/build/elocrypt/elocrypt" [arg]
+      sleep'
       assertExitedSuccess (seconds 2) p
 
 -- Utility functions
