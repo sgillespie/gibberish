@@ -18,17 +18,12 @@ main = do
   opts <- elocryptOpts args
   gen  <- getStdGen
 
-  -- TODO: Refactor me
-  if (optHelp opts) then do
+  when (optHelp opts) $ do
     hPutStrLn stderr usage
     exitSuccess
-  else return ()
-
-  -- TODO: Refactor me
-  if (optVersion opts) then do
+  when (optVersion opts) $ do
     hPutStrLn stderr version
     exitSuccess
-  else return ()
 
   putStrLn (passwords opts gen)
 
