@@ -11,6 +11,7 @@ import System.Random
 import Data.Elocrypt
 
 version = "elocrypt 0.4.0"
+termLen = 80
 
 main :: IO ()
 main = do
@@ -28,10 +29,14 @@ main = do
   putStrLn (passwords opts gen)
 
 passwords :: RandomGen g => Options -> g -> String
-passwords opts gen = concat . intersperse "\n" . map (concat . intersperse "\t") . group $ ps
+passwords opts gen = concat . intersperse "\n" . map (concat . intersperse "  ") . group' groupSize $ ps
   where ps = take (optNumber opts) . newPasswords (optLength opts) $ gen
-        group (p:ps:pss:psss) = [p, ps, pss]:(group psss)
-        group ps = [ps]
+        groupSize = termLen `div` (optLength opts + 2)
+
+group' :: Int -> [a] -> [[a]]
+group' _ [] = []
+group' i ls = g:(group' i ls')
+  where (g, ls') = splitAt i ls
 
 data Options
   = Options { optLength  :: Int,    -- Size of the password(s)
