@@ -5,6 +5,7 @@ import Data.Functor
 import Data.List
 import Data.Maybe (fromJust)
 import Control.Monad
+import Text.Printf
 
 import Test.Proctest
 import Test.Proctest.Assertions
@@ -27,18 +28,6 @@ tests = testGroup "CLI Tests" [testGroup']
 
 testGroup' = $(testGroupGenerator)
 
-newtype CliArg = CliArg { getArg :: String }
-               deriving Eq
-
-instance Show CliArg where
-  show = getArg
-
-instance Arbitrary CliArg where
-  arbitrary = do
-    arg <- elements ["-h", "--help",
-                     "-v", "--version"]
-    return (CliArg arg)
-
 newtype CliArgs = CliArgs  { getArgs :: [String] }
                deriving Eq
 
@@ -47,46 +36,18 @@ instance Show CliArgs where
 
 instance Arbitrary CliArgs where
   arbitrary = do
-    len  <- arbitrary :: Gen (GreaterThan2 Int)
-    num  <- arbitrary :: Gen (GreaterThan2 Int)
-    args <- listOf (elements ["-n " ++ show (getGT2 num), "--number=" ++ show (getGT2 num),
-                              show (getGT2 len)])
+    len  <- arbitrary `suchThat` (>2) `suchThat` (<=20) :: Gen Int
+    num  <- arbitrary `suchThat` (>2) `suchThat` (<=20) :: Gen Int
+    args <- sublistOf ["-n %d" `printf` num,
+                       show len]
     return (CliArgs args)
               
-prop_helpShouldPrintUsage :: CliArg -> Property
-prop_helpShouldPrintUsage (CliArg arg)
-  = arg == "-h" || arg == "--help" ==>
-    ioProperty $ do
-      (in', out', err', p) <- run "dist/build/elocrypt/elocrypt" [arg]
-      sleep'
-      assertExitedTimeout (seconds 2) p
-      response <- asUtf8Str <$> waitOutput (seconds 2) 1000 err'
-      return $ "Usage: " `isPrefixOf` response
-
-prop_helpShouldExitSuccess :: CliArg -> Property
-prop_helpShouldExitSuccess (CliArg arg)
-  = arg == "-h" || arg == "--help" ==>
-    ioProperty $ do
-      (in', out', err', p) <- run "dist/build/elocrypt/elocrypt" [arg]
-      sleep'
-      assertExitedSuccess (seconds 2) p
-
-prop_versionShouldExitSuccess :: CliArg -> Property
-prop_versionShouldExitSuccess (CliArg arg)
-  = arg == "-v" || arg == "--version" ==>
-    ioProperty $ do
-      (in', out', err', p) <- run "dist/build/elocrypt/elocrypt" [arg]
-      sleep'
-      assertExitedSuccess (seconds 2) p
-
 prop_shouldPrintPasswordsWithLength :: CliArgs -> Property
 prop_shouldPrintPasswordsWithLength (CliArgs args)
   = any (all ((flip elem) ['0'..'9'])) args  ==>
     ioProperty $ do
-      (in', out', err', p) <- run "dist/build/elocrypt/elocrypt" args
-      sleep'
-      response <- asUtf8Str <$> waitOutput (seconds 2) 5000 out'
-      assertExitedSuccess (seconds 2) p
+      (in', out', err', p) <- run' "dist/build/elocrypt/elocrypt" args
+      response <- readHandle out'
 
       let len    = fromJust $ find (all ((flip elem) ['0'..'9'])) args
           words' = words response
@@ -95,20 +56,28 @@ prop_shouldPrintPasswordsWithLength (CliArgs args)
 
 prop_shouldPrintNumberPasswords :: CliArgs -> Property
 prop_shouldPrintNumberPasswords (CliArgs args)
-  = any (\s -> "-n" `isPrefixOf` s || "--number=" `isPrefixOf` s) args  ==>
+  = any (isPrefixOf "-n") args  ==>
     ioProperty $ do
-      (in', out', err', p) <- run "dist/build/elocrypt/elocrypt" args
-      sleep'
-      response <- asUtf8Str <$> waitOutput (seconds 2) 5000 out'
-      assertExitedSuccess (seconds 2) p
+      (in', out', err', p) <- run' "dist/build/elocrypt/elocrypt" args
+      response <- readHandle out'
 
-      let option = fromJust $ find (\s -> "-n" `isPrefixOf` s || "--number=" `isPrefixOf` s) args
+      let option = fromJust $ find (isPrefixOf "-n") args
           number = tail $ dropWhile (not . ((flip elem) [' ', '='])) option
           words' = words response
 
       return (read number == length words')
 
 -- Utility functions
+run' :: FilePath -> [String] -> IO (Handle, Handle, Handle, ProcessHandle)
+run' exe args = do
+  res@(in', out', err', p) <- run exe args
+  sleep'
+  assertExitedSuccess (seconds 2) p
+  return res
+
+readHandle :: Handle -> IO String
+readHandle = (<$>) asUtf8Str . waitOutput (seconds 2) 5000
+
 assertExitedSuccess :: Timeout -> ProcessHandle -> IO Bool
 assertExitedSuccess t = liftM (== ExitSuccess) . assertExitedTimeout t
 
