@@ -3,7 +3,7 @@ module Main where
 
 import Data.Functor
 import Data.List
-import Data.Maybe (fromJust, fromMaybe)
+import Data.Maybe
 import Control.Monad
 import Text.Printf
 
@@ -44,36 +44,43 @@ instance Arbitrary CliArgs where
               
 prop_shouldPrintPasswordsWithLength :: CliArgs -> Property
 prop_shouldPrintPasswordsWithLength (CliArgs args)
-  = any (all ((flip elem) ['0'..'9'])) args  ==>
+  = isJust (getPosParam args) ==>
     ioProperty $ do
       (in', out', err', p) <- run' "dist/build/elocrypt/elocrypt" args
       response <- readHandle out'
 
-      let len    = fromJust $ find (all ((flip elem) ['0'..'9'])) args
+      let len    = read . fromJust . getPosParam $ args
           words' = words response
 
-      return (all (\s -> length s == read len) words')
+      return (all ((==) len . length) words')
 
 prop_shouldPrintNumberPasswords :: CliArgs -> Property
 prop_shouldPrintNumberPasswords (CliArgs args)
-  = any (isPrefixOf "-n") args  ==>
+  = isJust (getArg "-n" args) ==>
     ioProperty $ do
       (in', out', err', p) <- run' "dist/build/elocrypt/elocrypt" args
       response <- readHandle out'
 
-      let option = fromJust $ find (isPrefixOf "-n") args
-          number = tail $ dropWhile (not . ((flip elem) [' ', '='])) option
+      let number = read . fromJust . getArg "-n" $ args
           words' = words response
-
-      return (read number == length words')
+          
+      return (number == length words')
 
 prop_shouldPrintMultPasswordsPerLine :: CliArgs -> Property
 prop_shouldPrintMultPasswordsPerLine (CliArgs args)
-  = let len = fromMaybe "8" (find (all ((flip elem) ['0'..'9'])) args)
-    in read len <= 38 ==> (ioProperty $ do
+  = (read . fromMaybe "8" . getPosParam $ args) <= 38 ==>
+    ioProperty $ do
       (in', out', err', p) <- run' "dist/build/elocrypt/elocrypt" args
       response <- readHandle out'
-      return . all (>1) . tail . reverse . map length . map words . lines $ response)
+      return . all (>1) . tail . reverse . map length . map words . lines $ response
+
+prop_shouldPrintDefaultMultPasswordsPerLine :: CliArgs -> Property
+prop_shouldPrintDefaultMultPasswordsPerLine (CliArgs args)
+  = isNothing (getArg "-n" args) ==>
+    ioProperty $ do
+      (in', out', err', p) <- run' "dist/build/elocrypt/elocrypt" args
+      response <- readHandle out'
+      return . all (>1) . tail . reverse . map length . map words . lines $ response
 
 -- Utility functions
 run' :: FilePath -> [String] -> IO (Handle, Handle, Handle, ProcessHandle)
@@ -94,3 +101,11 @@ assertExitedFailure t = liftM not . assertExitedSuccess t
 
 sleep' :: IO ()
 sleep' = sleep (seconds 0.0001)
+
+getArg :: String -> [String] -> Maybe String
+getArg prefix args = (tail . dropWhile (not . elem')) `liftM` arg
+  where arg = find (isPrefixOf prefix) args
+        elem' = (flip elem) [' ', '=']
+
+getPosParam :: [String] -> Maybe String
+getPosParam = find $ (/= '-') . head

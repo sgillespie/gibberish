@@ -2,6 +2,7 @@ module Main where
 
 import Control.Monad
 import Data.List
+import Data.Maybe (fromMaybe)
 import System.Console.GetOpt
 import System.Environment
 import System.Exit
@@ -12,6 +13,7 @@ import Data.Elocrypt
 
 version = "elocrypt 0.4.0"
 termLen = 80
+termHeight = 20
 
 main :: IO ()
 main = do
@@ -29,9 +31,11 @@ main = do
   putStrLn (passwords opts gen)
 
 passwords :: RandomGen g => Options -> g -> String
-passwords opts gen = concat . intersperse "\n" . map (concat . intersperse "  ") . group' groupSize $ ps
-  where ps = take (optNumber opts) . newPasswords (optLength opts) $ gen
-        groupSize = termLen `div` (optLength opts + 2)
+passwords opts gen = format . group' cols $ ps
+  where ps = take num . newPasswords (optLength opts) $ gen
+        format = concat . intersperse "\n" . map (concat . intersperse "  ")
+        cols = termLen `div` (optLength opts + 2)
+        num = fromMaybe (cols * 20) (optNumber opts)
 
 group' :: Int -> [a] -> [[a]]
 group' _ [] = []
@@ -39,20 +43,20 @@ group' i ls = g:(group' i ls')
   where (g, ls') = splitAt i ls
 
 data Options
-  = Options { optLength  :: Int,    -- Size of the password(s)
-              optNumber  :: Int,    -- Number of passwords to generate
+  = Options { optLength  :: Int,        -- Size of the password(s)
+              optNumber  :: Maybe Int,  -- Number of passwords to generate
               optHelp    :: Bool,
               optVersion :: Bool }
   deriving (Show)
 
 defaultOptions :: Options
 defaultOptions = Options { optLength = 8,
-                           optNumber = 42,
+                           optNumber = Nothing,
                            optHelp = False,
                            optVersion = False }
 
 options :: [OptDescr (Options -> Options)]
-options = [Option ['n'] ["number"] (ReqArg (\n o -> o {optNumber = read n}) "NUMBER") "The number of passwords to generate (default: 42)",
+options = [Option ['n'] ["number"] (ReqArg (\n o -> o {optNumber = Just (read n)}) "NUMBER") "The number of passwords to generate (default: 42)",
            Option ['h'] ["help"] (NoArg (\o -> o { optHelp = True })) "Show this help",
            Option ['v'] ["version"] (NoArg (\o -> o { optVersion = True })) "Show version and exit"]
 
