@@ -77,6 +77,7 @@ prop_shouldPrintMultPasswordsPerLine (CliArgs args)
 prop_shouldPrintDefaultMultPasswordsPerLine :: CliArgs -> Property
 prop_shouldPrintDefaultMultPasswordsPerLine (CliArgs args)
   = isNothing (getArg "-n" args) ==>
+    (read . fromMaybe "8" . getPosParam $ args) <= 38 ==>
     ioProperty $ do
       (in', out', err', p) <- run' "dist/build/elocrypt/elocrypt" args
       response <- readHandle out'
