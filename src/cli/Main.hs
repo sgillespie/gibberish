@@ -13,7 +13,7 @@ import Data.Elocrypt
 
 version = "elocrypt 0.4.0"
 termLen = 80
-termHeight = 20
+termHeight = 10
 
 main :: IO ()
 main = do
@@ -35,7 +35,7 @@ passwords opts gen = format . group' cols $ ps
   where ps = take num . newPasswords (optLength opts) $ gen
         format = concat . intersperse "\n" . map (concat . intersperse "  ")
         cols = termLen `div` (optLength opts + 2)
-        num = fromMaybe (cols * 20) (optNumber opts)
+        num = fromMaybe (cols * termHeight) (optNumber opts)
 
 group' :: Int -> [a] -> [[a]]
 group' _ [] = []
