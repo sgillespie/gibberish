@@ -108,7 +108,8 @@ alphabet = ['a'..'z']
 
 -- |Generate two random characters
 first2 :: MonadRandom m => m String
-first2 = sequence . take 2 . repeat . uniform $ alphabet
+first2 = fromList (map toWeight frequencies)
+  where toWeight (s, w) = (s, sum w)
 
 -- |Generate a random character based on the previous two characters and
 --  their 'Elocrypt.Trigraph.trigraph'
