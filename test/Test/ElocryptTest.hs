@@ -48,7 +48,7 @@ prop_lastNShouldSkip0Weights :: AlphaChar -> AlphaChar -> Int -> StdGen -> Prope
 prop_lastNShouldSkip0Weights (Alpha c1) (Alpha c2) len gen
   = len > 0 ==> lastNShouldSkip0Weights' lastN'
   where f2 = [c1, c2]
-        lastN' = evalRand (lastN (reverse [c1, c2]) len) gen
+        lastN' = evalRand (lastN len [c2, c1]) gen
 
 lastNShouldSkip0Weights' :: String -> Property
 lastNShouldSkip0Weights' (p:ps:pss:psss) = isCandidate p [pss, ps] .&&.

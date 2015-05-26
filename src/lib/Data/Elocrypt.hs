@@ -85,7 +85,8 @@ newPasswords = evalRand . mkPasswords
 mkPassword :: MonadRandom m
               => Int -- ^ password length
               -> m String
-mkPassword len = reverse `liftM` first2 >>= (flip lastN) (len - 2) >>= return . reverse
+mkPassword len = first2 >>= reverse' >>= lastN (len - 2) >>= reverse'
+  where reverse' = return . reverse
 
 -- |Plural version of mkPassword.  Generate an infinite list of passwords using
 --  the MonadRandom m.  MonadRandom is exposed here for extra control.
@@ -106,7 +107,8 @@ alphabet = ['a'..'z']
 
 -- * Internal
 
--- |Generate two random characters
+-- |Generate two random characters. Uses 'Elocrypt.Trigraph.trigragh'
+--  to generate a weighted list.
 first2 :: MonadRandom m => m String
 first2 = fromList (map toWeight frequencies)
   where toWeight (s, w) = (s, sum w)
@@ -118,6 +120,6 @@ next (x:xs:_) = fromList . zip ['a'..'z'] . fromJust . findFrequency $ [xs,x]
 
 -- |Generate the last n characters using previous two characters
 --  and their 'Elocrypt.Trigraph.trigraph'
-lastN :: MonadRandom m => String -> Int -> m String
-lastN ls 0 = return ls
-lastN ls len = next ls >>= (flip lastN) (len - 1) . (flip (:)) ls
+lastN :: MonadRandom m => Int -> String -> m String
+lastN 0 ls   = return ls
+lastN len ls = next ls >>= lastN (len - 1) . (:ls)
