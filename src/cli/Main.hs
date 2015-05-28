@@ -56,7 +56,7 @@ defaultOptions = Options { optLength = 8,
                            optVersion = False }
 
 options :: [OptDescr (Options -> Options)]
-options = [Option ['n'] ["number"] (ReqArg (\n o -> o {optNumber = Just (read n)}) "NUMBER") "The number of passwords to generate (default: 42)",
+options = [Option ['n'] ["number"] (ReqArg (\n o -> o {optNumber = Just (read n)}) "NUMBER") "The number of passwords to generate",
            Option ['h'] ["help"] (NoArg (\o -> o { optHelp = True })) "Show this help",
            Option ['v'] ["version"] (NoArg (\o -> o { optVersion = True })) "Show version and exit"]
 
