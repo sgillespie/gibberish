@@ -47,7 +47,7 @@ cabal haddock
 ```
 
 ### API Examples
-You can use elocrypt to generate words in any Haskell code, so long as you have installed elocrypt. Generate a word by using Elocrypt.Password.generate
+You can use elocrypt to generate words in any Haskell code, so long as you have installed elocrypt. Generate a word by using Data.Elocrypt.generate
 ```
 import Data.Elocrypt
 ...
@@ -56,7 +56,7 @@ fooGen :: IO String
 fooGen = newPassword 10 `liftM` getStdGen
 ```
 
-Alternatively, you can use Elocrypt.Password.mkPassword if you want to complete control of the random monad
+Alternatively, you can use Data.Elocrypt.mkPassword if you want to complete control of the random monad
 ```
 import Data.Elocrypt
 import Control.Monad.Random
