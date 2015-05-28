@@ -14,6 +14,11 @@ Elocrypt is on [Hackage](https://hackage.haskell.org/package/elocrypt).  Install
 cabal install elocrypt
 ```
 
+Binaries are also available:
+ * [elocrypt-0.4.0-linux-bin.tar.gz](https://github.com/sgillespie/elocrypt/releases/download/v0.4.0/elocrypt-0.4.0-linux-bin.tar.gz)
+ * [elocrypt-0.4.0-osx-bin.tar.gz](https://github.com/sgillespie/elocrypt/releases/download/v0.4.0/elocrypt-0.4.0-osx-bin.tar.gz)
+ * [elocrypt-0.4.0-windows-bin.exe](https://github.com/sgillespie/elocrypt/releases/download/v0.4.0/elocrypt-0.4.0-windows-bin.exe)
+
 ## Running
 Running elocrypt is as simple as:
 ```
