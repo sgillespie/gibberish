@@ -85,8 +85,11 @@ newPasswords = evalRand . mkPasswords
 mkPassword :: MonadRandom m
               => Int -- ^ password length
               -> m String
-mkPassword len = first2 >>= reverse' >>= lastN (len - 2) >>= reverse'
-  where reverse' = return . reverse
+mkPassword len = do
+  f2 <- reverse `liftM` first2
+  if len > 2
+    then reverse `liftM` lastN (len - 2) f2
+    else return . reverse . take len $ f2
 
 -- |Plural version of mkPassword.  Generate an infinite list of passwords using
 --  the MonadRandom m.  MonadRandom is exposed here for extra control.
