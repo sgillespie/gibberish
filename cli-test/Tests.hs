@@ -83,6 +83,16 @@ prop_shouldPrintDefaultMultPasswordsPerLine (CliArgs args)
       response <- readHandle out'
       return . all (>1) . tail . reverse . map length . map words . lines $ response
 
+prop_shouldNotPrintZeroPasswords :: CliArgs -> Property
+prop_shouldNotPrintZeroPasswords (CliArgs args)
+  = isNothing (getPosParam args) ==>
+    ioProperty $ do
+      let args' = args ++ ["0"]
+      
+      (in', out', err', p) <- run' "dist/build/elocrypt/elocrypt" args'
+      response <- readHandle out'
+      return (response == "")
+
 -- Utility functions
 run' :: FilePath -> [String] -> IO (Handle, Handle, Handle, ProcessHandle)
 run' exe args = do

@@ -28,7 +28,10 @@ main = do
     hPutStrLn stderr version
     exitSuccess
 
-  putStrLn (passwords opts gen)
+  -- TODO[sgillespie]: REFACTOR ME?
+  if (optLength opts == 0)
+    then exitSuccess
+    else putStrLn (passwords opts gen)
 
 passwords :: RandomGen g => Options -> g -> String
 passwords opts gen = format . group' cols $ ps
