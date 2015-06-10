@@ -36,7 +36,7 @@ instance Show CliArgs where
 
 instance Arbitrary CliArgs where
   arbitrary = do
-    len  <- arbitrary `suchThat` (>2) `suchThat` (<=40) :: Gen Int
+    len  <- arbitrary `suchThat` (>0) `suchThat` (<=40) :: Gen Int
     num  <- arbitrary `suchThat` (>2) `suchThat` (<=20) :: Gen Int
     args <- sublistOf ["-n %d" `printf` num,
                        show len]
@@ -92,6 +92,14 @@ prop_shouldNotPrintZeroPasswords (CliArgs args)
       (in', out', err', p) <- run' "dist/build/elocrypt/elocrypt" args'
       response <- readHandle out'
       return (response == "")
+
+prop_shouldPrintLongPasswords :: GreaterThan79 Int -> Property
+prop_shouldPrintLongPasswords (GT79 a)
+  = ioProperty $ do
+      (in', out', err', p) <- run' "dist/build/elocrypt/elocrypt" [show a]
+      response <- readHandle out'
+      return . all (==1) . map length . map words . lines $ response
+
 
 -- Utility functions
 run' :: FilePath -> [String] -> IO (Handle, Handle, Handle, ProcessHandle)

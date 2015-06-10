@@ -37,8 +37,10 @@ passwords :: RandomGen g => Options -> g -> String
 passwords opts gen = format . group' cols $ ps
   where ps = take num . newPasswords (optLength opts) $ gen
         format = concat . intersperse "\n" . map (concat . intersperse "  ")
-        cols = termLen `div` (optLength opts + 2)
-        num = fromMaybe (cols * termHeight) (optNumber opts)
+        cols = if optLength opts <= termLen - 2
+                  then termLen `div` (optLength opts + 2)
+                  else 1
+        num = fromMaybe ((if cols == 0 then 1 else cols) * termHeight) (optNumber opts)
 
 group' :: Int -> [a] -> [[a]]
 group' _ [] = []

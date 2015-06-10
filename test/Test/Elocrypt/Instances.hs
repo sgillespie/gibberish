@@ -18,3 +18,9 @@ newtype GreaterThan2 a = GT2 { getGT2 :: a }
 
 instance (Num a, Ord a, Arbitrary a) => Arbitrary (GreaterThan2 a) where
   arbitrary = GT2 `fmap` (arbitrary `suchThat` (>2))
+
+newtype GreaterThan79 a = GT79 { getGT79 :: a }
+                        deriving (Eq, Ord, Show)
+
+instance (Integral a, Random a) => Arbitrary (GreaterThan79 a) where
+  arbitrary = GT79 `fmap` choose (80, 500)
