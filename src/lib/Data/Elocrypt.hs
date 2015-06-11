@@ -25,13 +25,14 @@ import System.Random hiding (next)
 --  @
 --  -- Generate a password of length 10 using the system generator
 --  myGenPassword :: IO (String, StdGen)
---  myGenPassword = genPassword 10 \`liftM\` getStdGen
+--  myGenPassword = genPassword 10 True \`liftM\` getStdGen
 --  @
 genPassword :: RandomGen g
-               => Int -- ^ password length
-               -> g   -- ^ random generator
+               => Int  -- ^ password length
+               -> Bool -- ^ include capitals?
+               -> g    -- ^ random generator
                -> (String, g)
-genPassword = runRand . mkPassword
+genPassword len = runRand . mkPassword len
 
 -- |Plural version of genPassword.  Generates an infinite list of passwords
 --  using the generator g, returning the result and the updated generator.
@@ -39,26 +40,28 @@ genPassword = runRand . mkPassword
 -- @
 -- -- Generate 10 passwords of length 10 using the system generator
 -- myGenPasswords :: IO ([String], StdGen)
--- myGenPasswords = (\(ls, g) -> (take 10 ls, g) `liftM` genPasswords 10 `liftM` getStdGen
+-- myGenPasswords = (\(ls, g) -> (take 10 ls, g) `liftM` genPasswords 10 True `liftM` getStdGen
 -- @
 genPasswords :: RandomGen g
-                => Int -- ^ password length
-                -> g   -- ^ random generator
+                => Int  -- ^ password length
+                -> Bool -- ^ include capitals?
+                -> g    -- ^ random generator
                 -> ([String], g)
-genPasswords = runRand . mkPasswords
+genPasswords len = runRand . mkPasswords len
 
 -- |Generate a password using the generator g, returning the result.
 --
 --  @
 --  -- Generate a password of length 10 using the system generator
 --  myNewPassword :: IO String
---  myNewPassword = newPassword 10 \`liftM\` getStdGen
+--  myNewPassword = newPassword 10 True \`liftM\` getStdGen
 --  @
 newPassword :: RandomGen g
-               => Int -- ^ password length
-               -> g   -- ^ random generator
+               => Int  -- ^ password length
+               -> Bool -- ^ include capitals?
+               -> g    -- ^ random generator
                -> String
-newPassword = evalRand . mkPassword
+newPassword len = evalRand . mkPassword len
 
 -- |Plural version of newPassword.  Generates an infinite list of passwords
 --  using the generator g, returning the result
@@ -66,13 +69,14 @@ newPassword = evalRand . mkPassword
 -- @
 -- -- Generate 10 passwords of length 10 using the system generator
 -- myNewPasswords :: IO [String]
--- myNewPasswords = (take 10 . genPasswords 10) `liftM` getStdGen
+-- myNewPasswords = (take 10 . genPasswords 10 True) `liftM` getStdGen
 -- @
 newPasswords :: RandomGen g
-                => Int -- ^ password length
-                -> g   -- ^ random generator
+                => Int  -- ^ password length
+                -> Bool -- ^ include capitals?
+                -> g    -- ^ random generator
                 -> [String]
-newPasswords = evalRand . mkPasswords
+newPasswords len = evalRand . mkPasswords len
 
 -- |Generate a password using the MonadRandom m. MonadRandom is exposed here
 --  for extra control.
@@ -80,12 +84,13 @@ newPasswords = evalRand . mkPasswords
 --  @
 --  -- Generate a password of length 10 using the system generator
 --  myPasswords :: IO String
---  myPasswords = evalRand (mkPassword 10) \`liftM\` getStdGen
+--  myPasswords = evalRand (mkPassword 10 True) \`liftM\` getStdGen
 --  @
 mkPassword :: MonadRandom m
-              => Int -- ^ password length
+              => Int  -- ^ password length
+              -> Bool -- ^ include capitals?
               -> m String
-mkPassword len = do
+mkPassword len caps = do
   f2 <- reverse `liftM` first2
   if len > 2
     then reverse `liftM` lastN (len - 2) f2
@@ -97,12 +102,13 @@ mkPassword len = do
 -- @
 -- -- Generate an infinite list of passwords of length 10 using the system generator
 -- myMkPasswords :: IO [String]
--- myMkPasswords = evalRand (mkPasswords 10) \`liftM\` getStdGen
+-- myMkPasswords = evalRand (mkPasswords 10 True) \`liftM\` getStdGen
 -- @
 mkPasswords :: MonadRandom m
-               => Int -- ^ password length
+               => Int  -- ^ password length
+               -> Bool -- ^ include capitals?
                -> m [String]
-mkPasswords = sequence . repeat . mkPassword
+mkPasswords len = sequence . repeat . mkPassword len
                
 -- |The alphabet we sample random values from
 alphabet :: [Char]

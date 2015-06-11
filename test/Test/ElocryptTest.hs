@@ -15,31 +15,32 @@ import Test.Elocrypt.Instances
 
 tests = $(testGroupGenerator)
 
-prop_genPasswordShouldBeUnique :: GreaterThan2 Int -> StdGen -> Bool
-prop_genPasswordShouldBeUnique (GT2 len) gen
-  = p /= fst (genPassword len gen')
-  where (p, gen') = genPassword len gen
+prop_genPasswordShouldBeUnique :: GreaterThan2 Int -> Bool -> StdGen -> Bool
+prop_genPasswordShouldBeUnique (GT2 len) caps gen
+  = p /= fst (genPassword len caps gen')
+  where (p, gen') = genPassword len caps gen
 
-prop_genPasswordsShouldBeUnique :: GreaterThan2 Int -> StdGen -> Bool
-prop_genPasswordsShouldBeUnique (GT2 len) gen
+prop_genPasswordsShouldBeUnique :: GreaterThan2 Int -> Bool -> StdGen -> Bool
+prop_genPasswordsShouldBeUnique (GT2 len) caps gen
   = p /= ps
-  where (p:ps:_) = fst (genPasswords len gen)
+  where (p:ps:_) = fst (genPasswords len caps gen)
 
-prop_newPasswordShouldBeLength :: Int -> StdGen -> Property
-prop_newPasswordShouldBeLength len gen = len > 0 ==> length (newPassword len gen) == len
+prop_newPasswordShouldBeLength :: Int -> Bool -> StdGen -> Property
+prop_newPasswordShouldBeLength len caps gen = len > 0 ==>
+                                              length (newPassword len caps gen) == len
 
-prop_newPasswordShouldConsistOfAlphabet :: Int -> StdGen -> Bool
-prop_newPasswordShouldConsistOfAlphabet len gen
-  = all ((flip elem) alphabet) (newPassword len gen)
+prop_newPasswordShouldConsistOfAlphabet :: Int -> Bool -> StdGen -> Bool
+prop_newPasswordShouldConsistOfAlphabet len caps gen
+  = all ((flip elem) alphabet) (newPassword len caps gen)
 
-prop_newPasswordsShouldBeUnique :: GreaterThan2 Int -> StdGen -> Bool
-prop_newPasswordsShouldBeUnique (GT2 len) gen
+prop_newPasswordsShouldBeUnique :: GreaterThan2 Int -> Bool -> StdGen -> Bool
+prop_newPasswordsShouldBeUnique (GT2 len) caps gen
   = p /= ps
-  where (p:ps:_) = newPasswords len gen
+  where (p:ps:_) = newPasswords len caps gen
 
-prop_newPasswordShouldHaveLen :: Int -> StdGen -> Property
-prop_newPasswordShouldHaveLen len gen
-  = len >= 0 ==> length (newPassword len gen) == len
+prop_newPasswordShouldHaveLen :: Int -> Bool -> StdGen -> Property
+prop_newPasswordShouldHaveLen len caps gen
+  = len >= 0 ==> length (newPassword len caps gen) == len
 
 prop_first2ShouldHaveLength2 :: StdGen -> Bool
 prop_first2ShouldHaveLength2 g = length (evalRand first2 g) == 2

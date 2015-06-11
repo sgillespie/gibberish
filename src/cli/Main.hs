@@ -35,7 +35,7 @@ main = do
 
 passwords :: RandomGen g => Options -> g -> String
 passwords opts gen = format . group' cols $ ps
-  where ps = take num . newPasswords (optLength opts) $ gen
+  where ps = take num . newPasswords (optLength opts) False $ gen -- TODO[sgillespie]: Add caps
         format = concat . intersperse "\n" . map (concat . intersperse "  ")
         cols = if optLength opts <= termLen - 2
                   then termLen `div` (optLength opts + 2)
