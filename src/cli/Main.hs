@@ -11,7 +11,7 @@ import System.Random
 
 import Data.Elocrypt
 
-version = "elocrypt 0.4.1"
+version = "elocrypt 0.5.0"
 termLen = 80
 termHeight = 10
 
