@@ -17,6 +17,10 @@ import Control.Monad.Random hiding (next)
 import Data.Maybe
 import System.Random hiding (next)
 
+-- |Generate a finite number of words of random length (between 3 and 9 chars).
+mkPassphrase :: Int -> IO [String]
+mkPassphrase n = sequence $ replicate n $ randomRIO (3, 9) >>= flip mkPassword False
+
 -- * Random password generators
 
 -- |Generate a password using the generator g, returning the result and the
@@ -109,7 +113,7 @@ mkPasswords :: MonadRandom m
                -> Bool -- ^ include capitals?
                -> m [String]
 mkPasswords len = sequence . repeat . mkPassword len
-               
+
 -- |The alphabet we sample random values from
 alphabet :: [Char]
 alphabet = ['a'..'z']
