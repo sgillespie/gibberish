@@ -15,7 +15,6 @@ import Data.Elocrypt.Trigraph
 import Control.Monad
 import Control.Monad.Random hiding (next)
 import Data.Maybe
-import System.Random hiding (next)
 
 -- |Generate a finite number of words of random length (between 3 and 9 chars).
 mkPassphrase :: Int -> IO [String]
