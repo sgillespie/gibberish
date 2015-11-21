@@ -23,7 +23,7 @@ prop_genPasswordShouldBeUnique (GT2 len) caps gen
 prop_genPasswordsShouldBeUnique :: GreaterThan2 Int -> Bool -> StdGen -> Bool
 prop_genPasswordsShouldBeUnique (GT2 len) caps gen
   = p /= ps
-  where (p:ps:_) = fst (genPasswords len caps gen)
+  where (p:ps:_) = fst (genPasswords len 30 caps gen)
 
 prop_newPasswordShouldBeLength :: Int -> Bool -> StdGen -> Property
 prop_newPasswordShouldBeLength len caps gen = len > 0 ==>
@@ -36,7 +36,7 @@ prop_newPasswordShouldConsistOfAlphabet len caps gen
 prop_newPasswordsShouldBeUnique :: GreaterThan2 Int -> Bool -> StdGen -> Bool
 prop_newPasswordsShouldBeUnique (GT2 len) caps gen
   = p /= ps
-  where (p:ps:_) = newPasswords len caps gen
+  where (p:ps:_) = newPasswords len 30 caps gen
 
 prop_newPasswordShouldHaveLen :: Int -> Bool -> StdGen -> Property
 prop_newPasswordShouldHaveLen len caps gen

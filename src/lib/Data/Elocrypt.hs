@@ -48,10 +48,11 @@ genPassword len = runRand . mkPassword len
 -- @
 genPasswords :: RandomGen g
                 => Int  -- ^ password length
+                -> Int  -- ^ number of passwords
                 -> Bool -- ^ include capitals?
                 -> g    -- ^ random generator
                 -> ([String], g)
-genPasswords len = runRand . mkPasswords len
+genPasswords len n = runRand . mkPasswords len n
 
 -- |Generate a password using the generator g, returning the result.
 --
@@ -77,10 +78,11 @@ newPassword len = evalRand . mkPassword len
 -- @
 newPasswords :: RandomGen g
                 => Int  -- ^ password length
+                -> Int  -- ^ number of passwords
                 -> Bool -- ^ include capitals?
                 -> g    -- ^ random generator
                 -> [String]
-newPasswords len = evalRand . mkPasswords len
+newPasswords len n = evalRand . mkPasswords len n
 
 -- |Generate a password using the MonadRandom m. MonadRandom is exposed here
 --  for extra control.
@@ -110,9 +112,10 @@ mkPassword len caps = do
 -- @
 mkPasswords :: MonadRandom m
                => Int  -- ^ password length
+               -> Int  -- ^ number of passwords
                -> Bool -- ^ include capitals?
                -> m [String]
-mkPasswords len = sequence . repeat . mkPassword len
+mkPasswords len n = sequence . replicate n . mkPassword len
 
 -- |The alphabet we sample random values from
 alphabet :: [Char]
