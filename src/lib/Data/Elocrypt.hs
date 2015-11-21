@@ -95,7 +95,7 @@ mkPassword :: MonadRandom m
               => Int  -- ^ password length
               -> Bool -- ^ include capitals?
               -> m String
-mkPassword len caps = do
+mkPassword len _ = do
   f2 <- reverse `liftM` first2
   if len > 2
     then reverse `liftM` lastN (len - 2) f2
