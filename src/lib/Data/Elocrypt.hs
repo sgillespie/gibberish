@@ -16,9 +16,11 @@ import Control.Monad
 import Control.Monad.Random hiding (next)
 import Data.Maybe
 
--- |Generate a finite number of words of random length (between 3 and 9 chars).
-mkPassphrase :: Int -> IO [String]
-mkPassphrase n = sequence $ replicate n $ randomRIO (3, 9) >>= flip mkPassword False
+
+-- |Generate a finite number of words of random length (between @l@ and @l'@ chars).
+mkPassphrase :: MonadRandom m => Int -> Int -> Int -> m [String]
+mkPassphrase n mi ma = sequence $ replicate n $ getRandomR (mi, ma) >>= flip mkPassword False
+
 
 -- * Random password generators
 
