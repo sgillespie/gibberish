@@ -14,6 +14,7 @@ import Data.Elocrypt.Trigraph
 
 import Control.Monad
 import Control.Monad.Random hiding (next)
+import Data.Bool
 import Data.Maybe
 import System.Random hiding (next)
 
@@ -129,10 +130,23 @@ first2 = fromList (map toWeight frequencies)
 -- |Generate a random character based on the previous two characters and
 --  their 'Elocrypt.Trigraph.trigraph'
 next :: MonadRandom m => String -> m Char
-next (x:xs:_) = fromList . zip ['a'..'z'] . fromJust . findFrequency $ [xs,x]
+next (x:xs:_) = fromList
+                . zip ['a'..'z']
+                . defaultFreqs
+                . fromJust
+                . findFrequency $ [xs, x]
+
+  -- Fix frequencies if they are all 0, since MonadRandom prohibits this.
+  -- Use all 1s in this case to give every item an equal weight.
+  where defaultFreqs :: [Rational] -> [Rational]
+        defaultFreqs f = bool (replicate 26 1) f (any (>0) f)
+
+-- This shouldn't ever happen
+next _ = undefined
 
 -- |Generate the last n characters using previous two characters
 --  and their 'Elocrypt.Trigraph.trigraph'
 lastN :: MonadRandom m => Int -> String -> m String
 lastN 0 ls   = return ls
 lastN len ls = next ls >>= lastN (len - 1) . (:ls)
+

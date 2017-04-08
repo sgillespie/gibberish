@@ -6,6 +6,7 @@ import Control.Monad.Random hiding (next)
 import Data.Maybe
 import System.Random hiding (next)
 import Test.QuickCheck
+import Test.Tasty
 import Test.Tasty.QuickCheck (testProperty)
 import Test.Tasty.TH
 
@@ -13,6 +14,7 @@ import Data.Elocrypt
 import Data.Elocrypt.Trigraph
 import Test.Elocrypt.Instances
 
+tests :: TestTree
 tests = $(testGroupGenerator)
 
 prop_genPasswordShouldBeUnique :: GreaterThan2 Int -> Bool -> StdGen -> Bool
