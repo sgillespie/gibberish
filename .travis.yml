@@ -1,6 +1,18 @@
-language: haskell
-ghc:
-  - '8.0'
-  - '7.10'
+sudo: false
+
+language: generic
+
+cache:
+  directories:
+    - $HOME/.stack
+
+before_install:
+  - mkdir -p ~/.local/bin
+  - export PATH="$HOME/.local/bin:$PATH"
+  - travis_retry curl https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
+
+install:
+  - stack --no-terminal --install-ghc test --only-dependencies
+  
 script:
-  - cabal configure --enable-tests && cabal build && cabal test --show-details=always
+  - stack --no-terminal test
