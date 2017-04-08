@@ -1,20 +1,23 @@
 ### Haskell
-dist
 cabal-dev
-*.o
-*.hi
-*.chi
-*.chs.h
-*.dyn_o
-*.dyn_hi
+cabal.sandbox.config
+dist
+
 .virtualenv
 .hpc
 .hsenv
 .cabal-sandbox/
-cabal.sandbox.config
-*.prof
+.stack-work/
+
 *.aux
+*.chi
+*.chs.h
+*.dyn_hi
+*.dyn_o
+*.hi
 *.hp
+*.o
+*.prof
 
 ### Idea
 .idea
