@@ -31,23 +31,23 @@ Elocrypt sources can be found
 
 ## Building
 In order to build or install you will need
- * GHC (tested on 8.0)
- * cabal-install (tested on 1.24)
+ * [GHC](https://www.haskell.org/ghc) (tested on 8.0)
+ * [Haskell Stack](https://haskellstack.org) (tested on 1.24)
 
 Build elocrypt:
 ```
-cabal configure
-cabal build
+stack setup
+stack build
 ```
 Then, install (if desired):
 ```
-cabal install
+stack install
 ```
 
 ## API Documentation
 The full API documentation is on hackage @ https://hackage.haskell.org/package/elocrypt/docs. To build the documentation yourself, run
 ```
-cabal haddock
+stack haddock
 ```
 
 ### API Examples
