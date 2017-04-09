@@ -16,12 +16,12 @@ import Control.Monad
 import Control.Monad.Random hiding (next)
 import Data.Bool
 import Data.Maybe
+import Prelude hiding (min, max)
 
 
--- |Generate a finite number of words of random length (between @l@ and @l'@ chars).
+-- |Generate a finite number of words of random length (between @min@ and @max@ chars).
 mkPassphrase :: MonadRandom m => Int -> Int -> Int -> m [String]
-mkPassphrase n mi ma = sequence $ replicate n $ getRandomR (mi, ma) >>= flip mkPassword False
-
+mkPassphrase n min max = replicateM n $ getRandomR (min, max) >>= flip mkPassword False
 
 -- * Random password generators
 
@@ -117,7 +117,7 @@ mkPasswords :: MonadRandom m
                -> Int  -- ^ number of passwords
                -> Bool -- ^ include capitals?
                -> m [String]
-mkPasswords len n = sequence . replicate n . mkPassword len
+mkPasswords len n = replicateM n . mkPassword len
 
 -- |The alphabet we sample random values from
 alphabet :: [Char]
@@ -134,11 +134,11 @@ first2 = fromList (map toWeight frequencies)
 -- |Generate a random character based on the previous two characters and
 --  their 'Elocrypt.Trigraph.trigraph'
 next :: MonadRandom m => String -> m Char
-next (x:xs:_) = fromList
-                . zip ['a'..'z']
-                . defaultFreqs
-                . fromJust
-                . findFrequency $ [xs, x]
+next (x:xs:_) = fromList .
+                zip ['a'..'z'] .
+                defaultFreqs .
+                fromJust .
+                findFrequency $ [xs, x]
 
   -- Fix frequencies if they are all 0, since MonadRandom prohibits this.
   -- Use all 1s in this case to give every item an equal weight.
