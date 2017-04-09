@@ -5,8 +5,8 @@ Elocrypt generates pronounceable, easy-to-remember, hard-to-guess passwords... a
 
 ## Prerequisites
 In order to build or install you will need
- * GHC (tested on 7.10 and 7.8)
- * cabal-install (tested on 1.20 and 1.22)
+ * GHC (tested on 8.0)
+ * cabal-install (tested on 1.24)
 
 ## Installing
 Elocrypt is on [Hackage](https://hackage.haskell.org/package/elocrypt).  Installation is as easy as:
@@ -15,9 +15,8 @@ cabal install elocrypt
 ```
 
 Binaries are also available:
- * [elocrypt-0.4.0-linux-bin.tar.gz](https://github.com/sgillespie/elocrypt/releases/download/v0.4.0/elocrypt-0.4.0-linux-bin.tar.gz)
- * [elocrypt-0.4.0-osx-bin.tar.gz](https://github.com/sgillespie/elocrypt/releases/download/v0.4.0/elocrypt-0.4.0-osx-bin.tar.gz)
- * [elocrypt-0.4.0-windows-bin.exe](https://github.com/sgillespie/elocrypt/releases/download/v0.4.0/elocrypt-0.4.0-windows-bin.exe)
+ * [elocrypt-0.6.0-linux-bin.tar.gz](https://github.com/sgillespie/elocrypt/releases/download/v0.4.0/elocrypt-0.4.0-linux-bin.tar.gz)
+ * [elocrypt-0.6.0-windows-bin.exe](https://github.com/sgillespie/elocrypt/releases/download/v0.4.0/elocrypt-0.4.0-windows-bin.exe)
 
 ## Running
 Running elocrypt is as simple as:
@@ -32,8 +31,8 @@ Elocrypt sources can be found
 
 ## Building
 In order to build or install you will need
- * GHC (tested on 7.10 and 7.8)
- * cabal-install (tested on 1.20 and 1.22)
+ * GHC (tested on 8.0)
+ * cabal-install (tested on 1.24)
 
 Build elocrypt:
 ```
