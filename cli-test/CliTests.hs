@@ -41,12 +41,14 @@ instance Arbitrary CliArgs where
     args <- sublistOf ["-n %d" `printf` num,
                        show len]
     return (CliArgs args)
-              
+
+elocrypt = "elocrypt"
+
 prop_shouldPrintPasswordsWithLength :: CliArgs -> Property
 prop_shouldPrintPasswordsWithLength (CliArgs args)
   = isJust (getPosParam args) ==>
     ioProperty $ do
-      (in', out', err', p) <- run' "dist/build/elocrypt/elocrypt" args
+      (in', out', err', p) <- run' elocrypt args
       response <- readHandle out'
 
       let len    = read . fromJust . getPosParam $ args
@@ -58,7 +60,7 @@ prop_shouldPrintNumberPasswords :: CliArgs -> Property
 prop_shouldPrintNumberPasswords (CliArgs args)
   = isJust (getArg "-n" args) ==>
     ioProperty $ do
-      (in', out', err', p) <- run' "dist/build/elocrypt/elocrypt" args
+      (in', out', err', p) <- run' elocrypt args
       response <- readHandle out'
 
       let number = read . fromJust . getArg "-n" $ args
@@ -70,7 +72,7 @@ prop_shouldPrintMultPasswordsPerLine :: CliArgs -> Property
 prop_shouldPrintMultPasswordsPerLine (CliArgs args)
   = (read . fromMaybe "8" . getPosParam $ args) <= 38 ==>
     ioProperty $ do
-      (in', out', err', p) <- run' "dist/build/elocrypt/elocrypt" args
+      (in', out', err', p) <- run' elocrypt args
       response <- readHandle out'
       return . all (>1) . tail . reverse . map length . map words . lines $ response
 
@@ -79,7 +81,7 @@ prop_shouldPrintDefaultMultPasswordsPerLine (CliArgs args)
   = isNothing (getArg "-n" args) ==>
     (read . fromMaybe "8" . getPosParam $ args) <= 38 ==>
     ioProperty $ do
-      (in', out', err', p) <- run' "dist/build/elocrypt/elocrypt" args
+      (in', out', err', p) <- run' elocrypt args
       response <- readHandle out'
       return . all (>1) . tail . reverse . map length . map words . lines $ response
 
@@ -89,14 +91,14 @@ prop_shouldNotPrintZeroPasswords (CliArgs args)
     ioProperty $ do
       let args' = args ++ ["0"]
       
-      (in', out', err', p) <- run' "dist/build/elocrypt/elocrypt" args'
+      (in', out', err', p) <- run' elocrypt args'
       response <- readHandle out'
       return (response == "")
 
 prop_shouldPrintLongPasswords :: GreaterThan79 Int -> Property
 prop_shouldPrintLongPasswords (GT79 a)
   = ioProperty $ do
-      (in', out', err', p) <- run' "dist/build/elocrypt/elocrypt" [show a]
+      (in', out', err', p) <- run' elocrypt [show a]
       response <- readHandle out'
       return . all (==1) . map length . map words . lines $ response
 
