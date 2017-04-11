@@ -53,6 +53,11 @@ prop_newPasswordShouldHaveLen :: Int -> Bool -> StdGen -> Property
 prop_newPasswordShouldHaveLen len caps gen
   = len >= 0 ==> length (newPassword len caps gen) == len
 
+-- TODO[sgillespie]:
+--  * mkPassphrase
+--  * newPassPhrase
+--  * genPassPhrase
+
 prop_first2ShouldHaveLength2 :: StdGen -> Bool
 prop_first2ShouldHaveLength2 g = length (evalRand first2 g) == 2
 
