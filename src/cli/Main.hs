@@ -61,7 +61,11 @@ defaultOptions = Options { optLength = 8,
                            optVersion = False }
 
 options :: [OptDescr (Options -> Options)]
-options = [Option ['n'] ["number"] (ReqArg (\n o -> o {optNumber = Just (read n)}) "NUMBER") "The number of passwords to generate",
+options = [Option ['n'] ["number"]
+                  (ReqArg (\n o -> o {optNumber = Just (read n)}) "NUMBER")
+                  "The number of passwords to generate",
+
+           Option ['p'] ["passphrase"] (NoArg id) "Generate passphrases instead of passwords",
            Option ['h'] ["help"] (NoArg (\o -> o { optHelp = True })) "Show this help",
            Option ['v'] ["version"] (NoArg (\o -> o { optVersion = True })) "Show version and exit"]
 
@@ -82,5 +86,8 @@ elocryptOpts' args = case getOpt Permute options args of
     exitFailure
 
 usage :: String
-usage = usageInfo header options
-  where header = "Usage: elocrypt [option...] length"
+usage = usageInfo (intercalate "\n" headerLines) options
+  where headerLines =
+          ["Usage: elocrypt [option...] length",
+           "       elocrypt -p [option...] min-length max-length",
+           ""]
