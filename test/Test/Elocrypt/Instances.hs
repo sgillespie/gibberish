@@ -13,6 +13,12 @@ newtype AlphaChar = Alpha Char
 instance Arbitrary AlphaChar where
   arbitrary = Alpha `liftM` elements ['a'..'z']
 
+newtype GreaterThan0 a = GT0 { getGT0 :: a }
+  deriving (Eq, Ord, Show)
+
+instance (Num a, Ord a, Arbitrary a) => Arbitrary (GreaterThan0 a) where
+  arbitrary = GT0 `fmap` (arbitrary `suchThat` (>0))
+
 newtype GreaterThan2 a = GT2 { getGT2 :: a }
                        deriving (Eq, Ord, Show)
 

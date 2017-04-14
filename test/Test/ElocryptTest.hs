@@ -3,6 +3,7 @@ module Test.ElocryptTest where
 
 import Control.Monad
 import Control.Monad.Random hiding (next)
+import Data.List
 import Data.Maybe
 import Test.QuickCheck hiding (frequency)
 import Test.Tasty
@@ -53,10 +54,35 @@ prop_newPasswordShouldHaveLen :: Int -> Bool -> StdGen -> Property
 prop_newPasswordShouldHaveLen len caps gen
   = len >= 0 ==> length (newPassword len caps gen) == len
 
--- TODO[sgillespie]:
---  * mkPassphrase
---  * newPassPhrase
---  * genPassPhrase
+prop_genPassphraseShouldBeUnique
+  :: GreaterThan2 Int
+  -> GreaterThan2 Int
+  -> GreaterThan0 Int
+  -> StdGen
+  -> Bool
+prop_genPassphraseShouldBeUnique (GT2 n) (GT2 min) (GT0 max) gen
+  = not . hasDuplicates $ phrase
+  where phrase = fst (genPassphrase n min (min+max) gen)
+
+prop_newPassphraseShouldBeUnique
+  :: GreaterThan2 Int
+  -> GreaterThan2 Int
+  -> GreaterThan0 Int
+  -> StdGen
+  -> Bool
+prop_newPassphraseShouldBeUnique (GT2 n) (GT2 min) (GT0 max) gen
+  = not . hasDuplicates $ phrase
+  where phrase = newPassphrase n min (min+max) gen
+
+prop_newPassphraseShouldHaveLen
+  :: GreaterThan2 Int
+  -> GreaterThan2 Int
+  -> GreaterThan0 Int
+  -> StdGen
+  -> Bool
+prop_newPassphraseShouldHaveLen (GT2 n) (GT2 min) (GT0 max) gen
+  = length phrase == n
+  where phrase = newPassphrase n min (min+max) gen
 
 prop_first2ShouldHaveLength2 :: StdGen -> Bool
 prop_first2ShouldHaveLength2 g = length (evalRand first2 g) == 2
@@ -92,3 +118,8 @@ findNextCandidates (c1:c2:_) = map fst `liftM` frequency
         frequency = (filter ((/=0) . snd) . zip ['a'..'z']) `liftM` findFrequency f2
 
 findNextCandidates _ = Nothing  -- This really shouldn't ever happen
+
+hasDuplicates = hasDuplicates' . sort
+  where hasDuplicates' (p1:p2:ps) | p1 == p2 = True
+                                  | otherwise = hasDuplicates' (p2:ps)
+        hasDuplicates' _ = False
