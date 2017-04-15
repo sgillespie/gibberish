@@ -62,25 +62,30 @@ main = do
   when (optHelp opts) $ do
     hPutStrLn stderr usage
     exitSuccess
+
   when (optVersion opts) $ do
     hPutStrLn stderr version
     exitSuccess
 
-  -- TODO[sgillespie]: REFACTOR ME?
-  if optLength opts == 0
-    then exitSuccess
-    else putStrLn (passwords opts gen)
+  when (optLength opts == 0)
+    exitSuccess    -- Nothing to do
+
+  putStrLn (passwords opts gen)
 
 elocryptOpts :: [String] -> IO Options
 elocryptOpts args = do
   (opts, nonopts) <- elocryptOpts' args
+
   return $ if null nonopts
      then opts
      else opts { optLength = read (head nonopts) }
 
 elocryptOpts' :: [String] -> IO (Options, [String])
 elocryptOpts' args = case getOpt Permute options args of
-  (opts, nonopts, [])   -> return (foldl (flip id) defaultOptions opts, nonopts)
+  (opts, nonopts, []) -> do
+    let opts' = foldl (flip id) defaultOptions opts
+    return (opts', nonopts)
+
   (_   , _      , errs) -> do
     -- TODO: Refactor me
     hPutStrLn stderr (concat errs)
@@ -90,11 +95,12 @@ elocryptOpts' args = case getOpt Permute options args of
 passwords :: RandomGen g => Options -> g -> String
 passwords opts gen = format . group' cols $ ps
   where ps = newPasswords (optLength opts) num False gen    -- TODO[sgillespie]: Add caps
-        format = intercalate "\n" . map (intercalate "  ")
-        cols = if optLength opts <= termLen - 2
-                  then termLen `div` (optLength opts + 2)
-                  else 1
-        num = fromMaybe ((if cols == 0 then 1 else cols) * termHeight) (optNumber opts)
+        cols = columns (optLength opts)
+        num = fromMaybe (nWords cols)
+                        (optNumber opts)
+
+passphrases :: RandomGen g => Options -> g -> String
+passphrases = undefined
 
 group' :: Int -> [a] -> [[a]]
 group' _ [] = []
@@ -107,3 +113,19 @@ usage = usageInfo (intercalate "\n" headerLines) options
           ["Usage: elocrypt [option...] length",
            "       elocrypt -p [option...] min-length max-length",
            ""]
+
+-- Utilities
+
+-- Calculate the number of passwords to print per line
+columns :: Int -> Int
+columns len | len <= termLen - 2 = termLen `div` (len + 2)
+            | otherwise = 1
+
+-- Format a 2D list of Strings,
+--  1 list per line
+format :: [[String]] -> String
+format = intercalate "\n" . map unwords
+
+-- Calculate the number of words to print
+nWords :: Int -> Int
+nWords cols = cols * termHeight
