@@ -20,30 +20,39 @@ termLen    = 80
 termHeight = 10
 
 data Options = Options {
-      optLength  :: Int,        -- Size of the password(s)
-      optNumber  :: Maybe Int,  -- Number of passwords to generate
-      optHelp    :: Bool,
-      optVersion :: Bool
+      optLength    :: Int,        -- Size of the password(s)
+      optMaxLength :: Int,
+      optNumber    :: Maybe Int,  -- Number of passwords to generate
+      optPassType  :: PassType,   -- Generate passwords or passphrases
+      optHelp      :: Bool,
+      optVersion   :: Bool
   } deriving (Show)
+
+data PassType
+  = Phrase
+  | Word
+  deriving (Eq, Show)
 
 defaultOptions :: Options
 defaultOptions = Options {
-      optLength  = 8,
-      optNumber  = Nothing,
-      optHelp    = False,
-      optVersion = False
+      optLength    = 8,
+      optMaxLength = 10,
+      optNumber    = Nothing,
+      optPassType  = Word,
+      optHelp      = False,
+      optVersion   = False
   }
 
 options :: [OptDescr (Options -> Options)]
 options = [
       Option ['n'] ["number"]
-        (ReqArg (\n o -> o {optNumber = Just (read n)}) "NUMBER")
+        (ReqArg (\n o -> o { optNumber = Just (read n) }) "NUMBER")
         "The number of passwords to generate",
 
       Option ['p'] ["passphrase"]
-        (NoArg id)
+        (NoArg (\o -> o { optPassType = Phrase }))
         "Generate passphrases instead of passwords",
-           
+
       Option ['h'] ["help"]
         (NoArg (\o -> o { optHelp = True }))
         "Show this help",
@@ -70,15 +79,16 @@ main = do
   when (optLength opts == 0)
     exitSuccess    -- Nothing to do
 
-  putStrLn (passwords opts gen)
+  putStrLn (generate opts gen)
 
 elocryptOpts :: [String] -> IO Options
 elocryptOpts args = do
   (opts, nonopts) <- elocryptOpts' args
 
-  return $ if null nonopts
-     then opts
-     else opts { optLength = read (head nonopts) }
+  return $ case nonopts of
+    (o:os:_) -> opts { optLength = read o, optMaxLength = read os }
+    (o:_) -> opts { optLength = read o }
+    [] -> opts
 
 elocryptOpts' :: [String] -> IO (Options, [String])
 elocryptOpts' args = case getOpt Permute options args of
@@ -87,32 +97,37 @@ elocryptOpts' args = case getOpt Permute options args of
     return (opts', nonopts)
 
   (_   , _      , errs) -> do
-    -- TODO: Refactor me
     hPutStrLn stderr (concat errs)
     hPutStrLn stderr usage
     exitFailure
 
+generate :: RandomGen g => Options -> g -> String
+generate opts@Options{optPassType=Word} = passwords opts
+generate opts@Options{optPassType=Phrase} = passphrases opts
+
 passwords :: RandomGen g => Options -> g -> String
-passwords opts gen = format . group' cols $ ps
-  where ps = newPasswords (optLength opts) num False gen    -- TODO[sgillespie]: Add caps
-        cols = columns (optLength opts)
-        num = fromMaybe (nWords cols)
-                        (optNumber opts)
+passwords Options{optLength = len, optNumber = n} gen
+  = format "  " . groupWith splitAt' width "  " $ ps
+  where ps = newPasswords len num False gen    -- TODO[sgillespie]: Add caps
+        cols = columns len
+        num = fromMaybe (nWords cols) n
+        width = max termLen (len + 2)
 
 passphrases :: RandomGen g => Options -> g -> String
-passphrases = undefined
-
-group' :: Int -> [a] -> [[a]]
-group' _ [] = []
-group' i ls = g : group' i ls'
-  where (g, ls') = splitAt i ls
+passphrases opts gen
+  = format " " . take lines' . groupWith splitAt' termLen " " $ passphrase
+  where passphrase = newPassphrase words' (optLength opts)
+                                          (optMaxLength opts) gen
+        words' = nWords . columns . optLength $ opts
+        lines' = fromMaybe termHeight
+                           (optNumber opts)
 
 usage :: String
 usage = usageInfo (intercalate "\n" headerLines) options
-  where headerLines =
-          ["Usage: elocrypt [option...] length",
-           "       elocrypt -p [option...] min-length max-length",
-           ""]
+  where headerLines = [
+              "Usage: elocrypt [option...] length",
+              "       elocrypt -p [option...] min-length max-length"
+          ]
 
 -- Utilities
 
@@ -123,9 +138,40 @@ columns len | len <= termLen - 2 = termLen `div` (len + 2)
 
 -- Format a 2D list of Strings,
 --  1 list per line
-format :: [[String]] -> String
-format = intercalate "\n" . map unwords
+format :: String -> [[String]] -> String
+format sep = intercalate "\n" . map (intercalate sep)
 
 -- Calculate the number of words to print
 nWords :: Int -> Int
 nWords cols = cols * termHeight
+
+-- Group a 2D array with a function by total length
+groupWith
+  :: (Int -> [a] -> [[a]] -> ([[a]], [[a]]))
+  -> Int
+  -> [a]
+  -> [[a]]
+  -> [[[a]]]
+groupWith _ _ _ [] = []
+groupWith f i sep ls | null groups = [[head ls]]
+                     | otherwise = groups
+  where groups = groupWith' f i sep ls
+
+groupWith'
+  :: (Int -> [a] -> [[a]] -> ([[a]], [[a]]))
+  -> Int
+  -> [a]
+  -> [[a]]
+  -> [[[a]]]
+groupWith' _ _ _ [] = []
+groupWith' f i sep ls = g : groupWith f i sep ls'
+  where (g, ls') = f i sep ls
+
+-- Split a 2D array by the total length
+splitAt' :: Int -> [a] -> [[a]] -> ([[a]], [[a]])
+splitAt' 0 _ ls = ([], ls)
+splitAt' _ _ [] = ([], [])
+splitAt' n sep (l:ls) | n >= length l + sl = (l:xs, xs')
+                      | otherwise = ([], l:ls)
+  where (xs, xs') = splitAt' (n - length l - sl) sep ls
+        sl = length sep
