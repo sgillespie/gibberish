@@ -1,5 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Test.Elocrypt.PasswordTest where
+module IntegTest.Elocrypt.PasswordTest where
 
 import Data.List
 import Data.Maybe

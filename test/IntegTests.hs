@@ -15,8 +15,8 @@ import Test.Tasty hiding (Timeout)
 import Test.Tasty.QuickCheck (QuickCheckTests(..), testProperty)
 import Test.Tasty.TH
 
-import qualified Test.Elocrypt.PasswordTest as PasswordTest
-import qualified Test.Elocrypt.PassphraseTest as PassphraseTest
+import qualified IntegTest.Elocrypt.PasswordTest as PasswordTest
+import qualified IntegTest.Elocrypt.PassphraseTest as PassphraseTest
 
 main :: IO ()
 main = defaultMain (options tests)
@@ -25,7 +25,7 @@ options :: TestTree -> TestTree
 options = localOption (QuickCheckTests 10)
 
 tests :: TestTree
-tests = testGroup "CLI Tests" [
+tests = testGroup "Integration Tests" [
       PasswordTest.tests,
       PassphraseTest.tests
   ]

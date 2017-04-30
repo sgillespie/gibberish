@@ -10,5 +10,5 @@ main :: IO ()
 main = defaultMain tests
 
 tests :: TestTree
-tests = testGroup "All Tests" [PasswordTest.tests,
-                               TrigraphTest.tests]
+tests = testGroup "Unit Tests" [PasswordTest.tests,
+                                TrigraphTest.tests]

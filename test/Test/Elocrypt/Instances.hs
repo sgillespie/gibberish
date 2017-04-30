@@ -2,14 +2,52 @@ module Test.Elocrypt.Instances where
 
 import Control.Monad
 import System.Random
+import Text.Printf
+
 import Test.QuickCheck
 
+newtype CliArgs
+  = CliArgs  { getArgs :: [String] }
+  deriving Eq
+
+instance Show CliArgs where
+  show = unwords . getArgs
+
+instance Arbitrary CliArgs where
+  arbitrary = do
+    len  <- arbitrary `suchThat` (>0) `suchThat` (<=40) :: Gen Int
+    num  <- arbitrary `suchThat` (>2) `suchThat` (<=20) :: Gen Int
+    args <- sublistOf ["-n %d" `printf` num,
+                       show len]
+    return (CliArgs args)
+
+newtype PhraseCliArgs
+  = PhraseCliArgs { getPhraseArgs :: [String] }
+  deriving Eq
+
+instance Show PhraseCliArgs where
+  show = unwords . getPhraseArgs
+
+instance Arbitrary PhraseCliArgs where
+  arbitrary = do
+    num    <- arbitrary `suchThat` (>2) `suchThat` (<=20) :: Gen Int
+    minLen <- arbitrary `suchThat` (>0) `suchThat` (<=40) :: Gen Int
+    maxLen <- arbitrary `suchThat` (>0) `suchThat` (<=40) :: Gen Int
+
+    -- Need Either [], [num], or [num, minLength, maxLength]
+    args <- sublistOf ["-n %d" `printf` num,
+                       show minLen,
+                       show (maxLen + minLen)]
+
+    return $ PhraseCliArgs ("-p" : args)
+
+-- Uh oh! I copy/pasted this!
 instance Arbitrary StdGen where
   arbitrary = mkStdGen `liftM` arbitrary
 
 newtype AlphaChar = Alpha Char
                   deriving (Eq, Ord, Show)
-
+-- 
 instance Arbitrary AlphaChar where
   arbitrary = Alpha `liftM` elements ['a'..'z']
 
