@@ -16,6 +16,7 @@ import Test.Tasty.QuickCheck (QuickCheckTests(..), testProperty)
 import Test.Tasty.TH
 
 import qualified Test.Elocrypt.PasswordTest as PasswordTest
+import qualified Test.Elocrypt.PassphraseTest as PassphraseTest
 
 main :: IO ()
 main = defaultMain (options tests)
@@ -25,7 +26,8 @@ options = localOption (QuickCheckTests 10)
 
 tests :: TestTree
 tests = testGroup "CLI Tests" [
-      PasswordTest.tests
+      PasswordTest.tests,
+      PassphraseTest.tests
   ]
 
 

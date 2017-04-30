@@ -78,5 +78,6 @@ test-suite ui-test
   hs-source-dirs:      cli-test
   main-is:             CliTests.hs
   other-modules:       Test.Elocrypt.Instances,
+                       Test.Elocrypt.PassphraseTest
                        Test.Elocrypt.PasswordTest
   type:                exitcode-stdio-1.0

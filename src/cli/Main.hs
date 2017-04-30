@@ -114,13 +114,14 @@ passwords Options{optLength = len, optNumber = n} gen
         width = max termLen (len + 2)
 
 passphrases :: RandomGen g => Options -> g -> String
-passphrases opts gen
-  = format " " . take lines' . groupWith splitAt' termLen " " $ passphrase
-  where passphrase = newPassphrase words' (optLength opts)
-                                          (optMaxLength opts) gen
-        words' = nWords . columns . optLength $ opts
-        lines' = fromMaybe termHeight
-                           (optNumber opts)
+passphrases Options{optLength = minLen,
+                    optMaxLength = maxLen,
+                    optNumber = n} gen
+  = format " " . take lines' . groupWith splitAt' width " " $ passphrase
+  where passphrase = newPassphrase words' minLen maxLen gen
+        words' = columns minLen * lines'
+        width = max termLen (maxLen + 1)
+        lines' = fromMaybe termHeight n
 
 usage :: String
 usage = usageInfo (intercalate "\n" headerLines) options
@@ -143,7 +144,7 @@ format sep = intercalate "\n" . map (intercalate sep)
 
 -- Calculate the number of words to print
 nWords :: Int -> Int
-nWords cols = cols * termHeight
+nWords cols = termHeight * cols
 
 -- Group a 2D array with a function by total length
 groupWith
