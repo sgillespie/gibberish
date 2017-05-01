@@ -15,13 +15,18 @@ cabal install elocrypt
 ```
 
 Binaries are also available:
- * [elocrypt-0.6.0-linux-bin.tar.gz](https://github.com/sgillespie/elocrypt/releases/download/v0.4.0/elocrypt-0.4.0-linux-bin.tar.gz)
- * [elocrypt-0.6.0-windows-bin.exe](https://github.com/sgillespie/elocrypt/releases/download/v0.4.0/elocrypt-0.4.0-windows-bin.exe)
+ * [elocrypt-1.0.0-linux-bin.tar.gz](https://github.com/sgillespie/elocrypt/releases/download/v1.0.0/elocrypt-1.0.0-linux-bin.tar.gz)
+ * [elocrypt-1.0.0-windows-bin.exe](https://github.com/sgillespie/elocrypt/releases/download/v1.0.0/elocrypt-1.0.0-windows-bin.exe)
 
 ## Running
-Running elocrypt is as simple as:
+Generate a list passwords:
 ```
 elocrypt [length]
+```
+
+You can also generate random phrases (1 per line):
+```
+elocrypt --passphrases [min-length] [max-length]
 ```
 
 ## Obtaining the source
