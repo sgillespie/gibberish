@@ -168,7 +168,7 @@ mkPassphrase n min max = replicateM n $
 -- * Internal
 
 -- |The alphabet we sample random values from
-alphabet :: [Char]
+alphabet :: String
 alphabet = ['a'..'z']
 
 -- |Generate two random characters. Uses 'Elocrypt.Trigraph.trigragh'

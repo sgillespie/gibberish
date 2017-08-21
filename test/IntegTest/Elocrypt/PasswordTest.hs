@@ -82,10 +82,10 @@ readHandle :: Handle -> IO String
 readHandle = (<$>) asUtf8Str . waitOutput (seconds 2) 5000
 
 assertExitedSuccess :: Timeout -> ProcessHandle -> IO Bool
-assertExitedSuccess t = liftM (== ExitSuccess) . assertExitedTimeout t
+assertExitedSuccess t = fmap (== ExitSuccess) . assertExitedTimeout t
 
 assertExitedFailure :: Timeout -> ProcessHandle -> IO Bool
-assertExitedFailure t = liftM not . assertExitedSuccess t
+assertExitedFailure t = fmap not . assertExitedSuccess t
 
 sleep' :: IO ()
 sleep' = sleep (seconds 0.0001)
@@ -93,7 +93,7 @@ sleep' = sleep (seconds 0.0001)
 getArg :: String -> [String] -> Maybe String
 getArg prefix args = (tail . dropWhile (not . elem')) `liftM` arg
   where arg = find (isPrefixOf prefix) args
-        elem' = (flip elem) [' ', '=']
+        elem' = flip elem [' ', '=']
 
 getPosParam :: [String] -> Maybe String
 getPosParam = find $ (/= '-') . head

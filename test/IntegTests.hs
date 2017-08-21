@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
 module Main where
 
 import Data.Functor

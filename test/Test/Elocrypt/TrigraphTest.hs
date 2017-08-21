@@ -2,6 +2,7 @@
 module Test.Elocrypt.TrigraphTest where
 
 import Control.Monad
+import Data.Maybe (isNothing)
 import Test.QuickCheck
 import Test.Tasty.QuickCheck (testProperty)
 import Test.Tasty.TH
@@ -19,4 +20,4 @@ prop_findFrequencyShouldSucceedWith2Chars (Alpha c1) (Alpha c2)
 
 prop_findFrequencyShouldFailWithNot2Chars :: String -> Property
 prop_findFrequencyShouldFailWithNot2Chars str
-  = length str /= 2 ==> findFrequency str == Nothing
+  = length str /= 2 ==> isNothing (findFrequency str)
