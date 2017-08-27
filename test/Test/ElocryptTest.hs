@@ -20,22 +20,22 @@ tests :: TestTree
 tests = $(testGroupGenerator)
 
 -- (len . fst) (genPassword x _ _) = x
-prop_genPasswordHasLen :: Positive Int -> Bool -> StdGen -> Bool
-prop_genPasswordHasLen (Positive len) caps gen
+prop_newPasswordHasLen :: Positive Int -> Bool -> StdGen -> Bool
+prop_newPasswordHasLen (Positive len) caps gen
   = length pass == len
-  where (pass, _) = genPassword len caps gen
+  where pass = newPassword len caps gen
 
 -- (all isLower . fst) (genPassword _ false _)
-prop_genPasswordIsLower :: Positive Int -> StdGen -> Bool
-prop_genPasswordIsLower (Positive len) gen
+prop_newPasswordIsLower :: Positive Int -> StdGen -> Bool
+prop_newPasswordIsLower (Positive len) gen
   = all isLower pass
-  where (pass, _) = genPassword len False gen
+  where pass = newPassword len False gen
 
 -- Third and each successive character is taken from the trigraph
 prop_3rdCharHasPositiveFrequency :: Positive Int -> Bool -> StdGen -> Property
 prop_3rdCharHasPositiveFrequency (Positive len) caps gen
   = conjoin $ loop pass
-  where (pass, _) = genPassword (len+2) caps gen
+  where pass = newPassword (len+2) caps gen
         loop (f:s:t:xs) = thirdCharIsInTrigraph [f, s, t] : loop (s:t:xs)
         loop _          = []
 
@@ -55,7 +55,7 @@ thirdCharIsInTrigraph pass
 prop_first2HavePositiveFrequencies :: Positive Int -> Bool -> StdGen -> Property
 prop_first2HavePositiveFrequencies (Positive len) caps gen
   = counterexample failMsg $ property (sum frequencies > 0)
-  where (pass, _) = genPassword (len+1) caps gen
+  where pass = newPassword (len+1) caps gen
         (f:s:_) = map toLower pass
         frequencies = zipWith (curry snd) alphabet .
                       fromJust .
@@ -63,27 +63,27 @@ prop_first2HavePositiveFrequencies (Positive len) caps gen
         failMsg = "no candidates for '" ++ [f, s] ++ "'"
 
 -- (len . fst) (genPasswords _ x _ _) = x
-prop_genPasswordsHasLen
+prop_newPasswordsHasLen
   :: Positive Int
   -> Positive Int
   -> Bool
   -> StdGen
   -> Property
-prop_genPasswordsHasLen (Positive len) (Positive num) caps gen
+prop_newPasswordsHasLen (Positive len) (Positive num) caps gen
   = counterexample failMsg $ property (length passes == num)
-  where (passes, _) = genPasswords len num caps gen
+  where passes = newPasswords len num caps gen
         failMsg     = show (length passes) ++ " /= " ++ show num
 
 -- (all ((x==) . length) . fst) (genPasswords x _ _ _) = x
-prop_genPasswordsAllHaveLen
+prop_newPasswordsAllHaveLen
   :: Positive Int
   -> Positive Int
   -> Bool
   -> StdGen
   -> Bool
-prop_genPasswordsAllHaveLen (Positive len) (Positive num) caps gen
+prop_newPasswordsAllHaveLen (Positive len) (Positive num) caps gen
   = all ((len==) . length) passes
-  where (passes, _) = genPasswords len num caps gen
+  where passes = newPasswords len num caps gen
 
 -- |Given the same generator, newPassword and genPassword generates the 
 --  same password.
