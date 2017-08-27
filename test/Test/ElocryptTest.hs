@@ -135,3 +135,21 @@ prop_newPassphraseWordsHaveLen (Positive len) (Positive min) (Positive max) gen
   = all (\w -> length w >= min && length w <= max') words
   where words = newPassphrase len min max' gen
         max'  = min + max
+
+-- |Given the same generator, genPassphrase and newPassphrase generates
+-- the same passphrase
+prop_genPassphraseMatchesNewPassphrase
+  :: Positive Int
+  -> Positive Int
+  -> Positive Int
+  -> StdGen
+  -> Property
+prop_genPassphraseMatchesNewPassphrase 
+  (Positive len) 
+  (Positive min) 
+  (Positive max) 
+  gen = counterexample failMsg $ property (words == words')
+  where (words, _) = genPassphrase len min max' gen
+        words'     = newPassphrase len min max' gen
+        max'       = min + max
+        failMsg    = show words ++ " /= " ++ show words'
