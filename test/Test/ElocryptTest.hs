@@ -3,6 +3,8 @@ module Test.ElocryptTest where
 
 import Control.Monad
 import Control.Monad.Random hiding (next)
+import Data.Bool
+import Data.Char
 import Data.List
 import Data.Maybe
 import Test.QuickCheck hiding (frequency)
@@ -17,109 +19,119 @@ import Test.Elocrypt.Instances
 tests :: TestTree
 tests = $(testGroupGenerator)
 
-prop_genPasswordShouldBeUnique :: GreaterThan2 Int -> Bool -> StdGen -> Bool
-prop_genPasswordShouldBeUnique (GT2 len) caps gen
-  = p /= fst (genPassword len caps gen')
-  where (p, gen') = genPassword len caps gen
+-- (len . fst) (genPassword x _ _) = x
+prop_genPasswordHasLen :: Positive Int -> Bool -> StdGen -> Bool
+prop_genPasswordHasLen (Positive len) caps gen
+  = length pass == len
+  where (pass, _) = genPassword len caps gen
 
-prop_genPasswordsShouldBeUnique
-  :: GreaterThan2 Int
-  -> GreaterThan2 Int
+-- (all isLower . fst) (genPassword _ false _)
+prop_genPasswordIsLower :: Positive Int -> StdGen -> Bool
+prop_genPasswordIsLower (Positive len) gen
+  = all isLower pass
+  where (pass, _) = genPassword len False gen
+
+-- Third and each successive character is taken from the trigraph
+prop_3rdCharHasPositiveFrequency :: Positive Int -> Bool -> StdGen -> Property
+prop_3rdCharHasPositiveFrequency (Positive len) caps gen
+  = conjoin $ loop pass
+  where (pass, _) = genPassword (len+2) caps gen
+        loop (f:s:t:xs) = thirdCharIsInTrigraph [f, s, t] : loop (s:t:xs)
+        loop _          = []
+
+thirdCharIsInTrigraph :: String -> Property
+thirdCharIsInTrigraph pass
+  = counterexample failMsg $ property (t `elem` candidates)
+  where (f:s:t:_) = map toLower pass
+        candidates = map fst . filter ((0/=) . snd) $ frequencies
+        frequencies = zip alphabet .
+                      defaultFrequencies .
+                      fromJust .
+                      findFrequency $ [f, s]
+
+        failMsg = t : " not in [" ++ candidates ++ "]"
+
+-- First 2 characters have total non-zero frequencies
+prop_first2HavePositiveFrequencies :: Positive Int -> Bool -> StdGen -> Property
+prop_first2HavePositiveFrequencies (Positive len) caps gen
+  = counterexample failMsg $ property (sum frequencies > 0)
+  where (pass, _) = genPassword (len+1) caps gen
+        (f:s:_) = map toLower pass
+        frequencies = zipWith (curry snd) alphabet .
+                      fromJust .
+                      findFrequency $ [f, s]
+        failMsg = "no candidates for '" ++ [f, s] ++ "'"
+
+-- (len . fst) (genPasswords _ x _ _) = x
+prop_genPasswordsHasLen
+  :: Positive Int
+  -> Positive Int
+  -> Bool
+  -> StdGen
+  -> Property
+prop_genPasswordsHasLen (Positive len) (Positive num) caps gen
+  = counterexample failMsg $ property (length passes == num)
+  where (passes, _) = genPasswords len num caps gen
+        failMsg     = show (length passes) ++ " /= " ++ show num
+
+-- (all ((x==) . length) . fst) (genPasswords x _ _ _) = x
+prop_genPasswordsAllHaveLen
+  :: Positive Int
+  -> Positive Int
   -> Bool
   -> StdGen
   -> Bool
-prop_genPasswordsShouldBeUnique (GT2 len) (GT2 n) caps gen
-  = p /= ps
-  where (p:ps:_) = fst (genPasswords len n caps gen)
+prop_genPasswordsAllHaveLen (Positive len) (Positive num) caps gen
+  = all ((len==) . length) passes
+  where (passes, _) = genPasswords len num caps gen
 
-prop_newPasswordShouldBeLength :: Int -> Bool -> StdGen -> Property
-prop_newPasswordShouldBeLength len caps gen = len > 0 ==>
-                                              length (newPassword len caps gen) == len
-
-prop_newPasswordShouldConsistOfAlphabet :: Int -> Bool -> StdGen -> Bool
-prop_newPasswordShouldConsistOfAlphabet len caps gen
-  = all (`elem` alphabet) (newPassword len caps gen)
-
-prop_newPasswordsShouldBeUnique
-  :: GreaterThan2 Int
-  -> GreaterThan2 Int
+-- |Given the same generator, newPassword and genPassword generates the 
+--  same password.
+prop_newPasswordMatchesGenPassword
+  :: Positive Int
   -> Bool
   -> StdGen
+  -> Property
+prop_newPasswordMatchesGenPassword (Positive len) caps gen
+  = counterexample failMsg $ property (pass == pass')
+  where (pass, _) = genPassword len caps gen
+        pass'     = newPassword len caps gen
+        failMsg   = show pass ++ " /= " ++ show pass'
+
+-- |Given the same generator, newPasswords and genPasswords genereates
+--  the same passwords.
+prop_newPasswordsMatchesGenPasswords
+  :: Positive Int
+  -> Positive Int
   -> Bool
-prop_newPasswordsShouldBeUnique (GT2 len) (GT2 n) caps gen
-  = p /= ps
-  where (p:ps:_) = newPasswords len n caps gen
+  -> StdGen
+  -> Property
+prop_newPasswordsMatchesGenPasswords (Positive len) (Positive num) caps gen
+  = counterexample failMsg $ property (passes == passes')
+  where (passes, _) = genPasswords len num caps gen
+        passes'     = newPasswords len num caps gen
+        failMsg     = show passes ++ " /= " ++ show passes'
 
-prop_newPasswordShouldHaveLen :: Int -> Bool -> StdGen -> Property
-prop_newPasswordShouldHaveLen len caps gen
-  = len >= 0 ==> length (newPassword len caps gen) == len
+-- |newPassphrase generates n words
+prop_newPassphraseHasLen 
+  :: Positive Int
+  -> Positive Int
+  -> Positive Int
+  -> StdGen
+  -> Property
+prop_newPassphraseHasLen (Positive len) (Positive min) (Positive max) gen
+  = counterexample failMsg $ property (length words == len)
+  where words   = newPassphrase len min max gen
+        failMsg = show len ++ " /= length " ++ show words
 
-prop_genPassphraseShouldBeUnique
-  :: GreaterThan2 Int
-  -> GreaterThan2 Int
-  -> GreaterThan0 Int
+-- |newPassphrase generates words in the allowed range
+prop_newPassphraseWordsHaveLen
+  :: Positive Int
+  -> Positive Int
+  -> Positive Int
   -> StdGen
   -> Bool
-prop_genPassphraseShouldBeUnique (GT2 n) (GT2 min) (GT0 max) gen
-  = not . hasDuplicates $ phrase
-  where phrase = fst (genPassphrase n min (min+max) gen)
-
-prop_newPassphraseShouldBeUnique
-  :: GreaterThan2 Int
-  -> GreaterThan2 Int
-  -> GreaterThan0 Int
-  -> StdGen
-  -> Bool
-prop_newPassphraseShouldBeUnique (GT2 n) (GT2 min) (GT0 max) gen
-  = not . hasDuplicates $ phrase
-  where phrase = newPassphrase n min (min+max) gen
-
-prop_newPassphraseShouldHaveLen
-  :: GreaterThan2 Int
-  -> GreaterThan2 Int
-  -> GreaterThan0 Int
-  -> StdGen
-  -> Bool
-prop_newPassphraseShouldHaveLen (GT2 n) (GT2 min) (GT0 max) gen
-  = length phrase == n
-  where phrase = newPassphrase n min (min+max) gen
-
-prop_first2ShouldHaveLength2 :: StdGen -> Bool
-prop_first2ShouldHaveLength2 g = length (evalRand first2 g) == 2
-
-prop_nextShouldSkip0Weights :: AlphaChar -> AlphaChar -> StdGen -> Property
-prop_nextShouldSkip0Weights (Alpha c1) (Alpha c2) gen = isCandidate next' [c1, c2]
-  where next' = evalRand (next . reverse $ [c1, c2]) gen
-
-prop_lastNShouldSkip0Weights :: AlphaChar -> AlphaChar -> Int -> StdGen -> Property
-prop_lastNShouldSkip0Weights (Alpha c1) (Alpha c2) len gen
-  = len > 0 ==> lastNShouldSkip0Weights' lastN'
-  where lastN' = evalRand (lastN len [c2, c1]) gen
-
-lastNShouldSkip0Weights' :: String -> Property
-lastNShouldSkip0Weights' (p:ps:pss:psss) = isCandidate p [pss, ps] .&&.
-                                           lastNShouldSkip0Weights' (ps:pss:psss)
-lastNShouldSkip0Weights' _ = property True
-
--- Utility functions
-isCandidate :: Char -> String -> Property
-isCandidate c (s:ss:_) = hasCandidates f2 ==>
-                           isJust $ elem c `liftM` findNextCandidates f2
-  where f2 = [s, ss]
-
-isCandidate _ _ = undefined -- This really shouldn't ever happen
-
-hasCandidates :: String -> Bool
-hasCandidates s = (not . null) `liftM` findNextCandidates s == Just True
-
-findNextCandidates :: String -> Maybe String
-findNextCandidates (c1:c2:_) = map fst `liftM` frequency
-  where f2 = [c1, c2]
-        frequency = (filter ((/=0) . snd) . zip ['a'..'z']) `liftM` findFrequency f2
-
-findNextCandidates _ = Nothing  -- This really shouldn't ever happen
-
-hasDuplicates = hasDuplicates' . sort
-  where hasDuplicates' (p1:p2:ps) | p1 == p2 = True
-                                  | otherwise = hasDuplicates' (p2:ps)
-        hasDuplicates' _ = False
+prop_newPassphraseWordsHaveLen (Positive len) (Positive min) (Positive max) gen
+  = all (\w -> length w >= min && length w <= max') words
+  where words = newPassphrase len min max' gen
+        max'  = min + max

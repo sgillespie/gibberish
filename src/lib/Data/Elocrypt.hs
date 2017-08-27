@@ -182,14 +182,9 @@ first2 = fromList (map toWeight frequencies)
 next :: MonadRandom m => String -> m Char
 next (x:xs:_) = fromList .
                 zip ['a'..'z'] .
-                defaultFreqs .
+                defaultFrequencies .
                 fromJust .
                 findFrequency $ [xs, x]
-
-  -- Fix frequencies if they are all 0, since MonadRandom prohibits this.
-  -- Use all 1s in this case to give every item an equal weight.
-  where defaultFreqs :: [Rational] -> [Rational]
-        defaultFreqs f = bool (replicate 26 1) f (any (>0) f)
 
 -- This shouldn't ever happen
 next _ = undefined

@@ -11,11 +11,17 @@ Generate a letter frequency trigraph, based on a dictionary
 module Data.Elocrypt.Trigraph where
 
 import Control.Monad
+import Data.Bool
 import Data.List
 
 -- |Search for the character frequencies based on the first a two-letter string
 findFrequency :: String -> Maybe [Rational]
 findFrequency s = snd `liftM` find ((==) s . fst) frequencies
+
+-- |Fix frequencies if they are all 0, since MonadRandom prohibits this.
+-- In this case, use all 1s to give every item an equal weight
+defaultFrequencies :: [Rational] -> [Rational]
+defaultFrequencies f = bool (replicate 26 1) f (any (>0) f)
 
 -- | A map of character frequencies, based on a dictionary.  The key is a two-letter
 --   string, and the value is a list of probabilities (a-z). It's form is:
