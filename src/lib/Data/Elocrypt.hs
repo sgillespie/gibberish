@@ -15,6 +15,7 @@ import Data.Elocrypt.Trigraph
 import Control.Monad
 import Control.Monad.Random hiding (next)
 import Data.Bool
+import Data.Char
 import Data.Maybe
 import Prelude hiding (min, max)
 
@@ -93,10 +94,10 @@ mkPassword :: MonadRandom m
               => Int  -- ^ password length
               -> Bool -- ^ include capitals?
               -> m String
-mkPassword len _ = do
-  f2 <- reverse `liftM` first2
+mkPassword len caps = do
+  f2 <- reverse `liftM` first2 caps
   if len > 2
-    then reverse `liftM` lastN (len - 2) f2
+    then reverse `liftM` lastN caps (len - 2) f2
     else return . reverse . take len $ f2
 
 -- |Plural version of mkPassword.  Generate an infinite list of passwords using
@@ -173,25 +174,39 @@ alphabet = ['a'..'z']
 
 -- |Generate two random characters. Uses 'Elocrypt.Trigraph.trigragh'
 --  to generate a weighted list.
-first2 :: MonadRandom m => m String
-first2 = fromList (map toWeight frequencies)
+first2 :: MonadRandom m 
+       => Bool  -- ^ include capitals?
+       -> m String
+first2 caps = fromList (map toWeight frequencies) >>= mapM (capitalizeR caps)
   where toWeight (s, w) = (s, sum w)
+
 
 -- |Generate a random character based on the previous two characters and
 --  their 'Elocrypt.Trigraph.trigraph'
-next :: MonadRandom m => String -> m Char
-next (x:xs:_) = fromList .
-                zip ['a'..'z'] .
-                defaultFrequencies .
-                fromJust .
-                findFrequency $ [xs, x]
+next :: MonadRandom m 
+     => Bool    -- ^ include capitals?
+     -> String  -- ^ the prefix
+     -> m Char
+next caps prefix = letterR prefix >>= capitalizeR caps
 
--- This shouldn't ever happen
-next _ = undefined
+-- |Randomly choose a letter from the trigraph
+letterR :: MonadRandom m
+        => String
+        -> m Char
+letterR (x:xs:_) = fromList . zip ['a'..'z'] $ freqs
+  where freqs = defaultFrequencies . fromJust . findFrequency . map toLower $ [xs, x]
+
+-- |Randomly capitalize a character 10% of the time
+capitalizeR :: MonadRandom m
+           => Bool    -- ^ Whether to do the capitalization
+           -> Char    -- ^ The character to capitalize
+           -> m Char
+capitalizeR cap c | cap = fromList [(c, 10), (toUpper c, 1)]
+                  | otherwise = return c
 
 -- |Generate the last n characters using previous two characters
 --  and their 'Elocrypt.Trigraph.trigraph'
-lastN :: MonadRandom m => Int -> String -> m String
-lastN 0 ls   = return ls
-lastN len ls = next ls >>= lastN (len - 1) . (:ls)
+lastN :: MonadRandom m => Bool -> Int -> String -> m String
+lastN _    0   ls = return ls
+lastN caps len ls = next caps ls >>= lastN caps (len - 1) . (:ls)
 

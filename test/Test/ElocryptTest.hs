@@ -19,19 +19,26 @@ import Test.Elocrypt.Instances
 tests :: TestTree
 tests = $(testGroupGenerator)
 
--- (len . fst) (genPassword x _ _) = x
+-- |Passwords have the specified length
 prop_newPasswordHasLen :: Positive Int -> Bool -> StdGen -> Bool
 prop_newPasswordHasLen (Positive len) caps gen
   = length pass == len
   where pass = newPassword len caps gen
 
--- (all isLower . fst) (genPassword _ false _)
+-- |Passwords are all lowercase when caps is false
 prop_newPasswordIsLower :: Positive Int -> StdGen -> Bool
 prop_newPasswordIsLower (Positive len) gen
   = all isLower pass
   where pass = newPassword len False gen
 
--- Third and each successive character is taken from the trigraph
+-- |Passwords with caps generates caps
+prop_newPasswordHasCaps :: Positive Int -> StdGen -> Property
+prop_newPasswordHasCaps (Positive len) gen
+  = cover (any isUpper pass) 50 "has caps" $
+      any isLower pass
+  where pass = newPassword (len + 2) True gen
+
+-- |Third and each successive character is taken from the trigraph
 prop_3rdCharHasPositiveFrequency :: Positive Int -> Bool -> StdGen -> Property
 prop_3rdCharHasPositiveFrequency (Positive len) caps gen
   = conjoin $ loop pass
