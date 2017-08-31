@@ -6,6 +6,8 @@ import Text.Printf
 
 import Test.QuickCheck
 
+-- |Representation of possible CLI arguments for a command line
+-- app.
 newtype CliArgs
   = CliArgs  { getArgs :: [String] }
   deriving Eq
@@ -21,6 +23,8 @@ instance Arbitrary CliArgs where
                        show len]
     return (CliArgs args)
 
+-- |Representation of an elocrypt execution with passphrases turned
+-- on.
 newtype PhraseCliArgs
   = PhraseCliArgs { getPhraseArgs :: [String] }
   deriving Eq
@@ -41,30 +45,40 @@ instance Arbitrary PhraseCliArgs where
 
     return $ PhraseCliArgs ("-p" : args)
 
--- Uh oh! I copy/pasted this!
 instance Arbitrary StdGen where
   arbitrary = mkStdGen `liftM` arbitrary
 
+-- |All letters, upper and lower case.
 newtype AlphaChar = Alpha Char
                   deriving (Eq, Ord, Show)
--- 
-instance Arbitrary AlphaChar where
-  arbitrary = Alpha `liftM` elements ['a'..'z']
 
+instance Arbitrary AlphaChar where
+  arbitrary = Alpha <$> elements (['a'..'z'] ++ ['A'..'Z'])
+
+-- |All lowercase letters
+newtype LowerAlphaChar = LowerAlpha Char
+                       deriving (Eq, Ord, Show)
+
+instance Arbitrary LowerAlphaChar where
+  arbitrary = LowerAlpha <$> elements ['a'..'z']
+
+-- |DEPRECATED: Positive integers.
 newtype GreaterThan0 a = GT0 { getGT0 :: a }
   deriving (Eq, Ord, Show)
 
 instance (Num a, Ord a, Arbitrary a) => Arbitrary (GreaterThan0 a) where
   arbitrary = GT0 `fmap` (arbitrary `suchThat` (>0))
 
+-- |DEPRECATED: Integers greater than 2
 newtype GreaterThan2 a = GT2 { getGT2 :: a }
                        deriving (Eq, Ord, Show)
 
 instance (Num a, Ord a, Arbitrary a) => Arbitrary (GreaterThan2 a) where
-  arbitrary = GT2 `fmap` (arbitrary `suchThat` (>2))
+  arbitrary = GT2 <$> (arbitrary `suchThat` (>2))
 
+-- |DEPRECATED: Integers greater than 79
 newtype GreaterThan79 a = GT79 { getGT79 :: a }
                         deriving (Eq, Ord, Show)
 
 instance (Integral a, Random a) => Arbitrary (GreaterThan79 a) where
-  arbitrary = GT79 `fmap` choose (80, 500)
+  arbitrary = GT79 <$> choose (80, 500)

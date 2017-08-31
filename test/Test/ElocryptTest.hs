@@ -51,7 +51,7 @@ thirdCharIsInTrigraph pass
   = counterexample failMsg $ property (t `elem` candidates)
   where (f:s:t:_) = map toLower pass
         candidates = map fst . filter ((0/=) . snd) $ frequencies
-        frequencies = zip alphabet .
+        frequencies = zip ['a'..'z'] .
                       defaultFrequencies .
                       fromJust .
                       findFrequency $ [f, s]
@@ -64,7 +64,7 @@ prop_first2HavePositiveFrequencies (Positive len) caps gen
   = counterexample failMsg $ property (sum frequencies > 0)
   where pass = newPassword (len+1) caps gen
         (f:s:_) = map toLower pass
-        frequencies = zipWith (curry snd) alphabet .
+        frequencies = zipWith (curry snd) ['a'..'z'] .
                       fromJust .
                       findFrequency $ [f, s]
         failMsg = "no candidates for '" ++ [f, s] ++ "'"

@@ -168,10 +168,6 @@ mkPassphrase n min max = replicateM n $
 
 -- * Internal
 
--- |The alphabet we sample random values from
-alphabet :: String
-alphabet = ['a'..'z']
-
 -- |Generate two random characters. Uses 'Elocrypt.Trigraph.trigragh'
 --  to generate a weighted list.
 first2 :: MonadRandom m 
@@ -180,6 +176,11 @@ first2 :: MonadRandom m
 first2 caps = fromList (map toWeight frequencies) >>= mapM (capitalizeR caps)
   where toWeight (s, w) = (s, sum w)
 
+-- |Generate the last n characters using previous two characters
+--  and their 'Elocrypt.Trigraph.trigraph'
+lastN :: MonadRandom m => Bool -> Int -> String -> m String
+lastN _    0   ls = return ls
+lastN caps len ls = next caps ls >>= lastN caps (len - 1) . (:ls)
 
 -- |Generate a random character based on the previous two characters and
 --  their 'Elocrypt.Trigraph.trigraph'
@@ -187,14 +188,13 @@ next :: MonadRandom m
      => Bool    -- ^ include capitals?
      -> String  -- ^ the prefix
      -> m Char
-next caps prefix = letterR prefix >>= capitalizeR caps
+next caps prefix = nextLetter prefix >>= capitalizeR caps
 
 -- |Randomly choose a letter from the trigraph
-letterR :: MonadRandom m
-        => String
-        -> m Char
-letterR (x:xs:_) = fromList . zip ['a'..'z'] $ freqs
-  where freqs = defaultFrequencies . fromJust . findFrequency . map toLower $ [xs, x]
+nextLetter :: MonadRandom m
+           => String  -- ^ the prefix
+           -> m Char
+nextLetter = fromList . fromJust . findWeights . reverse . take 2
 
 -- |Randomly capitalize a character 10% of the time
 capitalizeR :: MonadRandom m
@@ -204,9 +204,4 @@ capitalizeR :: MonadRandom m
 capitalizeR cap c | cap = fromList [(c, 10), (toUpper c, 1)]
                   | otherwise = return c
 
--- |Generate the last n characters using previous two characters
---  and their 'Elocrypt.Trigraph.trigraph'
-lastN :: MonadRandom m => Bool -> Int -> String -> m String
-lastN _    0   ls = return ls
-lastN caps len ls = next caps ls >>= lastN caps (len - 1) . (:ls)
 

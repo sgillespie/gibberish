@@ -12,7 +12,14 @@ module Data.Elocrypt.Trigraph where
 
 import Control.Monad
 import Data.Bool
+import Data.Char
 import Data.List
+
+-- |Search for the character frequencies and return a weighted list
+findWeights :: String   -- ^ The two letter prefix
+            -> Maybe [(Char, Rational)]
+findWeights = fmap (zip ['a'..'z'] . defaultFrequencies) . findFrequency'
+  where findFrequency' = findFrequency . map toLower
 
 -- |Search for the character frequencies based on the first a two-letter string
 findFrequency :: String -> Maybe [Rational]
