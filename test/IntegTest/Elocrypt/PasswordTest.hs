@@ -1,6 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 module IntegTest.Elocrypt.PasswordTest where
 
+import Data.Char
 import Data.List
 import Data.Maybe
 import Control.Monad
@@ -41,10 +42,10 @@ prop_printsNothingWhenSpecifiedLengthIsZero (CliArgs args)
       response <- readHandle out'
       return (response == "")
 
-prop_printsLongPasswords :: GreaterThan79 Int -> Property
-prop_printsLongPasswords (GT79 a)
+prop_printsLongPasswords :: Positive Int -> Property
+prop_printsLongPasswords (Positive a)
   = ioProperty $ do
-      (in', out', err', p) <- run' elocrypt [show a]
+      (in', out', err', p) <- run' elocrypt [show (a+79)]
       response <- readHandle out'
       return . all (==1) . map (length . words) . lines $ response
 
@@ -69,6 +70,18 @@ prop_printsMultiplePasswordsPerLine (CliArgs args)
 
       return $
         all (>1) . tail . reverse . map (length . words) . lines $ response
+
+prop_printsCapitals :: CliArgs -> Property
+prop_printsCapitals (CliArgs args)
+  = ioProperty $ do
+      (in', out', err', p) <- run' elocrypt ("-c" : args)
+      response <- readHandle out'
+
+      let passes = words response
+
+      return $
+        cover (any (any isUpper) passes) 80 "has caps" True
+
 
 -- Utility functions
 run' :: FilePath -> [String] -> IO (Handle, Handle, Handle, ProcessHandle)

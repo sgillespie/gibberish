@@ -20,6 +20,7 @@ instance Arbitrary CliArgs where
     len  <- arbitrary `suchThat` (>0) `suchThat` (<=40) :: Gen Int
     num  <- arbitrary `suchThat` (>2) `suchThat` (<=20) :: Gen Int
     args <- sublistOf ["-n %d" `printf` num,
+                       "-c",
                        show len]
     return (CliArgs args)
 

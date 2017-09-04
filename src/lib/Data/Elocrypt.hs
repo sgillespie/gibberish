@@ -201,7 +201,7 @@ capitalizeR :: MonadRandom m
            => Bool    -- ^ Whether to do the capitalization
            -> Char    -- ^ The character to capitalize
            -> m Char
-capitalizeR cap c | cap = fromList [(c, 10), (toUpper c, 1)]
+capitalizeR cap c | cap = fromList [(c, 6), (toUpper c, 1)]
                   | otherwise = return c
 
 
