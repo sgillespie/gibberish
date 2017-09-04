@@ -6,9 +6,9 @@ import Data.List
 import Data.Maybe
 import Control.Monad
 
+import Test.Elocrypt.QuickCheck
 import Test.Proctest
 import Test.Proctest.Assertions
-import Test.QuickCheck
 import Test.Tasty hiding (Timeout)
 import Test.Tasty.QuickCheck (testProperty)
 import Test.Tasty.TH
@@ -20,61 +20,75 @@ tests = $(testGroupGenerator)
 
 elocrypt = "elocrypt"
 
-prop_printsPasswordsWithSpecifiedLength :: CliArgs -> Property
-prop_printsPasswordsWithSpecifiedLength (CliArgs args)
-  = isJust (getPosParam args) ==>
+-- |All passwords have specified length
+prop_printsPasswordsWithLength :: CliOptions -> Property
+prop_printsPasswordsWithLength opts@CliOptions {cliLength=len}
+  = isJust len ==>
     ioProperty $ do
-      (in', out', err', p) <- run' elocrypt args
+      (in', out', err', p) <- run' elocrypt (getOptions opts)
       response <- readHandle out'
 
-      let len    = read . fromJust . getPosParam $ args
+      let len'   = fromJust len
           words' = words response
 
-      return (all ((==) len . length) words')
+      return (all ((==) len' . length) words')
 
-prop_printsNothingWhenSpecifiedLengthIsZero :: CliArgs -> Property
-prop_printsNothingWhenSpecifiedLengthIsZero (CliArgs args)
-  = isNothing (getPosParam args) ==>
-    ioProperty $ do
-      let args' = args ++ ["0"]
+-- |Prints nothing when length is 0
+prop_printsNothingWhenLengthIsZero :: CliOptions -> Property
+prop_printsNothingWhenLengthIsZero opts
+  = ioProperty $ do
+      let opts' = opts { cliLength = Just 0 }
 
-      (in', out', err', p) <- run' elocrypt args'
+      (in', out', err', p) <- run' elocrypt (getOptions opts')
       response <- readHandle out'
       return (response == "")
 
-prop_printsLongPasswords :: Positive Int -> Property
-prop_printsLongPasswords (Positive a)
+-- |Always prints at least 1 password
+prop_printsLongPasswords :: CliOptions -> Property
+prop_printsLongPasswords opts
+  = forAll (scale (*7) (arbitrary :: Gen (Positive Int))) $ \len ->
+      ioProperty $ do
+        let len'  = getPositive len
+            opts' = opts { cliLength = Just len' }
+
+        (in', out', err', p) <- run' elocrypt (getOptions opts')
+        response <- readHandle out'
+
+        return $
+          cover (len' > 80) 30 "long" $
+            all (>=1) . map (length . words) . lines $ response
+
+-- |Prints the specified number of passwords
+prop_printsNumberPasswords :: Positive Int -> CliOptions -> Property
+prop_printsNumberPasswords (Positive num) opts
   = ioProperty $ do
-      (in', out', err', p) <- run' elocrypt [show (a+79)]
-      response <- readHandle out'
-      return . all (==1) . map (length . words) . lines $ response
+      let opts' = opts { cliNumber = Just num }
 
-prop_printsSpecifiedNumberOfPasswords :: CliArgs -> Property
-prop_printsSpecifiedNumberOfPasswords (CliArgs args)
-  = isJust (getArg "-n" args) ==>
-    ioProperty $ do
-      (in', out', err', p) <- run' elocrypt args
+      (in', out', err', p) <- run' elocrypt (getOptions opts')
       response <- readHandle out'
 
-      let number = read . fromJust . getArg "-n" $ args
-          words' = words response
+      let words' = words response
 
-      return (number == length words')
+      return $ num == length words'
 
-prop_printsMultiplePasswordsPerLine :: CliArgs -> Property
-prop_printsMultiplePasswordsPerLine (CliArgs args)
-  = (read . fromMaybe "8" . getPosParam $ args) <= 38 ==>
+-- |Prints multiple passwords per line when length is sufficiently small
+prop_printsMultiplePasswordsPerLine :: CliOptions -> Property
+prop_printsMultiplePasswordsPerLine opts@CliOptions{cliLength=len}
+  = isNothing len || fromJust len <= 38 ==>
     ioProperty $ do
-      (in', out', err', p) <- run' elocrypt args
+      (in', out', err', p) <- run' elocrypt (getOptions opts)
       response <- readHandle out'
 
       return $
         all (>1) . tail . reverse . map (length . words) . lines $ response
 
-prop_printsCapitals :: CliArgs -> Property
-prop_printsCapitals (CliArgs args)
+-- |Prints capitals when specified
+prop_printsCapitals :: CliOptions -> Property
+prop_printsCapitals opts
   = ioProperty $ do
-      (in', out', err', p) <- run' elocrypt ("-c" : args)
+      let opts' = opts { cliCapitals = True }
+
+      (in', out', err', p) <- run' elocrypt (getOptions opts')
       response <- readHandle out'
 
       let passes = words response
