@@ -2,8 +2,8 @@
 module Test.Elocrypt.QuickCheck (
   module Test.QuickCheck,
   CliOptions(..),
-  PassphraseCliOptions(..),
-  PasswordCliOptions(..),
+  PhraseCliOptions(..),
+  WordCliOptions(..),
   getOptions
   ) where
 
@@ -20,27 +20,27 @@ data CliOptions = CliOptions {
 instance Show CliOptions where
   show = unwords . getOptions
 
-newtype PasswordCliOptions 
-  = PasswordCliOptions { getPasswordOpts :: CliOptions }
+newtype WordCliOptions 
+  = WordCliOptions { getWordOpts :: CliOptions }
   deriving Eq
 
-instance Show PasswordCliOptions where
-  show = show . getPasswordOpts
+instance Show WordCliOptions where
+  show = show . getWordOpts
 
-newtype PassphraseCliOptions 
-  = PassphraseCliOptions { getPassphraseOpts :: CliOptions }
+newtype PhraseCliOptions 
+  = PhraseCliOptions { getPhraseOpts :: CliOptions }
   deriving Eq
 
-instance Show PassphraseCliOptions where
-  show = show . getPassphraseOpts
+instance Show PhraseCliOptions where
+  show = show . getPhraseOpts
 
-instance Arbitrary PasswordCliOptions where
+instance Arbitrary WordCliOptions where
   arbitrary = do
     caps <- arbitrary
     len  <- arbitrary
     num  <- arbitrary
 
-    return $ PasswordCliOptions CliOptions{ 
+    return $ WordCliOptions CliOptions{ 
       cliCapitals = caps,
       cliLength   = fromPositive len,
       cliNumber   = fromPositive num

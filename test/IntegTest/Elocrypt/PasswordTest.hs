@@ -21,8 +21,8 @@ tests = $(testGroupGenerator)
 elocrypt = "elocrypt"
 
 -- |All passwords have specified length
-prop_printsPasswordsWithLength :: PasswordCliOptions -> Property
-prop_printsPasswordsWithLength (PasswordCliOptions opts)
+prop_printsPasswordsWithLength :: WordCliOptions -> Property
+prop_printsPasswordsWithLength (WordCliOptions opts)
   = isJust len ==>
     ioProperty $ do
       (in', out', err', p) <- run' elocrypt (getOptions opts)
@@ -36,8 +36,8 @@ prop_printsPasswordsWithLength (PasswordCliOptions opts)
   where CliOptions{cliLength=len} = opts
 
 -- |Prints nothing when length is 0
-prop_printsNothingWhenLengthIsZero :: PasswordCliOptions -> Property
-prop_printsNothingWhenLengthIsZero (PasswordCliOptions opts)
+prop_printsNothingWhenLengthIsZero :: WordCliOptions -> Property
+prop_printsNothingWhenLengthIsZero (WordCliOptions opts)
   = ioProperty $ do
       let opts' = opts { cliLength = Just 0 }
 
@@ -46,8 +46,8 @@ prop_printsNothingWhenLengthIsZero (PasswordCliOptions opts)
       return (response == "")
 
 -- |Always prints at least 1 password
-prop_printsLongPasswords :: PasswordCliOptions -> Property
-prop_printsLongPasswords (PasswordCliOptions opts)
+prop_printsLongPasswords :: WordCliOptions -> Property
+prop_printsLongPasswords (WordCliOptions opts)
   = forAll (scale (*7) (arbitrary :: Gen (Positive Int))) $ \len ->
       ioProperty $ do
         let len'  = getPositive len
@@ -61,8 +61,8 @@ prop_printsLongPasswords (PasswordCliOptions opts)
             all (>=1) . map (length . words) . lines $ response
 
 -- |Prints the specified number of passwords
-prop_printsNumberPasswords :: Positive Int -> PasswordCliOptions -> Property
-prop_printsNumberPasswords (Positive num) (PasswordCliOptions opts)
+prop_printsNumberPasswords :: Positive Int -> WordCliOptions -> Property
+prop_printsNumberPasswords (Positive num) (WordCliOptions opts)
   = ioProperty $ do
       let opts' = opts { cliNumber = Just num }
 
@@ -74,8 +74,8 @@ prop_printsNumberPasswords (Positive num) (PasswordCliOptions opts)
       return $ num == length words'
 
 -- |Prints multiple passwords per line when length is sufficiently small
-prop_printsMultiplePasswordsPerLine :: PasswordCliOptions -> Property
-prop_printsMultiplePasswordsPerLine (PasswordCliOptions opts)
+prop_printsMultiplePasswordsPerLine :: WordCliOptions -> Property
+prop_printsMultiplePasswordsPerLine (WordCliOptions opts)
   = isNothing len || fromJust len <= 38 ==>
     ioProperty $ do
       (in', out', err', p) <- run' elocrypt (getOptions opts)
@@ -87,8 +87,8 @@ prop_printsMultiplePasswordsPerLine (PasswordCliOptions opts)
   where CliOptions{cliLength=len} = opts
 
 -- |Prints capitals when specified
-prop_printsCapitals :: PasswordCliOptions -> Property
-prop_printsCapitals (PasswordCliOptions opts)
+prop_printsCapitals :: WordCliOptions -> Property
+prop_printsCapitals (WordCliOptions opts)
   = ioProperty $ do
       let opts' = opts { cliCapitals = True }
 
