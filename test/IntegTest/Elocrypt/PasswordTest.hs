@@ -6,14 +6,11 @@ import Data.List
 import Data.Maybe
 import Control.Monad
 
-import Test.Elocrypt.QuickCheck
-import Test.Proctest
-import Test.Proctest.Assertions
 import Test.Tasty hiding (Timeout)
 import Test.Tasty.QuickCheck (testProperty)
 import Test.Tasty.TH
 
-import Test.Elocrypt.Instances
+import Test.Elocrypt.QuickCheck
 
 tests :: TestTree
 tests = $(testGroupGenerator)
@@ -25,8 +22,8 @@ prop_printsPasswordsWithLength :: WordCliOptions -> Property
 prop_printsPasswordsWithLength (WordCliOptions opts)
   = isJust len ==>
     ioProperty $ do
-      (in', out', err', p) <- run' elocrypt (getOptions opts)
-      response <- readHandle out'
+      (_, out, _, _) <- run opts
+      response <- readHandle out
 
       let len'   = fromJust len
           words' = words response
@@ -41,20 +38,20 @@ prop_printsNothingWhenLengthIsZero (WordCliOptions opts)
   = ioProperty $ do
       let opts' = opts { cliLength = Just 0 }
 
-      (in', out', err', p) <- run' elocrypt (getOptions opts')
-      response <- readHandle out'
+      (_, out, _, _) <- run opts'
+      response <- readHandle out
       return (response == "")
 
 -- |Always prints at least 1 password
 prop_printsLongPasswords :: WordCliOptions -> Property
 prop_printsLongPasswords (WordCliOptions opts)
-  = forAll (scale (*7) (arbitrary :: Gen (Positive Int))) $ \len ->
+  = forAll (scale (*7) arbitrary) $ \len ->
       ioProperty $ do
         let len'  = getPositive len
             opts' = opts { cliLength = Just len' }
 
-        (in', out', err', p) <- run' elocrypt (getOptions opts')
-        response <- readHandle out'
+        (_, out, _, _) <- run opts'
+        response <- readHandle out
 
         return $
           cover (len' > 80) 30 "long" $
@@ -66,8 +63,8 @@ prop_printsNumberPasswords (Positive num) (WordCliOptions opts)
   = ioProperty $ do
       let opts' = opts { cliNumber = Just num }
 
-      (in', out', err', p) <- run' elocrypt (getOptions opts')
-      response <- readHandle out'
+      (_, out, _, _) <- run opts'
+      response <- readHandle out
 
       let words' = words response
 
@@ -78,8 +75,8 @@ prop_printsMultiplePasswordsPerLine :: WordCliOptions -> Property
 prop_printsMultiplePasswordsPerLine (WordCliOptions opts)
   = isNothing len || fromJust len <= 38 ==>
     ioProperty $ do
-      (in', out', err', p) <- run' elocrypt (getOptions opts)
-      response <- readHandle out'
+      (_, out, _, _) <- run opts
+      response <- readHandle out
 
       return $
         all (>1) . tail . reverse . map (length . words) . lines $ response
@@ -92,39 +89,10 @@ prop_printsCapitals (WordCliOptions opts)
   = ioProperty $ do
       let opts' = opts { cliCapitals = True }
 
-      (in', out', err', p) <- run' elocrypt (getOptions opts')
-      response <- readHandle out'
+      (_, out, _, _) <- run opts'
+      response <- readHandle out
 
       let passes = words response
 
       return $
         cover (any (any isUpper) passes) 80 "has caps" True
-
-
--- Utility functions
-run' :: FilePath -> [String] -> IO (Handle, Handle, Handle, ProcessHandle)
-run' exe args = do
-  res@(in', out', err', p) <- run exe args
-  sleep'
-  assertExitedSuccess (seconds 2) p
-  return res
-
-readHandle :: Handle -> IO String
-readHandle = (<$>) asUtf8Str . waitOutput (seconds 2) 5000
-
-assertExitedSuccess :: Timeout -> ProcessHandle -> IO Bool
-assertExitedSuccess t = fmap (== ExitSuccess) . assertExitedTimeout t
-
-assertExitedFailure :: Timeout -> ProcessHandle -> IO Bool
-assertExitedFailure t = fmap not . assertExitedSuccess t
-
-sleep' :: IO ()
-sleep' = sleep (seconds 0.0001)
-
-getArg :: String -> [String] -> Maybe String
-getArg prefix args = (tail . dropWhile (not . elem')) `liftM` arg
-  where arg = find (isPrefixOf prefix) args
-        elem' = flip elem [' ', '=']
-
-getPosParam :: [String] -> Maybe String
-getPosParam = find $ (/= '-') . head

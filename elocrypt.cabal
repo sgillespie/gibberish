@@ -79,7 +79,7 @@ test-suite ui-test
   main-is:             IntegTests.hs
   other-modules:       IntegTest.Elocrypt.PassphraseTest,
                        IntegTest.Elocrypt.PasswordTest,
-                       Test.Elocrypt.QuickCheck
+                       Test.Elocrypt.QuickCheck,
                        Test.Elocrypt.Instances
   type:                exitcode-stdio-1.0
 

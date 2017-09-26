@@ -2,113 +2,105 @@
 module IntegTest.Elocrypt.PassphraseTest where
 
 import Control.Monad
+import Data.Bool
 import Data.List
 import Data.Maybe
 
-import Test.Proctest
-import Test.Proctest.Assertions
 import Test.QuickCheck
 import Test.Tasty hiding (Timeout)
 import Test.Tasty.QuickCheck (testProperty)
 import Test.Tasty.TH
+import qualified Test.Proctest as Proctest
 
-import Test.Elocrypt.Instances
+import Test.Elocrypt.QuickCheck
 
 tests :: TestTree
 tests = $(testGroupGenerator)
 
 elocrypt = "elocrypt"
 
-prop_printsWordsWithSpecifiedLengthRange :: PhraseCliArgs -> Property
-prop_printsWordsWithSpecifiedLengthRange (PhraseCliArgs args)
-  = length (getPosParams args) == 2 ==>
+-- |Passphrases consist of words in specified length range
+prop_printsWordsWithLengthRange :: PhraseCliOptions -> Property
+prop_printsWordsWithLengthRange (PhraseCliOptions opts)
+  = isJust minLen && isJust maxLen && fromJust maxLen <= 79 ==>
     ioProperty $ do
-      (_, out', _, _) <- run' elocrypt args
-      response <- readHandle out'
+      (_, out, _, _) <- run opts
+      response <- readHandle out
 
-      let (minLen:maxLen:_) = map read (getPosParams args)
-          words' = words response
+      let words'  = words response
+          minLen' = fromJust minLen
+          maxLen' = fromJust maxLen
 
-      return (all ((\n -> n >= minLen && n <= maxLen) . length) words')
+      return (all ((\n -> n >= minLen' && n <= maxLen') . length) words')
 
-prop_printsWordsWithSpecifiedMinLengthRange :: PhraseCliArgs -> Property
-prop_printsWordsWithSpecifiedMinLengthRange (PhraseCliArgs args)
-  = length (getPosParams args) == 1 ==>
+  where CliOptions{cliLength=minLen, cliMaxLength=maxLen} = opts
+
+-- |Passphrases consist of words with specified minimum range
+prop_printsWordsWithMinLength:: PhraseCliOptions -> Property
+prop_printsWordsWithMinLength(PhraseCliOptions opts)
+  = isJust minLen && fromJust minLen <= 79 ==>
     ioProperty $ do
-      (_, out', _, _) <- run' elocrypt args
-      response <- readHandle out'
+      (_, out, _, _) <- run opts
+      response <- readHandle out
 
-      let (minLen:_) = map read (getPosParams args)
+      return . all ((>= min (fromJust minLen) 10) . length) . words $ response
 
-      return . all ((>= min minLen 10) . length) . words $ response
+  where CliOptions{cliLength=minLen} = opts
 
-prop_printsWordsWithDefaultLengthRange :: PhraseCliArgs -> Property
-prop_printsWordsWithDefaultLengthRange (PhraseCliArgs args)
-  = length (getPosParams args) == 0 ==>
+-- |Prints the specificed number of phrases
+prop_printsSpecifiedNumberOfPassphrases :: PhraseCliOptions -> Property
+prop_printsSpecifiedNumberOfPassphrases (PhraseCliOptions opts)
+  = isJust number && 
+    (isJust maxLen || isNothing len) && -- maxLen > len
+    maybe True (< 79) maxLen ==>        -- minLen/maxLen < 79
+
     ioProperty $ do
-      (_, out', _, _) <- run' elocrypt args
-      response <- readHandle out'
 
-      let words' = words response
+      (_, out, _, _) <- run opts
+      response       <- readHandle out
 
-      return (all ((\n -> n >= 8 && n <= 10) . length) words')
+      let phrases = lines response
 
-prop_printsSpecifiedNumberOfPassphrases :: PhraseCliArgs -> Property
-prop_printsSpecifiedNumberOfPassphrases (PhraseCliArgs args)
-  = isJust (getArg "-n" args) &&
-    length (getPosParams args) /= 1 ==>    -- Make sure maxLen > minLen
-    ioProperty $ do
-      (_, out', _, _) <- run' elocrypt args
-      response        <- readHandle out'
+      return $ counterexample (failMsg phrases) 
+                              (fromJust number == length phrases)
 
-      let number = read . fromJust . getArg "-n" $ args
-          phrases = lines response
+  where CliOptions{cliNumber=number, cliLength=len, cliMaxLength=maxLen} = opts
+        failMsg p = "length phrases (" ++ show (length p) ++ 
+                    ") /= " ++ show (fromJust number)
 
-      return (number == length phrases)
+-- |Prints multiple passwords per line
+prop_printsMultipleWordsPerLine :: PhraseCliOptions 
+                                -> LessThan20 Int
+                                -> LessThan20 Int
+                                -> Property
+prop_printsMultipleWordsPerLine (PhraseCliOptions opts) (LT20 min) (LT20 max)
+  = ioProperty $ do
+      let opts' = opts { -- Make sure we can fit 2+ words on a line
+        cliLength = Just min, 
+        cliMaxLength = Just max}
 
-prop_printsMultipleWordsPerLine :: PhraseCliArgs -> Property
-prop_printsMultipleWordsPerLine (PhraseCliArgs args)
-  = sum (map read (getPosParams args) :: [Integer]) <= 29 ==>
-    ioProperty $ do
-      (_, out', _, _) <- run' elocrypt args
-      response <- readHandle out'
+      (_, out, _, _) <- run opts'
+      response <- readHandle out
 
       return $
         all (>1) . tail . reverse . map (length . words) . lines $ response
 
-prop_printsLongPassphrases :: GreaterThan79 Int -> GreaterThan0 Int -> Property
-prop_printsLongPassphrases (GT79 minLen) (GT0 maxLen)
-  = ioProperty $ do
-    (_, out', _, _) <- run' elocrypt ["-p",
-                                      show minLen,
-                                      show (minLen + maxLen)]
-    response        <- readHandle out'
-    
-    return . all (==1) . map (length . words) . lines $ response
+-- |Always prints a passphrase
+prop_printsLongPassphrases :: PhraseCliOptions
+                           -> Positive Int
+                           -> Positive Int 
+                           -> Property
+prop_printsLongPassphrases (PhraseCliOptions opts) (Positive min) (Positive max)
+  = forAll (scale (*7) arbitrary) $ \min ->
+      ioProperty $ do
+        let minLen = getPositive min
+            opts' = opts{
+              cliLength = Just minLen,
+              cliMaxLength = Just (minLen + max)}
 
-getArg :: String -> [String] -> Maybe String
-getArg prefix args = (tail . dropWhile (not . elem')) `liftM` arg
-  where arg = find (isPrefixOf prefix) args
-        elem' = flip elem [' ', '=']
-
-getPosParams :: [String] -> [String]
-getPosParams = filter ((/= '-') . head)
-
-run' :: FilePath -> [String] -> IO (Handle, Handle, Handle, ProcessHandle)
-run' exe args = do
-  res@(_, _, _, p) <- run exe args
-  sleep'
-  _ <- assertExitedSuccess (seconds 2) p
-  return res
-
-readHandle :: Handle -> IO String
-readHandle = (<$>) asUtf8Str . waitOutput (seconds 2) 5000
-
-sleep' :: IO ()
-sleep' = sleep (seconds 0.0001)
-
-assertExitedSuccess :: Timeout -> ProcessHandle -> IO Bool
-assertExitedSuccess t = fmap (== ExitSuccess) . assertExitedTimeout t
-
-assertExitedFailure :: Timeout -> ProcessHandle -> IO Bool
-assertExitedFailure t = fmap not . assertExitedSuccess t
+        (_, out, _, _) <- run opts
+        response       <- readHandle out
+        
+        return $
+          cover (minLen > 80) 20 "long" $ 
+          all (>=1) . map (length . words) . lines $ response
