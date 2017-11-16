@@ -3,6 +3,7 @@ module IntegTest.Elocrypt.PassphraseTest where
 
 import Control.Monad
 import Data.Bool
+import Data.Char
 import Data.List
 import Data.Maybe
 
@@ -104,3 +105,15 @@ prop_printsLongPassphrases (PhraseCliOptions opts) (Positive min) (Positive max)
         return $
           cover (minLen > 80) 20 "long" $ 
           all (>=1) . map (length . words) . lines $ response
+
+-- |Prints capitals when specified
+prop_printsCapitals :: PhraseCliOptions -> Property
+prop_printsCapitals (PhraseCliOptions opts)
+  = ioProperty $ do
+    let opts' = opts { cliCapitals = True }
+
+    (_, out, _, _) <- run opts'
+    response <- readHandle out
+
+    return $
+      all (isUpper . head) . lines $ response

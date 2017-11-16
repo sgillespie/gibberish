@@ -1,6 +1,7 @@
 module Main where
 
 import Control.Monad
+import Data.Char
 import Data.List
 import Data.Maybe (fromMaybe)
 import System.Console.GetOpt
@@ -120,14 +121,17 @@ passwords Options{optCapitals = caps, optLength = len, optNumber = n} gen
         width = max termLen (len + 2)
 
 passphrases :: RandomGen g => Options -> g -> String
-passphrases Options{optLength = minLen,
+passphrases Options{optCapitals = caps,
+                    optLength = minLen,
                     optMaxLength = maxLen,
                     optNumber = n} gen
-  = format " " . take lines' . groupWith splitAt' width " " $ passphrase
+  = format " " . take lines' . map (map capitalize) . groupWith splitAt' width " " $ passphrase
   where passphrase = newPassphrase words' minLen maxLen gen
         words' = columns minLen * lines'
         width = max termLen (maxLen + 1)
         lines' = fromMaybe termHeight n
+        capitalize word@(c:cs) | caps = toUpper c : cs
+                               | otherwise = word
 
 usage :: String
 usage = usageInfo (intercalate "\n" headerLines) options
