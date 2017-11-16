@@ -1,11 +1,10 @@
-resolver: lts-9.1
+resolver: lts-9.13
 
 packages:
   - '.'
 
 extra-deps:
   - proctest-0.1.3.0
-  - tasty-th-0.1.7
 
 flags: {}
 

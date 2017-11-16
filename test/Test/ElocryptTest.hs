@@ -2,12 +2,12 @@
 module Test.ElocryptTest where
 
 import Control.Monad
-import Control.Monad.Random hiding (next)
+import Control.Monad.Random
 import Data.Bool
 import Data.Char
 import Data.List
 import Data.Maybe
-import Test.QuickCheck hiding (frequency)
+import Test.QuickCheck
 import Test.Tasty
 import Test.Tasty.QuickCheck (testProperty)
 import Test.Tasty.TH
@@ -152,10 +152,8 @@ prop_genPassphraseMatchesNewPassphrase
   -> StdGen
   -> Property
 prop_genPassphraseMatchesNewPassphrase 
-  (Positive len) 
-  (Positive min) 
-  (Positive max) 
-  gen = counterexample failMsg $ property (words == words')
+  (Positive len) (Positive min) (Positive max) gen 
+  = counterexample failMsg $ property (words == words')
   where (words, _) = genPassphrase len min max' gen
         words'     = newPassphrase len min max' gen
         max'       = min + max
