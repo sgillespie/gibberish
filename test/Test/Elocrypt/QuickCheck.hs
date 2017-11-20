@@ -21,6 +21,13 @@ import Test.Proctest hiding (run)
 import Test.Proctest.Assertions
 import qualified Test.Proctest as Proctest
 
+import Data.Elocrypt
+
+instance Arbitrary GenOptions where
+  arbitrary = do
+    caps <- arbitrary
+    return genOptions{genCapitals=caps}
+
 -- |A representation of elocrypt's command line
 -- options
 data CliOptions = CliOptions {

@@ -51,6 +51,7 @@ test-suite test
   build-depends:       base >= 4.7 && <5,
                        elocrypt,
                        MonadRandom,
+                       proctest,
                        QuickCheck,
                        random,
                        tasty,
@@ -60,6 +61,7 @@ test-suite test
   hs-source-dirs:      test
   main-is:             Tests.hs
   other-modules:       Test.Elocrypt.Instances,
+                       Test.Elocrypt.QuickCheck,
                        Test.Elocrypt.TrigraphTest,
                        Test.ElocryptTest
   type:                exitcode-stdio-1.0

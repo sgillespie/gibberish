@@ -113,9 +113,9 @@ generate opts@Options{optPassType=Word}   = passwords opts
 generate opts@Options{optPassType=Phrase} = passphrases opts
 
 passwords :: RandomGen g => Options -> g -> String
-passwords Options{optCapitals = caps, optLength = len, optNumber = n} gen
+passwords opts@Options{optLength = len, optNumber = n} gen
   = format "  " . groupWith splitAt' width "  " $ ps
-  where ps = newPasswords len num caps gen
+  where ps = newPasswords len num (getGenOptions opts) gen
         cols = columns len
         num = fromMaybe (nWords cols) n
         width = max termLen (len + 2)
@@ -132,6 +132,9 @@ passphrases Options{optCapitals = caps,
         lines' = fromMaybe termHeight n
         capitalize word@(c:cs) | caps = toUpper c : cs
                                | otherwise = word
+
+getGenOptions :: Options -> GenOptions
+getGenOptions Options{optCapitals=caps} = genOptions{genCapitals=caps}
 
 usage :: String
 usage = usageInfo (intercalate "\n" headerLines) options
