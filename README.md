@@ -15,8 +15,8 @@ cabal install elocrypt
 ```
 
 Binaries are also available:
- * [elocrypt-2.0.0-linux-bin.tar.gz](https://github.com/sgillespie/elocrypt/releases/download/v1.0.0/elocrypt-1.0.0-linux-bin.tar.gz)
- * [elocrypt-2.0.0-windows-bin.exe](https://github.com/sgillespie/elocrypt/releases/download/v1.0.0/elocrypt-1.0.0-windows-bin.exe)
+ * [elocrypt-2.0.0-linux-bin.tar.gz](https://github.com/sgillespie/elocrypt/releases/download/v2.0.0/elocrypt-2.0.0-linux-bin.tar.gz)
+ * [elocrypt-2.0.0-windows-bin.exe](https://github.com/sgillespie/elocrypt/releases/download/v2.0.0/elocrypt-2.0.0-windows-bin.exe)
 
 ## Running
 Generate a list passwords:
