@@ -21,15 +21,15 @@ import Prelude hiding (min, max)
 
 -- * Data Types
 
--- |Options for generating passwords or passphrases.
--- Do not use the constructor here. Instead use @genOptions@
--- below for forward compatibility.
+-- |Options for generating passwords or passphrases. Do not use
+-- this constructor directly. Instead use 'genOptions' to construct
+-- an instance.
 newtype GenOptions = GenOptions {
   genCapitals :: Bool
 } deriving (Eq, Show)
 
--- |Default options for generating passwords or passphrases. Use
--- this over the GenOptions constructor.
+-- |Default options for generating passwords or passphrases. This is
+-- the preferred way to construct 'GenOptions'.
 genOptions :: GenOptions
 genOptions = GenOptions {
   genCapitals = False
@@ -43,7 +43,7 @@ genOptions = GenOptions {
 --  @
 --  -- Generate a password of length 10 using the system generator
 --  myGenPassword :: IO (String, StdGen)
---  myGenPassword = genPassword 10 True \`liftM\` getStdGen
+--  myGenPassword = genPassword 10 genOptions \`liftM\` getStdGen
 --  @
 genPassword :: RandomGen g
                => Int        -- ^ password length
@@ -58,7 +58,7 @@ genPassword len = runRand . mkPassword len
 -- @
 -- -- Generate 10 passwords of length 10 using the system generator
 -- myGenPasswords :: IO ([String], StdGen)
--- myGenPasswords = (\(ls, g) -> (ls, g) `liftM` genPasswords 10 10 True `liftM` getStdGen
+-- myGenPasswords = (\(ls, g) -> (ls, g) `liftM` genPasswords 10 10 genOptions `liftM` getStdGen
 -- @
 genPasswords :: RandomGen g
                 => Int        -- ^ password length
@@ -73,7 +73,7 @@ genPasswords len n = runRand . mkPasswords len n
 --  @
 --  -- Generate a password of length 10 using the system generator
 --  myNewPassword :: IO String
---  myNewPassword = newPassword 10 True \`liftM\` getStdGen
+--  myNewPassword = newPassword 10 genOptions \`liftM\` getStdGen
 --  @
 newPassword :: RandomGen g
                => Int        -- ^ password length
@@ -88,7 +88,7 @@ newPassword len = evalRand . mkPassword len
 -- @
 -- -- Generate 10 passwords of length 10 using the system generator
 -- myNewPasswords :: IO [String]
--- myNewPasswords = genPasswords 10 10 True `liftM` getStdGen
+-- myNewPasswords = genPasswords 10 10 genOptions `liftM` getStdGen
 -- @
 newPasswords :: RandomGen g
                 => Int        -- ^ password length
@@ -104,7 +104,7 @@ newPasswords len n = evalRand . mkPasswords len n
 --  @
 --  -- Generate a password of length 10 using the system generator
 --  myPassword :: IO String
---  myPassword = evalRand (mkPassword 10 True) \`liftM\` getStdGen
+--  myPassword = evalRand (mkPassword 10 genOptions) \`liftM\` getStdGen
 --  @
 mkPassword :: MonadRandom m
               => Int        -- ^ password length
