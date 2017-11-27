@@ -115,5 +115,7 @@ prop_printsCapitals (PhraseCliOptions opts)
     (_, out, _, _) <- run opts'
     response <- readHandle out
 
+    let phrases = lines response
+
     return $
-      all (isUpper . head) . lines $ response
+      cover (any (any isUpper) phrases) 80 "has caps" True
