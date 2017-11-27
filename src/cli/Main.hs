@@ -121,17 +121,15 @@ passwords opts@Options{optLength = len, optNumber = n} gen
         width = max termLen (len + 2)
 
 passphrases :: RandomGen g => Options -> g -> String
-passphrases Options{optCapitals = caps,
+passphrases opts@Options{optCapitals = caps,
                     optLength = minLen,
                     optMaxLength = maxLen,
                     optNumber = n} gen
-  = format " " . take lines' . map (map capitalize) . groupWith splitAt' width " " $ passphrase
-  where passphrase = newPassphrase words' minLen maxLen gen
+  = format " " . take lines' . groupWith splitAt' width " " $ passphrase
+  where passphrase = newPassphrase words' minLen maxLen (getGenOptions opts) gen
         words' = columns minLen * lines'
         width = max termLen (maxLen + 1)
         lines' = fromMaybe termHeight n
-        capitalize word@(c:cs) | caps = toUpper c : cs
-                               | otherwise = word
 
 getGenOptions :: Options -> GenOptions
 getGenOptions Options{optCapitals=caps} = genOptions{genCapitals=caps}

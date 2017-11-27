@@ -122,7 +122,7 @@ mkPassword len opts = do
 -- @
 -- -- Generate an list of length 20 with passwords of length 10 using the system generator
 -- myMkPasswords :: IO [String]
--- myMkPasswords = evalRand (mkPasswords 10 20 True) \`liftM\` getStdGen
+-- myMkPasswords = evalRand (mkPasswords 10 20 genOptions) \`liftM\` getStdGen
 -- @
 mkPasswords :: MonadRandom m
                => Int        -- ^ password length
@@ -140,15 +140,16 @@ mkPasswords len n = replicateM n . mkPassword len
 --  -- Generate a passphrase of 10 words, each having a length between 6 and 12,
 --  -- using the system generator
 --  myGenPassphrase :: IO (String, StdGen)
---  myGenPassphrase = genPassword 10 True \`liftM\` getStdGen
+--  myGenPassphrase = genPassword 10 6 10 genOptions \`liftM\` getStdGen
 --  @
 genPassphrase :: RandomGen g
-              => Int  -- ^ number of words
-              -> Int  -- ^ minimum word length
-              -> Int  -- ^ maximum word length
-              -> g    -- ^ random generator
+              => Int        -- ^ number of words
+              -> Int        -- ^ minimum word length
+              -> Int        -- ^ maximum word length
+              -> GenOptions -- ^ options
+              -> g          -- ^ random generator
               -> ([String], g)
-genPassphrase n min = runRand . mkPassphrase n min
+genPassphrase n min max = runRand . mkPassphrase n min max
 
 -- |Generate a passphrase using the generator g, returning the result.
 --
@@ -159,12 +160,13 @@ genPassphrase n min = runRand . mkPassphrase n min
 --  myNewPassphrase = newPassphrase 10 6 12 \`liftM\` getStdGen
 --  @
 newPassphrase :: RandomGen g
-               => Int  -- ^ number of words
-               -> Int  -- ^ minimum word length
-               -> Int  -- ^ maximum word length
-               -> g    -- ^ random generator
+               => Int        -- ^ number of words
+               -> Int        -- ^ minimum word length
+               -> Int        -- ^ maximum word length
+               -> GenOptions -- ^ options
+               -> g          -- ^ random generator
                -> [String]
-newPassphrase n min = evalRand . mkPassphrase n min
+newPassphrase n min max = evalRand . mkPassphrase n min max
 
 -- |Generate a finite number of words of random length (between @min@ and @max@ chars)
 --  using the MonadRandom m. MonadRandom is exposed here for extra control.
@@ -175,12 +177,13 @@ newPassphrase n min = evalRand . mkPassphrase n min
 --  myPassphrase = evalRand (mkPassphrase 10 6 12) \`liftM\` getStdGen
 --  @
 mkPassphrase :: MonadRandom m
-             => Int  -- ^ number of words
-             -> Int  -- ^ minimum word length
-             -> Int  -- ^ maximum word length
+             => Int        -- ^ number of words
+             -> Int        -- ^ minimum word length
+             -> Int        -- ^ maximum word length
+             -> GenOptions -- ^ options
              -> m [String]
-mkPassphrase n min max = replicateM n $
-  getRandomR (min, max) >>= flip mkPassword genOptions
+mkPassphrase n min max opts = replicateM n $
+  getRandomR (min, max) >>= flip mkPassword opts
 
 -- * Internal
 
