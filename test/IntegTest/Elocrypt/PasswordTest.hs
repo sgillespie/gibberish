@@ -54,7 +54,7 @@ prop_printsLongPasswords (WordCliOptions opts)
         response <- readHandle out
 
         return $
-          cover (len' > 80) 30 "long" $
+          cover 30 (len' > 80) "long" $
             all (>=1) . map (length . words) . lines $ response
 
 -- |Prints the specified number of passwords
@@ -95,4 +95,4 @@ prop_printsCapitals (WordCliOptions opts)
       let passes = words response
 
       return $
-        cover (any (any isUpper) passes) 80 "has caps" True
+        cover 80 (any (any isUpper) passes) "has caps" True

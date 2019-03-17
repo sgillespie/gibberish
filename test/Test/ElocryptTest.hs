@@ -36,7 +36,7 @@ prop_newPasswordIsLower (Positive len) gen
 -- |Passwords with caps generates caps
 prop_newPasswordHasCaps :: Positive Int -> StdGen -> Property
 prop_newPasswordHasCaps (Positive len) gen
-  = cover (any isUpper pass) 50 "has caps" $
+  = cover 50 (any isUpper pass) "has caps" $
       any isLower pass
   where pass = newPassword (len + 2) opts gen
         opts = genOptions{genCapitals = True}

@@ -103,7 +103,7 @@ prop_printsLongPassphrases (PhraseCliOptions opts) (Positive min) (Positive max)
         response       <- readHandle out
         
         return $
-          cover (minLen > 80) 20 "long" $ 
+          cover 20 (minLen > 80) "long" $ 
           all (>=1) . map (length . words) . lines $ response
 
 -- |Prints capitals when specified
@@ -118,4 +118,4 @@ prop_printsCapitals (PhraseCliOptions opts)
     let phrases = lines response
 
     return $
-      cover (any (any isUpper) phrases) 80 "has caps" True
+      cover 80 (any (any isUpper) phrases) "has caps" True
