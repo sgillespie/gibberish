@@ -1,5 +1,5 @@
 name:                elocrypt
-version:             2.0.0
+version:             2.0.1
 synopsis:            Generate easy-to-remember, hard-to-guess passwords
 homepage:            https://www.github.com/sgillespie/elocrypt
 license:             OtherLicense
@@ -26,7 +26,7 @@ source-repository head
 source-repository this
   type: git
   location: https://github.com/sgillespie/elocrypt.git
-  tag: v1.0.0
+  tag: v2.0.1
                   
 library
   exposed-modules:     Data.Elocrypt,
