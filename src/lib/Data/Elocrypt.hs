@@ -31,9 +31,7 @@ newtype GenOptions = GenOptions {
 -- |Default options for generating passwords or passphrases. This is
 -- the preferred way to construct 'GenOptions'.
 genOptions :: GenOptions
-genOptions = GenOptions {
-  genCapitals = False
-}
+genOptions = GenOptions {genCapitals = False}
 
 -- * Random password generators
 
@@ -45,11 +43,12 @@ genOptions = GenOptions {
 --  myGenPassword :: IO (String, StdGen)
 --  myGenPassword = genPassword 10 genOptions \`liftM\` getStdGen
 --  @
-genPassword :: RandomGen g
-               => Int        -- ^ password length
-               -> GenOptions -- ^ options
-               -> g          -- ^ random generator
-               -> (String, g)
+genPassword
+  :: RandomGen g
+  => Int        -- ^ password length
+  -> GenOptions -- ^ options
+  -> g          -- ^ random generator
+  -> (String, g)
 genPassword len = runRand . mkPassword len
 
 -- |Plural version of genPassword.  Generates an infinite list of passwords
@@ -60,12 +59,13 @@ genPassword len = runRand . mkPassword len
 -- myGenPasswords :: IO ([String], StdGen)
 -- myGenPasswords = (\(ls, g) -> (ls, g) `liftM` genPasswords 10 10 genOptions `liftM` getStdGen
 -- @
-genPasswords :: RandomGen g
-                => Int        -- ^ password length
-                -> Int        -- ^ number of passwords
-                -> GenOptions -- ^ options
-                -> g          -- ^ random generator
-                -> ([String], g)
+genPasswords
+  :: RandomGen g
+  => Int        -- ^ password length
+  -> Int        -- ^ number of passwords
+  -> GenOptions -- ^ options
+  -> g          -- ^ random generator
+  -> ([String], g)
 genPasswords len n = runRand . mkPasswords len n
 
 -- |Generate a password using the generator g, returning the result.
@@ -75,11 +75,12 @@ genPasswords len n = runRand . mkPasswords len n
 --  myNewPassword :: IO String
 --  myNewPassword = newPassword 10 genOptions \`liftM\` getStdGen
 --  @
-newPassword :: RandomGen g
-               => Int        -- ^ password length
-               -> GenOptions -- ^ options
-               -> g          -- ^ random generator
-               -> String
+newPassword
+  :: RandomGen g
+  => Int        -- ^ password length
+  -> GenOptions -- ^ options
+  -> g          -- ^ random generator
+  -> String
 newPassword len = evalRand . mkPassword len
 
 -- |Plural version of newPassword.  Generates an infinite list of passwords
@@ -90,12 +91,13 @@ newPassword len = evalRand . mkPassword len
 -- myNewPasswords :: IO [String]
 -- myNewPasswords = genPasswords 10 10 genOptions `liftM` getStdGen
 -- @
-newPasswords :: RandomGen g
-                => Int        -- ^ password length
-                -> Int        -- ^ number of passwords
-                -> GenOptions -- ^ options
-                -> g          -- ^ random generator
-                -> [String]
+newPasswords
+  :: RandomGen g
+  => Int        -- ^ password length
+  -> Int        -- ^ number of passwords
+  -> GenOptions -- ^ options
+  -> g          -- ^ random generator
+  -> [String]
 newPasswords len n = evalRand . mkPasswords len n
 
 -- |Generate a password using the MonadRandom m. MonadRandom is exposed here
@@ -106,15 +108,19 @@ newPasswords len n = evalRand . mkPasswords len n
 --  myPassword :: IO String
 --  myPassword = evalRand (mkPassword 10 genOptions) \`liftM\` getStdGen
 --  @
-mkPassword :: MonadRandom m
-              => Int        -- ^ password length
-              -> GenOptions -- ^ options
-              -> m String
+mkPassword
+  :: MonadRandom m
+  => Int        -- ^ password length
+  -> GenOptions -- ^ options
+  -> m String
 mkPassword len opts = do
-  f2 <- reverse `liftM` first2 opts
-  if len > 2
-    then reverse `liftM` lastN opts (len - 2) f2
-    else return . reverse . take len $ f2
+  f2 <- first2
+  let f2' = reverse f2
+
+  pass <- if len > 2 then lastN (len - 2) f2' else return (take len f2')
+  let pass' = reverse pass
+
+  if genCapitals opts then capitalizeR len pass' else return pass'
 
 -- |Plural version of mkPassword.  Generate an infinite list of passwords using
 --  the MonadRandom m.  MonadRandom is exposed here for extra control.
@@ -124,11 +130,12 @@ mkPassword len opts = do
 -- myMkPasswords :: IO [String]
 -- myMkPasswords = evalRand (mkPasswords 10 20 genOptions) \`liftM\` getStdGen
 -- @
-mkPasswords :: MonadRandom m
-               => Int        -- ^ password length
-               -> Int        -- ^ number of passwords
-               -> GenOptions -- ^ options
-               -> m [String]
+mkPasswords
+  :: MonadRandom m
+  => Int        -- ^ password length
+  -> Int        -- ^ number of passwords
+  -> GenOptions -- ^ options
+  -> m [String]
 mkPasswords len n = replicateM n . mkPassword len
 
 -- * Random passphrase generators
@@ -142,13 +149,14 @@ mkPasswords len n = replicateM n . mkPassword len
 --  myGenPassphrase :: IO (String, StdGen)
 --  myGenPassphrase = genPassword 10 6 10 genOptions \`liftM\` getStdGen
 --  @
-genPassphrase :: RandomGen g
-              => Int        -- ^ number of words
-              -> Int        -- ^ minimum word length
-              -> Int        -- ^ maximum word length
-              -> GenOptions -- ^ options
-              -> g          -- ^ random generator
-              -> ([String], g)
+genPassphrase
+  :: RandomGen g
+  => Int        -- ^ number of words
+  -> Int        -- ^ minimum word length
+  -> Int        -- ^ maximum word length
+  -> GenOptions -- ^ options
+  -> g          -- ^ random generator
+  -> ([String], g)
 genPassphrase n min max = runRand . mkPassphrase n min max
 
 -- |Generate a passphrase using the generator g, returning the result.
@@ -159,13 +167,14 @@ genPassphrase n min max = runRand . mkPassphrase n min max
 --  myNewPassphrase :: IO String
 --  myNewPassphrase = newPassphrase 10 6 12 \`liftM\` getStdGen
 --  @
-newPassphrase :: RandomGen g
-               => Int        -- ^ number of words
-               -> Int        -- ^ minimum word length
-               -> Int        -- ^ maximum word length
-               -> GenOptions -- ^ options
-               -> g          -- ^ random generator
-               -> [String]
+newPassphrase
+  :: RandomGen g
+  => Int        -- ^ number of words
+  -> Int        -- ^ minimum word length
+  -> Int        -- ^ maximum word length
+  -> GenOptions -- ^ options
+  -> g          -- ^ random generator
+  -> [String]
 newPassphrase n min max = evalRand . mkPassphrase n min max
 
 -- |Generate a finite number of words of random length (between @min@ and @max@ chars)
@@ -176,51 +185,52 @@ newPassphrase n min max = evalRand . mkPassphrase n min max
 --  myPassphrase :: IO String
 --  myPassphrase = evalRand (mkPassphrase 10 6 12) \`liftM\` getStdGen
 --  @
-mkPassphrase :: MonadRandom m
-             => Int        -- ^ number of words
-             -> Int        -- ^ minimum word length
-             -> Int        -- ^ maximum word length
-             -> GenOptions -- ^ options
-             -> m [String]
-mkPassphrase n min max opts = replicateM n $
-  getRandomR (min, max) >>= flip mkPassword opts
+mkPassphrase
+  :: MonadRandom m
+  => Int        -- ^ number of words
+  -> Int        -- ^ minimum word length
+  -> Int        -- ^ maximum word length
+  -> GenOptions -- ^ options
+  -> m [String]
+mkPassphrase n min max opts =
+  replicateM n $ getRandomR (min, max) >>= flip mkPassword opts
 
 -- * Internal
 
 -- |Generate two random characters. Uses 'Elocrypt.Trigraph.trigragh'
 --  to generate a weighted list.
-first2 :: MonadRandom m 
-       => GenOptions
-       -> m String
-first2 opts = fromList (map toWeight frequencies) >>= mapM (capitalizeR caps)
+first2 :: MonadRandom m => m String
+first2 = fromList (map toWeight frequencies)
   where toWeight (s, w) = (s, sum w)
-        GenOptions{genCapitals=caps} = opts
 
 -- |Generate the last n characters using previous two characters
 --  and their 'Elocrypt.Trigraph.trigraph'
-lastN :: MonadRandom m => GenOptions -> Int -> String -> m String
-lastN _    0   ls = return ls
-lastN opts len ls = next opts ls >>= lastN opts (len - 1) . (:ls)
+lastN :: MonadRandom m => Int -> String -> m String
+lastN 0 ls = return ls
+lastN len ls = next ls >>= lastN (len - 1) . (: ls)
 
 -- |Generate a random character based on the previous two characters and
 --  their 'Elocrypt.Trigraph.trigraph'
-next :: MonadRandom m 
-     => GenOptions -- ^ options
-     -> String     -- ^ the prefix
-     -> m Char
-next opts prefix = nextLetter prefix >>= capitalizeR caps
-  where GenOptions{genCapitals=caps} = opts
+next
+  :: MonadRandom m
+  => String     -- ^ the prefix
+  -> m Char
+next = fromList . fromJust . findWeights . reverse . take 2
 
--- |Randomly choose a letter from the trigraph
-nextLetter :: MonadRandom m
-           => String  -- ^ the prefix
-           -> m Char
-nextLetter = fromList . fromJust . findWeights . reverse . take 2
+-- |Randomly capitalize at least 1 character. Additional characters capitalize
+-- at a probability of 1/12
+capitalizeR :: MonadRandom m => Int -> String -> m String
+capitalizeR len s = mapM capitalize s >>= capitalize1 len
+  where capitalize ch = fromList [(ch, 12), (toUpper ch, 1)]
 
--- |Randomly capitalize a character 10% of the time
-capitalizeR :: MonadRandom m
-           => Bool    -- ^ Whether to do the capitalization
-           -> Char    -- ^ The character to capitalize
-           -> m Char
-capitalizeR True  c = fromList [(c, 6), (toUpper c, 1)]
-capitalizeR False c = return c
+-- |Randomly capitalize 1 character
+capitalize1
+  :: MonadRandom m
+  => Int -- ^ length
+  -> String -- ^ the string to capitalize
+  -> m String
+capitalize1 len s = capitalize1' <$> getRandomR (0, len - 1)
+  where
+    capitalize1' pos =
+      let (prefix, ch : suffix) = splitAt (pos - 1) s
+      in prefix ++ (toUpper ch : suffix)
