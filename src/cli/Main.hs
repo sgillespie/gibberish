@@ -22,6 +22,7 @@ termHeight = 10
 
 data Options = Options {
       optCapitals  :: Bool,       -- Include capital letters?
+      optDigits    :: Bool,       -- Inlcude digits?
       optLength    :: Int,        -- Size of the password(s)
       optMaxLength :: Int,
       optNumber    :: Maybe Int,  -- Number of passwords to generate
@@ -38,6 +39,7 @@ data PassType
 defaultOptions :: Options
 defaultOptions = Options
   { optCapitals = False
+  , optDigits = False
   , optLength = 8
   , optMaxLength = 10
   , optNumber = Nothing
@@ -53,6 +55,11 @@ options =
     ["capitals"]
     (NoArg (\o -> o { optCapitals = True }))
     "Include at least one capital letter"
+  , Option
+    ['d']
+    ["digits"]
+    (NoArg (\o -> o { optDigits = True }))
+    "Include numerals"
   , Option
     ['n']
     ["number"]
@@ -132,8 +139,8 @@ passphrases opts@Options { optCapitals = caps, optLength = minLen, optMaxLength 
     lines' = fromMaybe termHeight n
 
 getGenOptions :: Options -> GenOptions
-getGenOptions Options { optCapitals = caps } =
-  genOptions { genCapitals = caps }
+getGenOptions Options { optCapitals = caps, optDigits = digits }
+  = genOptions { genCapitals = caps, genDigits = digits }
 
 usage :: String
 usage = usageInfo (intercalate "\n" headerLines) options

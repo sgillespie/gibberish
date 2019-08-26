@@ -16,22 +16,28 @@ import Control.Monad
 import Control.Monad.Random hiding (next)
 import Data.Bool
 import Data.Char
+import Data.List (findIndices)
 import Data.Maybe
 import Prelude hiding (min, max)
+import qualified Data.Map as M
 
 -- * Data Types
 
 -- |Options for generating passwords or passphrases. Do not use
 -- this constructor directly. Instead use 'genOptions' to construct
 -- an instance.
-newtype GenOptions = GenOptions {
-  genCapitals :: Bool
+data GenOptions = GenOptions {
+  genCapitals :: Bool,
+  genDigits   :: Bool
 } deriving (Eq, Show)
 
 -- |Default options for generating passwords or passphrases. This is
 -- the preferred way to construct 'GenOptions'.
 genOptions :: GenOptions
-genOptions = GenOptions {genCapitals = False}
+genOptions = GenOptions {
+  genCapitals = False,
+  genDigits   = False
+}
 
 -- * Random password generators
 
@@ -120,7 +126,10 @@ mkPassword len opts = do
   pass <- if len > 2 then lastN (len - 2) f2' else return (take len f2')
   let pass' = reverse pass
 
-  if genCapitals opts then capitalizeR len pass' else return pass'
+  
+  pass'' <- if genDigits opts then numerizeR len pass' else return pass'
+  
+  if genCapitals opts then capitalizeR len pass'' else return pass''
 
 -- |Plural version of mkPassword.  Generate an infinite list of passwords using
 --  the MonadRandom m.  MonadRandom is exposed here for extra control.
@@ -234,3 +243,43 @@ capitalize1 len s = capitalize1' <$> getRandomR (0, len - 1)
     capitalize1' pos =
       let (prefix, ch : suffix) = splitAt (pos - 1) s
       in prefix ++ (toUpper ch : suffix)
+
+-- |Randomly numerize at least 1 character. Additional characters numerize
+-- at a probability of 1/6
+numerizeR :: MonadRandom m => Int -> String -> m String
+numerizeR len s = mapM numerize s >>= numerize1 len
+  where numerize ch = do
+          ch' <- uniform (toDigit ch)
+          fromList [(ch, 8), (ch', 1)]
+
+numerize1
+  :: MonadRandom m
+  => Int    -- ^ length
+  -> String -- ^ the string to capitalize
+  -> m String
+numerize1 len s
+  | clen == 0 = return s
+  | otherwise = do
+      pos <- uniform candidates
+
+      let (prefix, ch : suffix) = splitAt pos s
+
+      ch' <- uniform (toDigit ch)
+      return $ prefix ++ (ch' : suffix)
+  where candidates = findIndices (`elem` "olzeasgtb") s
+        clen = length candidates
+
+-- |Map a letter to one or more digits, if possible
+toDigit :: Char -> String
+toDigit c = fromMaybe [c] (numeralConversions M.!? c)
+
+numeralConversions = M.fromList [
+  ('o', ['0']),
+  ('l', ['1']),
+  ('z', ['2']),
+  ('e', ['3']),
+  ('a', ['4']),
+  ('s', ['5']),
+  ('g', ['6', '9']),
+  ('t', ['7']),
+  ('b', ['8'])]

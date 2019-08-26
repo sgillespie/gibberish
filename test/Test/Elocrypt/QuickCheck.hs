@@ -32,6 +32,7 @@ instance Arbitrary GenOptions where
 -- options
 data CliOptions = CliOptions {
   cliCapitals   :: Bool,
+  cliDigits     :: Bool,
   cliLength     :: Maybe Int,
   cliMaxLength  :: Maybe Int,
   cliNumber     :: Maybe Int,
@@ -51,12 +52,14 @@ instance Show WordCliOptions where
 
 instance Arbitrary WordCliOptions where
   arbitrary = do
-    caps <- arbitrary
-    len  <- arbitrary
-    num  <- arbitrary
+    caps   <- arbitrary
+    digits <- arbitrary
+    len    <- arbitrary
+    num    <- arbitrary
 
     return $ WordCliOptions CliOptions{ 
       cliCapitals   = caps,
+      cliDigits     = digits,
       cliLength     = fromPositive len,
       cliMaxLength  = Nothing,
       cliNumber     = fromPositive num,
@@ -76,6 +79,7 @@ instance Show PhraseCliOptions where
 instance Arbitrary PhraseCliOptions where
   arbitrary = do
     caps   <- arbitrary
+    digits <- arbitrary
     minLen <- arbitrary
     maxLen <- arbitrary
     num    <- arbitrary
@@ -87,6 +91,7 @@ instance Arbitrary PhraseCliOptions where
 
     return $ PhraseCliOptions CliOptions{ 
       cliCapitals   = caps,
+      cliDigits     = digits,
       cliLength     = minLen',
       cliMaxLength  = maxLen',  
       -- CLI gets very inconsistent when number >= 20
@@ -111,8 +116,9 @@ instance (Arbitrary n, Num n, Random n) => Arbitrary (LessThan79 n) where
 -- |Convert CliOptions into a list of cli arguments
 getOptions :: CliOptions -> [String]
 getOptions opts
-  = caps ++ num ++ phrase ++ len ++ maxLen
+  = caps ++ digits ++ num ++ phrase ++ len ++ maxLen
   where caps   = ["-c" | cliCapitals opts]
+        digits = ["-d" | cliDigits opts]
         len    = maybe [] (singleton . show) (cliLength opts)
         maxLen = maybe [] (singleton . show) (cliMaxLength opts)
         maxLen' = cliLength opts >> cliMaxLength opts

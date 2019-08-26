@@ -42,11 +42,28 @@ prop_newPasswordHasCaps (Positive len) gen = any isUpper pass
 -- |Most passwords have more than one capital
 prop_newPasswordHasMultipleCaps :: Positive Int -> StdGen -> Property
 prop_newPasswordHasMultipleCaps (Positive len) gen =
-  cover 50 (length (filter isUpper pass) > 1) "has multiple caps"
-    $ any isLower pass
+  checkCoverage $
+    cover 50 (length (filter isUpper pass) > 1) "has multiple caps" True
   where
     pass = newPassword (len + 2) opts gen
     opts = genOptions { genCapitals = True }
+
+-- |Passwords are all letters when numbers is false
+prop_newPasswordIsAlpha :: Positive Int -> StdGen -> Bool
+prop_newPasswordIsAlpha (Positive len) gen = all isAlpha pass
+  where
+    pass = newPassword len opts gen
+    opts = genOptions { genDigits = False }
+
+-- |Most passwords have at least one number
+prop_newPasswordHasDigits :: Positive Int -> StdGen -> Property
+prop_newPasswordHasDigits (Positive len) gen =
+  checkCoverage $
+    cover 50 (any isDigit pass) "has digits" True
+  where
+    pass = newPassword (len + 2) opts gen
+    opts = genOptions { genDigits = True }
+  
 
 -- |Third and each successive character is taken from the trigraph
 prop_3rdCharHasPositiveFrequency

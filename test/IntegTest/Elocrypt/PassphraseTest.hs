@@ -115,7 +115,22 @@ prop_printsCapitals (PhraseCliOptions opts)
     (_, out, _, _) <- run opts'
     response <- readHandle out
 
-    let phrases = lines response
+    let result = any (any isUpper) . lines $ response
 
     return $
-      cover 80 (any (any isUpper) phrases) "has caps" True
+      cover 80 result "has caps" True
+
+-- |Prints numbers when specified
+prop_printsNumbers :: WordCliOptions -> Property
+prop_printsNumbers (WordCliOptions opts)
+  = ioProperty $ do
+      let opts' = opts { cliDigits = True }
+
+      (_, out, _, _) <- run opts'
+      response <- readHandle out
+
+      let result = any (any isDigit) . lines $ response
+
+      return $
+        cover 80 result "has numbers" True
+
