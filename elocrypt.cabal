@@ -30,7 +30,8 @@ source-repository this
                   
 library
   exposed-modules:     Data.Elocrypt,
-                       Data.Elocrypt.Trigraph
+                       Data.Elocrypt.Trigraph,
+                       Data.Elocrypt.Utils
   -- other-modules:       
   -- other-extensions:    
   build-depends:       base >=4.7 && <5,
@@ -54,6 +55,7 @@ test-suite test
                        MonadRandom,
                        proctest,
                        QuickCheck,
+                       containers,
                        random,
                        tasty,
                        tasty-quickcheck,
@@ -64,6 +66,7 @@ test-suite test
   other-modules:       Test.Elocrypt.Instances,
                        Test.Elocrypt.QuickCheck,
                        Test.Elocrypt.TrigraphTest,
+                       Test.Elocrypt.UtilsTest,
                        Test.ElocryptTest
   type:                exitcode-stdio-1.0
 
