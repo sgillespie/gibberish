@@ -106,7 +106,7 @@ newPasswords
   -> GenOptions -- ^ options
   -> g          -- ^ random generator
   -> [String]
-newPasswords len n opts g = evalRand (mkPasswords len n opts) g
+newPasswords len n = evalRand . mkPasswords len n
 
 -- |Generate a password using the MonadRandom m. MonadRandom is exposed here
 --  for extra control.
