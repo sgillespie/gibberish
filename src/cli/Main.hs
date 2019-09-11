@@ -27,6 +27,7 @@ data Options = Options {
       optMaxLength :: Int,
       optNumber    :: Maybe Int,  -- Number of passwords to generate
       optPassType  :: PassType,   -- Generate passwords or passphrases
+      optSpecials  :: Bool,       -- Include special characters?
       optHelp      :: Bool,
       optVersion   :: Bool
   } deriving (Show)
@@ -44,6 +45,7 @@ defaultOptions = Options
   , optMaxLength = 10
   , optNumber = Nothing
   , optPassType = Word
+  , optSpecials = False
   , optHelp = False
   , optVersion = False
   }
@@ -60,6 +62,11 @@ options =
     ["digits"]
     (NoArg (\o -> o { optDigits = True }))
     "Include numerals"
+  , Option
+    ['s']
+    ["symbols"]
+    (NoArg (\o -> o { optSpecials = True }))
+    "Include special characters"
   , Option
     ['n']
     ["number"]
@@ -139,8 +146,12 @@ passphrases opts@Options { optCapitals = caps, optLength = minLen, optMaxLength 
     lines' = fromMaybe termHeight n
 
 getGenOptions :: Options -> GenOptions
-getGenOptions Options { optCapitals = caps, optDigits = digits }
-  = genOptions { genCapitals = caps, genDigits = digits }
+getGenOptions opts
+  = genOptions
+    { genCapitals = optCapitals opts,
+      genDigits = optDigits opts,
+      genSpecials = optSpecials opts
+    }
 
 usage :: String
 usage = usageInfo (intercalate "\n" headerLines) options

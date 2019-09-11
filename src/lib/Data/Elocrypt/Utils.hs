@@ -1,9 +1,11 @@
 module Data.Elocrypt.Utils where
 
-import Control.Monad.Random (MonadRandom(), fromList)
+import Data.Char (isAlphaNum, isSpace)
 import Data.Maybe (fromMaybe)
 import Data.Ratio
 import qualified Data.Map as M
+
+import Control.Monad.Random (MonadRandom(), fromList)
 
 -- |A mapping from letters to numbers that look like them
 numeralConversions = M.fromList [
@@ -17,9 +19,23 @@ numeralConversions = M.fromList [
   ('t', ['7']),
   ('b', ['8'])]
 
+-- |A mapping from letters to symbols that look like them
+symbolConversions = M.fromList [
+  ('a', ['@']),
+  ('l', ['!']),
+  ('s', ['$'])]
+
 -- |Map a letter to one or more digits, if possible
 toDigit :: Char -> String
 toDigit c = fromMaybe [c] (numeralConversions M.!? c)
+
+-- |Map a letter to one or more symbols, if possible
+toSymbol :: Char -> String
+toSymbol c = fromMaybe [c] (symbolConversions M.!? c)
+
+-- |Selects special characters
+isSymbol :: Char -> Bool
+isSymbol c = not (isAlphaNum c || isSpace c)
 
 -- |Randomly update characters at the specified probability
 updateR

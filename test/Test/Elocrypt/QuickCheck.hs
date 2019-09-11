@@ -36,7 +36,8 @@ data CliOptions = CliOptions {
   cliLength     :: Maybe Int,
   cliMaxLength  :: Maybe Int,
   cliNumber     :: Maybe Int,
-  cliPassphrase :: Bool
+  cliPassphrase :: Bool,
+  cliSpecials   :: Bool
 } deriving Eq
 
 instance Show CliOptions where
@@ -52,10 +53,11 @@ instance Show WordCliOptions where
 
 instance Arbitrary WordCliOptions where
   arbitrary = do
-    caps   <- arbitrary
-    digits <- arbitrary
-    len    <- arbitrary
-    num    <- arbitrary
+    caps     <- arbitrary
+    digits   <- arbitrary
+    len      <- arbitrary
+    num      <- arbitrary
+    specials <- arbitrary
 
     return $ WordCliOptions CliOptions{ 
       cliCapitals   = caps,
@@ -63,7 +65,8 @@ instance Arbitrary WordCliOptions where
       cliLength     = fromPositive len,
       cliMaxLength  = Nothing,
       cliNumber     = fromPositive num,
-      cliPassphrase = False
+      cliPassphrase = False,
+      cliSpecials   = specials
     }
   
     where fromPositive = fmap getPositive
@@ -78,11 +81,12 @@ instance Show PhraseCliOptions where
 
 instance Arbitrary PhraseCliOptions where
   arbitrary = do
-    caps   <- arbitrary
-    digits <- arbitrary
-    minLen <- arbitrary
-    maxLen <- arbitrary
-    num    <- arbitrary
+    caps     <- arbitrary
+    digits   <- arbitrary
+    minLen   <- arbitrary
+    maxLen   <- arbitrary
+    num      <- arbitrary
+    specials <- arbitrary
 
     -- CLI gets very inconsistent when len >= 80
     -- TODO: Fix ^^^
@@ -97,7 +101,8 @@ instance Arbitrary PhraseCliOptions where
       -- CLI gets very inconsistent when number >= 20
       -- TODO: Fix ^^^
       cliNumber     = fromLT20 num,
-      cliPassphrase = True
+      cliPassphrase = True,
+      cliSpecials   = specials
     }
 
 newtype LessThan20 n = LT20 { getLT20 :: n } deriving (Eq, Show)
@@ -116,7 +121,7 @@ instance (Arbitrary n, Num n, Random n) => Arbitrary (LessThan79 n) where
 -- |Convert CliOptions into a list of cli arguments
 getOptions :: CliOptions -> [String]
 getOptions opts
-  = caps ++ digits ++ num ++ phrase ++ len ++ maxLen
+  = caps ++ digits ++ specials ++ num ++ phrase ++ len ++ maxLen
   where caps   = ["-c" | cliCapitals opts]
         digits = ["-d" | cliDigits opts]
         len    = maybe [] (singleton . show) (cliLength opts)
@@ -124,6 +129,7 @@ getOptions opts
         maxLen' = cliLength opts >> cliMaxLength opts
         num    = maybe [] (("-n":) . singleton . show) (cliNumber opts)
         phrase = ["-p" | cliPassphrase opts]
+        specials = ["-s" | cliSpecials opts]
 
 -- |Run elocrypt with the given options
 run :: CliOptions -> IO (Handle, Handle, Handle, ProcessHandle)

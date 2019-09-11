@@ -30,7 +30,8 @@ import qualified Data.Map as M
 -- an instance.
 data GenOptions = GenOptions {
   genCapitals :: Bool,
-  genDigits   :: Bool
+  genDigits   :: Bool,
+  genSpecials :: Bool
 } deriving (Eq, Show)
 
 -- |Default options for generating passwords or passphrases. This is
@@ -38,7 +39,8 @@ data GenOptions = GenOptions {
 genOptions :: GenOptions
 genOptions = GenOptions {
   genCapitals = False,
-  genDigits   = False
+  genDigits   = False,
+  genSpecials = False
 }
 
 -- * Random password generators
@@ -129,9 +131,11 @@ mkPassword len opts = do
   let pass' = reverse pass
 
   -- Apply the transformations in order, if appropriate options specified
-  let ms = [
-        (genCapitals opts, capitalizeR),
-        (genDigits opts,   numerizeR)]
+  let ms =
+        [(genCapitals opts, capitalizeR),
+         (genDigits opts,   numerizeR),
+         (genSpecials opts, specializeR)
+        ]
 
   foldM (\p f -> f len p) pass' . map snd . filter fst $ ms
 
@@ -251,5 +255,19 @@ numerize1 :: MonadRandom m => Int -> String -> m String
 numerize1 len s
   | null candidates = return s
   | otherwise = uniform candidates >>= numerize1' s
-  where candidates = findIndices (`elem` "olzeasgtb") s
+  where candidates = findIndices (`elem` M.keys numeralConversions) s
         numerize1' = update1 (uniform . toDigit)
+
+-- |Randomly make at least 1 character a symbol. Additional characters specialize
+-- at a probability of 1/4
+specializeR :: MonadRandom m => Int -> String -> m String
+specialize1 :: MonadRandom m => Int -> String -> m String
+
+specializeR len s = specialize s >>= specialize1 len
+  where specialize = updateR (uniform . toSymbol) (1 % 6)
+
+specialize1 len s
+  | null candidates = return s
+  | otherwise = uniform candidates >>= specialize1' s
+  where candidates = findIndices (`elem` M.keys symbolConversions) s
+        specialize1' = update1 (uniform . toSymbol)

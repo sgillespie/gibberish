@@ -3,7 +3,7 @@ module IntegTest.Elocrypt.PassphraseTest where
 
 import Control.Monad
 import Data.Bool
-import Data.Char
+import Data.Char hiding (isSymbol)
 import Data.List
 import Data.Maybe
 
@@ -13,6 +13,7 @@ import Test.Tasty.QuickCheck (testProperty)
 import Test.Tasty.TH
 import qualified Test.Proctest as Proctest
 
+import Data.Elocrypt.Utils (isSymbol)
 import Test.Elocrypt.QuickCheck
 
 tests :: TestTree
@@ -121,8 +122,8 @@ prop_printsCapitals (PhraseCliOptions opts)
       cover 80 result "has caps" True
 
 -- |Prints numbers when specified
-prop_printsNumbers :: WordCliOptions -> Property
-prop_printsNumbers (WordCliOptions opts)
+prop_printsNumbers :: PhraseCliOptions -> Property
+prop_printsNumbers (PhraseCliOptions opts)
   = ioProperty $ do
       let opts' = opts { cliDigits = True }
 
@@ -134,3 +135,15 @@ prop_printsNumbers (WordCliOptions opts)
       return $
         cover 80 result "has numbers" True
 
+-- |Prints special characters when specified
+prop_printsSpecials :: PhraseCliOptions -> Property
+prop_printsSpecials (PhraseCliOptions opts) = ioProperty $ do
+  let opts' = opts { cliSpecials = True }
+
+  (_, out, _, _) <- run opts'
+  response <- readHandle out
+
+  let result = any (any isSymbol) . lines $ response
+
+  return $ checkCoverage $
+    cover 80 result "has special characters" True

@@ -4,7 +4,7 @@ module Test.ElocryptTest where
 import Control.Monad
 import Control.Monad.Random
 import Data.Bool
-import Data.Char
+import Data.Char hiding (isSymbol)
 import Data.List
 import Data.Maybe
 import Test.QuickCheck
@@ -14,6 +14,7 @@ import Test.Tasty.TH
 
 import Data.Elocrypt
 import Data.Elocrypt.Trigraph
+import Data.Elocrypt.Utils (isSymbol)
 import Test.Elocrypt.QuickCheck
 import Test.Elocrypt.Instances
 
@@ -63,7 +64,15 @@ prop_newPasswordHasDigits (Positive len) gen =
   where
     pass = newPassword (len + 2) opts gen
     opts = genOptions { genDigits = True }
-  
+
+-- |Most passwords have at least one special character
+prop_newPasswordHasSpecials :: Positive Int -> StdGen -> Property
+prop_newPasswordHasSpecials (Positive len) gen =
+  checkCoverage $
+    cover 50 (any isSymbol pass) "has specials" True
+  where
+    pass = newPassword (len + 2) opts gen
+    opts = genOptions { genSpecials = True }
 
 -- |Third and each successive character is taken from the trigraph
 prop_3rdCharHasPositiveFrequency

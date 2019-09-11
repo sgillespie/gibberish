@@ -33,6 +33,25 @@ prop_toDigitDoesntLookLikeNumber c
   where candidates = M.keys numeralConversions
         c' = toDigit c
 
+-- |toSymbol never returns a letter that looks like a symbol
+prop_toSymbolDoesntLookLikeSymbol :: Char -> Bool
+prop_toSymbolDoesntLookLikeSymbol c
+  = isNothing $ find (`elem` M.keys symbolConversions) c'
+  where c' = toSymbol c
+
+prop_toSymbolReturnsSymbols :: Bool
+prop_toSymbolReturnsSymbols = all isSymbol ss
+  where ks = M.keys symbolConversions
+        ss = concatMap toSymbol ks
+
+-- |isSymbol returns false for letters and numbers
+prop_isSymbolAlphaNumReturnsFalse :: Char -> Property
+prop_isSymbolAlphaNumReturnsFalse c
+  = c `elem` (['a'..'z'] ++ ['A'..'Z'] ++ ['0'..'9']) ==> not (isSymbol c)
+
+prop_isSymbolWhitespaceReturnsFalse :: Bool
+prop_isSymbolWhitespaceReturnsFalse = all (not . isSymbol) " \n"
+
 -- |updateR always updates when prob = 1/0
 prop_updateRAlwaysUpdates :: String -> StdGen -> Bool
 prop_updateRAlwaysUpdates s = evalRand $ do
