@@ -16,7 +16,7 @@ version :: String
 termLen :: Int
 termHeight :: Int
 
-version = "elocrypt 2.0.1"
+version = "elocrypt 2.1.0"
 termLen = 80
 termHeight = 10
 
