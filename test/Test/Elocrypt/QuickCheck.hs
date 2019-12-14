@@ -154,7 +154,7 @@ fromLT79 = fmap getLT79
 fromPositive = fmap getPositive
 
 readHandle :: Handle -> IO String
-readHandle = (<$>) asUtf8Str . waitOutput (seconds 2) 5000
+readHandle = (<$>) asUtf8Str . waitOutput (seconds 5) 5000
 
 assertExitedSuccess :: Timeout -> ProcessHandle -> IO Bool
 assertExitedSuccess t = fmap (== ExitSuccess) . assertExitedTimeout t
