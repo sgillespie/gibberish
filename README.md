@@ -5,8 +5,8 @@ Elocrypt generates pronounceable, easy-to-remember, hard-to-guess passwords... a
 
 ## Prerequisites
 In order to build or install you will need
- * GHC (tested on 8.0)
- * cabal-install (tested on 1.24)
+ * GHC (tested on 8.6.5)
+ * Stack (tested on 2.1.3.1)
 
 ## Installing
 Elocrypt is on [Hackage](https://hackage.haskell.org/package/elocrypt).  Installation is as easy as:
@@ -15,8 +15,8 @@ cabal install elocrypt
 ```
 
 Binaries are also available:
- * [elocrypt-2.0.0-linux-bin.tar.gz](https://github.com/sgillespie/elocrypt/releases/download/v2.0.0/elocrypt-2.0.0-linux-bin.tar.gz)
- * [elocrypt-2.0.0-windows-bin.exe](https://github.com/sgillespie/elocrypt/releases/download/v2.0.0/elocrypt-2.0.0-windows-bin.exe)
+ * [elocrypt-2.1.0-linux-bin.tar.gz](https://github.com/sgillespie/elocrypt/releases/download/v2.1.0/elocrypt-v2.1.0-linux-bin.tar.gz)
+ * [elocrypt-2.1.0-osx-bin.exe](https://github.com/sgillespie/elocrypt/releases/download/v2.1.0/elocrypt-v2.1.0-osx-bin.tar.gz)
 
 ## Running
 Generate a list passwords:
@@ -36,8 +36,8 @@ Elocrypt sources can be found
 
 ## Building
 In order to build or install you will need
- * [GHC](https://www.haskell.org/ghc) (tested on 8.0)
- * [Haskell Stack](https://haskellstack.org) (tested on 1.24)
+ * [GHC](https://www.haskell.org/ghc) (tested on 8.6.5)
+ * [Haskell Stack](https://haskellstack.org) (tested on 2.1.3.1)
 
 Build elocrypt:
 ```
