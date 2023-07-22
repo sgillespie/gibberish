@@ -2,6 +2,7 @@
 cabal-dev
 cabal.sandbox.config
 dist
+dist-newstyle
 
 .virtualenv
 .hpc
