@@ -106,7 +106,7 @@ prop_first2HavePositiveFrequencies (Positive len) opts gen =
     pass = newPassword (len + 1) opts gen
     (f : s : _) = map toLower pass
     frequencies =
-      zipWith (curry snd) ['a' .. 'z'] . fromJust . findFrequency $ [f, s]
+      zipWith (const id) ['a' .. 'z'] . fromJust . findFrequency $ [f, s]
     failMsg = "no candidates for '" ++ [f, s] ++ "'"
 
 -- (len . fst) (genPasswords _ x _ _) = x

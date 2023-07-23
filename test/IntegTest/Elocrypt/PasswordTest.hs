@@ -59,7 +59,7 @@ prop_printsLongPasswords (WordCliOptions opts) =
       return $
         checkCoverage $
           cover 30 (len' > 80) "long" $
-            all (>= 1) . map (length . words) . lines $
+            (not . any (null . words)) . lines $
               response
 
 -- | Prints the specified number of passwords

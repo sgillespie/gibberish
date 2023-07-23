@@ -124,7 +124,7 @@ prop_printsLongPassphrases (PhraseCliOptions opts) (Positive min) (Positive max)
 
       return $
         cover 20 (minLen > 80) "long" $
-          all (>= 1) . map (length . words) . lines $
+          (not . any . (null . words)) . lines $
             response
 
 -- | Prints capitals when specified

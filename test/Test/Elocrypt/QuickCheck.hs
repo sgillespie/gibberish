@@ -144,9 +144,6 @@ run opts = do
   return res
 
 -- Utilities
-singleton :: a -> [a]
-singleton a = [a]
-
 fromLT20 :: Functor f => f (LessThan20 a) -> f a
 fromLT40 :: Functor f => f (LessThan40 a) -> f a
 fromLT79 :: Functor f => f (LessThan79 a) -> f a

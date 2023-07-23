@@ -55,7 +55,7 @@ prop_isSymbolAlphaNumReturnsFalse c =
   c `elem` (['a' .. 'z'] ++ ['A' .. 'Z'] ++ ['0' .. '9']) ==> not (isSymbol c)
 
 prop_isSymbolWhitespaceReturnsFalse :: Bool
-prop_isSymbolWhitespaceReturnsFalse = all (not . isSymbol) " \n"
+prop_isSymbolWhitespaceReturnsFalse = not $ any isSymbol " \n"
 
 -- | updateR always updates when prob = 1/0
 prop_updateRAlwaysUpdates :: String -> StdGen -> Bool

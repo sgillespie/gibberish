@@ -51,7 +51,7 @@ instance Arbitrary PhraseCliArgs where
     return $ PhraseCliArgs ("-p" : args)
 
 instance Arbitrary StdGen where
-  arbitrary = mkStdGen `liftM` arbitrary
+  arbitrary = mkStdGen <$> arbitrary
 
 -- | All letters, upper and lower case.
 newtype AlphaChar = Alpha Char

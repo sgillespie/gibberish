@@ -26,7 +26,7 @@ findWeights = fmap (zip ['a' .. 'z'] . defaultFrequencies) . findFrequency'
 
 -- | Search for the character frequencies based on the first a two-letter string
 findFrequency :: String -> Maybe [Rational]
-findFrequency s = snd `liftM` find ((==) s . fst) frequencies
+findFrequency s = snd <$> find ((==) s . fst) frequencies
 
 -- | Fix frequencies if they are all 0, since MonadRandom prohibits this.
 --  In this case, use all 1s to give every item an equal weight
