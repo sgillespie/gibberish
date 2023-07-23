@@ -1,11 +1,12 @@
 {-# LANGUAGE TemplateHaskell #-}
+
 module Test.Elocrypt.UtilsTest where
 
 import Control.Monad.Random
-import Data.Maybe (isNothing)
-import Data.List (find, elem, sort)
-import Data.Ratio ((%))
+import Data.List (elem, find, sort)
 import qualified Data.Map as M
+import Data.Maybe (isNothing)
+import Data.Ratio ((%))
 
 import Test.QuickCheck
 import Test.QuickCheck.Monadic (monadicIO)
@@ -14,45 +15,49 @@ import Test.Tasty.QuickCheck (testProperty)
 import Test.Tasty.TH
 
 import Data.Elocrypt.Utils
-import Test.Elocrypt.QuickCheck
 import Test.Elocrypt.Instances
+import Test.Elocrypt.QuickCheck
 
 tests :: TestTree
 tests = $(testGroupGenerator)
 
--- |Maps letters to all digits 0-9
+-- | Maps letters to all digits 0-9
 prop_numeralConversionsHasAllDigits :: Bool
-prop_numeralConversionsHasAllDigits
-  = sort digits == ['0'..'9']
-  where digits = M.foldr (++) [] numeralConversions
+prop_numeralConversionsHasAllDigits =
+  sort digits == ['0' .. '9']
+  where
+    digits = M.foldr (++) [] numeralConversions
 
--- |toDigit never returns a letter that looks like a number
+-- | toDigit never returns a letter that looks like a number
 prop_toDigitDoesntLookLikeNumber :: Char -> Bool
-prop_toDigitDoesntLookLikeNumber c
-  = isNothing $ find (`elem` candidates) c'
-  where candidates = M.keys numeralConversions
-        c' = toDigit c
+prop_toDigitDoesntLookLikeNumber c =
+  isNothing $ find (`elem` candidates) c'
+  where
+    candidates = M.keys numeralConversions
+    c' = toDigit c
 
--- |toSymbol never returns a letter that looks like a symbol
+-- | toSymbol never returns a letter that looks like a symbol
 prop_toSymbolDoesntLookLikeSymbol :: Char -> Bool
-prop_toSymbolDoesntLookLikeSymbol c
-  = isNothing $ find (`elem` M.keys symbolConversions) c'
-  where c' = toSymbol c
+prop_toSymbolDoesntLookLikeSymbol c =
+  isNothing $ find (`elem` M.keys symbolConversions) c'
+  where
+    c' = toSymbol c
 
 prop_toSymbolReturnsSymbols :: Bool
 prop_toSymbolReturnsSymbols = all isSymbol ss
-  where ks = M.keys symbolConversions
-        ss = concatMap toSymbol ks
+  where
+    ks = M.keys symbolConversions
+    ss = concatMap toSymbol ks
 
--- |isSymbol returns false for letters and numbers
+-- | isSymbol returns false for letters and numbers
 prop_isSymbolAlphaNumReturnsFalse :: Char -> Property
-prop_isSymbolAlphaNumReturnsFalse c
-  = c `elem` (['a'..'z'] ++ ['A'..'Z'] ++ ['0'..'9']) ==> not (isSymbol c)
+prop_isSymbolAlphaNumReturnsFalse c =
+  c `elem` (['a' .. 'z'] ++ ['A' .. 'Z'] ++ ['0' .. '9']) ==> not (isSymbol c)
 
 prop_isSymbolWhitespaceReturnsFalse :: Bool
 prop_isSymbolWhitespaceReturnsFalse = all (not . isSymbol) " \n"
 
--- |updateR always updates when prob = 1/0
+-- | updateR always updates when prob = 1/0
 prop_updateRAlwaysUpdates :: String -> StdGen -> Bool
 prop_updateRAlwaysUpdates s = evalRand $ do
   let f _ = return '*'
@@ -60,9 +65,9 @@ prop_updateRAlwaysUpdates s = evalRand $ do
   s' <- updateR f prob s
 
   -- Make sure almost all letters are '*'
-  return $ length (filter (=='*') s') >= length s - 1
+  return $ length (filter (== '*') s') >= length s - 1
 
--- |updateR never updates when prob = 0/1
+-- | updateR never updates when prob = 0/1
 prop_updateRNeverUpdates :: String -> StdGen -> Bool
 prop_updateRNeverUpdates s = evalRand $ do
   let f _ = return '*'
@@ -71,17 +76,18 @@ prop_updateRNeverUpdates s = evalRand $ do
 
   return $ s == s'
 
--- |update1 Always updates at least one character
+-- | update1 Always updates at least one character
 prop_update1AlwaysUpdates1 :: String -> Property
-prop_update1AlwaysUpdates1 s = not (null s) ==> do
-  let f = (const . return) '*'
-  
-  pos <- choose (0, length s - 1)
-  s'  <- update1 f s pos
+prop_update1AlwaysUpdates1 s =
+  not (null s) ==> do
+    let f = (const . return) '*'
 
-  return $ elem '*' s'
+    pos <- choose (0, length s - 1)
+    s' <- update1 f s pos
 
--- |update1 allows empty string
+    return $ elem '*' s'
+
+-- | update1 allows empty string
 prop_update1DoesntCrashOnEmpty :: Property
 prop_update1DoesntCrashOnEmpty = monadicIO $ do
   let f _ = return '*'

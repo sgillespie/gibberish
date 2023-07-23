@@ -15,22 +15,22 @@ import Data.Elocrypt
 version :: String
 termLen :: Int
 termHeight :: Int
-
 version = "elocrypt 2.1.0"
 termLen = 80
 termHeight = 10
 
-data Options = Options {
-      optCapitals  :: Bool,       -- Include capital letters?
-      optDigits    :: Bool,       -- Inlcude digits?
-      optLength    :: Int,        -- Size of the password(s)
-      optMaxLength :: Int,
-      optNumber    :: Maybe Int,  -- Number of passwords to generate
-      optPassType  :: PassType,   -- Generate passwords or passphrases
-      optSpecials  :: Bool,       -- Include special characters?
-      optHelp      :: Bool,
-      optVersion   :: Bool
-  } deriving (Show)
+data Options = Options
+  { optCapitals :: Bool, -- Include capital letters?
+    optDigits :: Bool, -- Inlcude digits?
+    optLength :: Int, -- Size of the password(s)
+    optMaxLength :: Int,
+    optNumber :: Maybe Int, -- Number of passwords to generate
+    optPassType :: PassType, -- Generate passwords or passphrases
+    optSpecials :: Bool, -- Include special characters?
+    optHelp :: Bool,
+    optVersion :: Bool
+  }
+  deriving (Show)
 
 data PassType
   = Phrase
@@ -38,51 +38,52 @@ data PassType
   deriving (Eq, Show)
 
 defaultOptions :: Options
-defaultOptions = Options
-  { optCapitals = False
-  , optDigits = False
-  , optLength = 8
-  , optMaxLength = 10
-  , optNumber = Nothing
-  , optPassType = Word
-  , optSpecials = False
-  , optHelp = False
-  , optVersion = False
-  }
+defaultOptions =
+  Options
+    { optCapitals = False,
+      optDigits = False,
+      optLength = 8,
+      optMaxLength = 10,
+      optNumber = Nothing,
+      optPassType = Word,
+      optSpecials = False,
+      optHelp = False,
+      optVersion = False
+    }
 
 options :: [OptDescr (Options -> Options)]
 options =
   [ Option
-    ['c']
-    ["capitals"]
-    (NoArg (\o -> o { optCapitals = True }))
-    "Include at least one capital letter"
-  , Option
-    ['d']
-    ["digits"]
-    (NoArg (\o -> o { optDigits = True }))
-    "Include numerals"
-  , Option
-    ['s']
-    ["symbols"]
-    (NoArg (\o -> o { optSpecials = True }))
-    "Include special characters"
-  , Option
-    ['n']
-    ["number"]
-    (ReqArg (\n o -> o { optNumber = Just (read n) }) "NUMBER")
-    "The number of passwords to generate"
-  , Option
-    ['p']
-    ["passphrase"]
-    (NoArg (\o -> o { optPassType = Phrase }))
-    "Generate passphrases instead of passwords"
-  , Option ['h'] ["help"] (NoArg (\o -> o { optHelp = True })) "Show this help"
-  , Option
-    ['v']
-    ["version"]
-    (NoArg (\o -> o { optVersion = True }))
-    "Show version and exit"
+      ['c']
+      ["capitals"]
+      (NoArg (\o -> o {optCapitals = True}))
+      "Include at least one capital letter",
+    Option
+      ['d']
+      ["digits"]
+      (NoArg (\o -> o {optDigits = True}))
+      "Include numerals",
+    Option
+      ['s']
+      ["symbols"]
+      (NoArg (\o -> o {optSpecials = True}))
+      "Include special characters",
+    Option
+      ['n']
+      ["number"]
+      (ReqArg (\n o -> o {optNumber = Just (read n)}) "NUMBER")
+      "The number of passwords to generate",
+    Option
+      ['p']
+      ["passphrase"]
+      (NoArg (\o -> o {optPassType = Phrase}))
+      "Generate passphrases instead of passwords",
+    Option ['h'] ["help"] (NoArg (\o -> o {optHelp = True})) "Show this help",
+    Option
+      ['v']
+      ["version"]
+      (NoArg (\o -> o {optVersion = True}))
+      "Show version and exit"
   ]
 
 main :: IO ()
@@ -99,8 +100,7 @@ main = do
     hPutStrLn stderr version
     exitSuccess
 
-  when (optLength opts == 0) exitSuccess    -- Nothing to do
-
+  when (optLength opts == 0) exitSuccess -- Nothing to do
   putStrLn (generate opts gen)
 
 elocryptOpts :: [String] -> IO Options
@@ -108,8 +108,8 @@ elocryptOpts args = do
   (opts, nonopts) <- elocryptOpts' args
 
   return $ case nonopts of
-    (o : os : _) -> opts { optLength = read o, optMaxLength = read os }
-    (o : _) -> opts { optLength = read o }
+    (o : os : _) -> opts {optLength = read o, optMaxLength = read os}
+    (o : _) -> opts {optLength = read o}
     [] -> opts
 
 elocryptOpts' :: [String] -> IO (Options, [String])
@@ -117,18 +117,17 @@ elocryptOpts' args = case getOpt Permute options args of
   (opts, nonopts, []) -> do
     let opts' = foldl (flip id) defaultOptions opts
     return (opts', nonopts)
-
   (_, _, errs) -> do
     hPutStrLn stderr (concat errs)
     hPutStrLn stderr usage
     exitFailure
 
 generate :: RandomGen g => Options -> g -> String
-generate opts@Options { optPassType = Word } = passwords opts
-generate opts@Options { optPassType = Phrase } = passphrases opts
+generate opts@Options {optPassType = Word} = passwords opts
+generate opts@Options {optPassType = Phrase} = passphrases opts
 
 passwords :: RandomGen g => Options -> g -> String
-passwords opts@Options { optLength = len, optNumber = n } gen =
+passwords opts@Options {optLength = len, optNumber = n} gen =
   format "  " . groupWith splitAt' width "  " $ ps
   where
     ps = newPasswords len num (getGenOptions opts) gen
@@ -137,8 +136,8 @@ passwords opts@Options { optLength = len, optNumber = n } gen =
     width = max termLen (len + 2)
 
 passphrases :: RandomGen g => Options -> g -> String
-passphrases opts@Options { optCapitals = caps, optLength = minLen, optMaxLength = maxLen, optNumber = n } gen
-  = format " " . take lines' . groupWith splitAt' width " " $ passphrase
+passphrases opts@Options {optCapitals = caps, optLength = minLen, optMaxLength = maxLen, optNumber = n} gen =
+  format " " . take lines' . groupWith splitAt' width " " $ passphrase
   where
     passphrase = newPassphrase words' minLen maxLen (getGenOptions opts) gen
     words' = columns minLen * lines'
@@ -146,8 +145,8 @@ passphrases opts@Options { optCapitals = caps, optLength = minLen, optMaxLength 
     lines' = fromMaybe termHeight n
 
 getGenOptions :: Options -> GenOptions
-getGenOptions opts
-  = genOptions
+getGenOptions opts =
+  genOptions
     { genCapitals = optCapitals opts,
       genDigits = optDigits opts,
       genSpecials = optSpecials opts
@@ -157,8 +156,8 @@ usage :: String
 usage = usageInfo (intercalate "\n" headerLines) options
   where
     headerLines =
-      [ "Usage: elocrypt [option...] length"
-      , "       elocrypt -p [option...] min-length max-length"
+      [ "Usage: elocrypt [option...] length",
+        "       elocrypt -p [option...] min-length max-length"
       ]
 
 -- Utilities
@@ -185,7 +184,8 @@ groupWith _ _ _ [] = []
 groupWith f i sep ls
   | null groups = [[head ls]]
   | otherwise = groups
-  where groups = groupWith' f i sep ls
+  where
+    groups = groupWith' f i sep ls
 
 groupWith'
   :: (Int -> [a] -> [[a]] -> ([[a]], [[a]])) -> Int -> [a] -> [[a]] -> [[[a]]]
