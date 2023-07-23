@@ -29,8 +29,10 @@
                   };
 
                   nativeBuildInputs = with final; [fourmolu hlint];
-
                   withHoogle = true;
+
+                  # No cross platforms should speed up evaluation
+                  crossPlatforms = _: [];
                 };
               };
             })
@@ -76,6 +78,11 @@
           };
 
           flake = pkgs.gibberishProject.flake {
+            crossPlatforms = p:
+              pkgs.lib.optionals pkgs.stdenv.hostPlatform.isx86_64 (
+                [p.mingwW64] ++
+                (pkgs.lib.optionals pkgs.stdenv.hostPlatform.isLinux
+                  [p.musl64]));
           };
         in
           pkgs.lib.recursiveUpdate flake {
@@ -83,10 +90,17 @@
               inherit (pkgs) hlintCheck fourmoluCheck;
             };
 
-            packages = {
-              inherit (pkgs) hlintCheck fourmoluCheck;
-              default = flake.packages."gibberish:exe:gibber";
-            };
+            packages =
+              let
+                inherit (pkgs.stdenv.hostPlatform) isx86_64 isLinux;
+              in {
+                inherit (pkgs) hlintCheck fourmoluCheck;
+                default = flake.packages."gibberish:exe:gibber";
+              } // pkgs.lib.optionals isx86_64 {
+                "cross/mingw64" = flake.packages."x86_64-w64-mingw32:gibberish:exe:gibber";
+              } // pkgs.lib.optionals (isx86_64 && isLinux) {
+                "cross/musl64" = flake.packages."x86_64-unknown-linux-musl:gibberish:exe:gibber";
+              };
           });
 
 
