@@ -19,22 +19,54 @@
             (final: prev: {
               elocryptProject = final.haskell-nix.cabalProject' {
                 src = ./.;
-                compiler-nix-name = "ghc962";
+                compiler-nix-name = "ghc945";
                 name = "elocrypt";
 
                 shell = {
                   tools = {
                     cabal = "latest";
-                    hlint = "latest";
                     haskell-language-server = "latest";
-                    fourmolu = "0.13.1.0";
                   };
 
-                  nativeBuildInputs = [pkgs.haskellPackages.weeder];
+                  nativeBuildInputs = with final; [fourmolu hlint];
 
                   withHoogle = true;
                 };
               };
+            })
+
+            (final: prev: {
+              fourmolu =
+                final.haskell-nix.tool
+                  final.elocryptProject.args.compiler-nix-name
+                  "fourmolu"
+                  "0.13.1.0";
+
+              hlint =
+                final.haskell-nix.tool
+                  final.elocryptProject.args.compiler-nix-name
+                  "hlint"
+                  "latest";
+
+              fourmoluCheck =
+                prev.runCommand
+                  "fourmolu-check"
+                  { buildInputs = [final.fourmolu]; }
+                  ''
+                    cd "${final.elocryptProject.args.src}"
+                    fourmolu --mode check src test
+                    [[ "$?" -eq "0" ]] && touch $out
+                  '';
+
+              hlintCheck =
+                prev.runCommand
+                  "hlint-check"
+                  { buildInputs = [final.hlint]; }
+                  ''
+                    cd "${final.elocryptProject.args.src}"
+                    hlint src test
+                    [[ "$?" -eq "0" ]] && touch $out
+                  '';
             })
           ];
 
@@ -42,10 +74,15 @@
             inherit system overlays;
             inherit (haskellNix) config;
           };
+
           flake = pkgs.elocryptProject.flake {
           };
         in
           pkgs.lib.recursiveUpdate flake {
+            checks = {
+              inherit (pkgs) hlintCheck fourmoluCheck;
+            };
+
             packages.default = flake.packages."elocrypt:exe:elocrypt";
           });
 
@@ -56,7 +93,7 @@
       "sgillespie.cachix.org-1:Zgif/WHW2IzHqbMb1z56cMmV5tLAA+zW9d5iB5w/VU4="
       "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
     ];
-    
+
     substituters = [
       "https://cache.nixos.org/"
       "https://cache.iog.io"
