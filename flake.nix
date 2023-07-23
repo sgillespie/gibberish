@@ -17,10 +17,10 @@
           overlays = [
             haskellNix.overlay
             (final: prev: {
-              elocryptProject = final.haskell-nix.cabalProject' {
+              gibberishProject = final.haskell-nix.cabalProject' {
                 src = ./.;
                 compiler-nix-name = "ghc962";
-                name = "elocrypt";
+                name = "gibberish";
 
                 shell = {
                   tools = {
@@ -38,13 +38,13 @@
             (final: prev: {
               fourmolu =
                 final.haskell-nix.tool
-                  final.elocryptProject.args.compiler-nix-name
+                  final.gibberishProject.args.compiler-nix-name
                   "fourmolu"
                   "0.13.1.0";
 
               hlint =
                 final.haskell-nix.tool
-                  final.elocryptProject.args.compiler-nix-name
+                  final.gibberishProject.args.compiler-nix-name
                   "hlint"
                   "latest";
 
@@ -53,7 +53,7 @@
                   "fourmolu-check"
                   { buildInputs = [final.fourmolu]; }
                   ''
-                    cd "${final.elocryptProject.args.src}"
+                    cd "${final.gibberishProject.args.src}"
                     fourmolu --mode check src test
                     [[ "$?" -eq "0" ]] && touch $out
                   '';
@@ -63,7 +63,7 @@
                   "hlint-check"
                   { buildInputs = [final.hlint]; }
                   ''
-                    cd "${final.elocryptProject.args.src}"
+                    cd "${final.gibberishProject.args.src}"
                     hlint src test
                     [[ "$?" -eq "0" ]] && touch $out
                   '';
@@ -75,7 +75,7 @@
             inherit (haskellNix) config;
           };
 
-          flake = pkgs.elocryptProject.flake {
+          flake = pkgs.gibberishProject.flake {
           };
         in
           pkgs.lib.recursiveUpdate flake {
@@ -83,7 +83,10 @@
               inherit (pkgs) hlintCheck fourmoluCheck;
             };
 
-            packages.default = flake.packages."elocrypt:exe:elocrypt";
+            packages = {
+              inherit (pkgs) hlintCheck fourmoluCheck;
+              default = flake.packages."gibberish:exe:gibber";
+            };
           });
 
 

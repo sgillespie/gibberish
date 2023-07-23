@@ -1,12 +1,12 @@
-name:                elocrypt
-version:             2.1.0
+name:                gibberish
+version:             3.0.0
 synopsis:            Generate easy-to-remember, hard-to-guess passwords
-homepage:            https://www.github.com/sgillespie/elocrypt
-license:             OtherLicense
+homepage:            https://www.github.com/sgillespie/gibberish
+license:             MIT
 license-file:        LICENSE
 author:              Sean Gillespie
 maintainer:          sean@mistersg.net
-copyright:           Copyright: (c) 2017 Sean Gillespie
+copyright:           Copyright: (c) 2023 Sean Gillespie
 category:            Cryptography
 build-type:          Simple
 extra-source-files:  README.md,
@@ -16,17 +16,16 @@ extra-source-files:  README.md,
 cabal-version:       >=1.10
 
 description:
-  Generates pronounceable, hard-to-guess passwords--as hard as
-  Vince Carter's knee cartilage is.
+  Generates pronounceable passwords that are easy-to-remember and hard-to-guess.
 
 source-repository head
   type: git
-  location: https://github.com/sgillespie/elocrypt.git
+  location: https://github.com/sgillespie/gibberish.git
 
 source-repository this
   type: git
-  location: https://github.com/sgillespie/elocrypt.git
-  tag: v2.0.1
+  location: https://github.com/sgillespie/gibberish.git
+  tag: v3.0.0
                   
 library
   exposed-modules:     Data.Elocrypt,
@@ -41,9 +40,9 @@ library
   hs-source-dirs:      src/lib
   default-language:    Haskell2010
 
-executable elocrypt
+executable gibber
   build-depends:       base >= 4.7 && <5,
-                       elocrypt,
+                       gibberish,
                        random
   default-language:    Haskell2010
   hs-source-dirs:      src/cli
@@ -51,7 +50,7 @@ executable elocrypt
 
 test-suite test
   build-depends:       base >= 4.7 && <5,
-                       elocrypt,
+                       gibberish,
                        MonadRandom,
                        proctest,
                        QuickCheck,
@@ -69,12 +68,3 @@ test-suite test
                        Test.Elocrypt.UtilsTest,
                        Test.ElocryptTest
   type:                exitcode-stdio-1.0
-
-test-suite elocrypt-lint
-  type:                exitcode-stdio-1.0
-  hs-source-dirs:      test
-  main-is:             HLint.hs
-  build-depends:       base >= 4.7 && < 5,
-                       hlint
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  default-language:    Haskell2010
