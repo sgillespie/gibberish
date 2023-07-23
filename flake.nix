@@ -19,7 +19,7 @@
             (final: prev: {
               elocryptProject = final.haskell-nix.cabalProject' {
                 src = ./.;
-                compiler-nix-name = "ghc945";
+                compiler-nix-name = "ghc962";
                 name = "elocrypt";
 
                 shell = {
