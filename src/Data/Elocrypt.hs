@@ -8,7 +8,19 @@ Stability:   Experimental
 
 Generate easy-to-remember, hard-to-guess passwords
 -}
-module Data.Elocrypt where
+module Data.Elocrypt
+  ( GenOptions (..),
+    genOptions,
+    genPassword,
+    genPasswords,
+    newPassword,
+    newPasswords,
+    mkPassword,
+    mkPasswords,
+    genPassphrase,
+    newPassphrase,
+    mkPassphrase,
+  ) where
 
 import Data.Elocrypt.Trigraph
 import Data.Elocrypt.Utils
@@ -292,7 +304,7 @@ numerizeR len s = numerize s >>= numerize1 len
     numerize = updateR (uniform . toDigit) (1 % 6)
 
 numerize1 :: MonadRandom m => Int -> String -> m String
-numerize1 len s
+numerize1 _ s
   | null candidates = return s
   | otherwise = uniform candidates >>= numerize1' s
   where
@@ -307,7 +319,7 @@ specializeR len s = specialize s >>= specialize1 len
   where
     specialize = updateR (uniform . toSymbol) (1 % 6)
 
-specialize1 len s
+specialize1 _ s
   | null candidates = return s
   | otherwise = uniform candidates >>= specialize1' s
   where

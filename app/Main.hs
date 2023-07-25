@@ -1,8 +1,7 @@
-module Main where
+module Main (main) where
 
 import Control.Monad
-import Data.Char
-import Data.List
+import Data.List (intercalate)
 import Data.Maybe (fromMaybe)
 import System.Console.GetOpt
 import System.Environment
@@ -136,7 +135,7 @@ passwords opts@Options {optLength = len, optNumber = n} gen =
     width = max termLen (len + 2)
 
 passphrases :: RandomGen g => Options -> g -> String
-passphrases opts@Options {optCapitals = caps, optLength = minLen, optMaxLength = maxLen, optNumber = n} gen =
+passphrases opts@Options {optCapitals = _, optLength = minLen, optMaxLength = maxLen, optNumber = n} gen =
   format " " . take lines' . groupWith splitAt' width " " $ passphrase
   where
     passphrase = newPassphrase words' minLen maxLen (getGenOptions opts) gen

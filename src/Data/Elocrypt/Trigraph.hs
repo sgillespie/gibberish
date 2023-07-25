@@ -8,12 +8,16 @@ Stability:   Experimental
 
 Generate a letter frequency trigraph, based on a dictionary
 -}
-module Data.Elocrypt.Trigraph where
+module Data.Elocrypt.Trigraph
+  ( findWeights,
+    findFrequency,
+    frequencies,
+    defaultFrequencies,
+  ) where
 
-import Control.Monad
 import Data.Bool
 import Data.Char
-import Data.List
+import Data.List (find)
 
 -- | Search for the character frequencies and return a weighted list
 findWeights

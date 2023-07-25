@@ -1,4 +1,12 @@
-module Data.Elocrypt.Utils where
+module Data.Elocrypt.Utils
+  ( numeralConversions,
+    symbolConversions,
+    toDigit,
+    toSymbol,
+    isSymbol,
+    updateR,
+    update1,
+  ) where
 
 import Data.Char (isAlphaNum, isSpace)
 import qualified Data.Map as M
@@ -8,6 +16,7 @@ import Data.Ratio
 import Control.Monad.Random (MonadRandom (), fromList)
 
 -- | A mapping from letters to numbers that look like them
+numeralConversions :: M.Map Char [Char]
 numeralConversions =
   M.fromList
     [ ('o', ['0']),
@@ -22,6 +31,7 @@ numeralConversions =
     ]
 
 -- | A mapping from letters to symbols that look like them
+symbolConversions :: M.Map Char [Char]
 symbolConversions =
   M.fromList
     [ ('a', ['@']),
@@ -68,6 +78,7 @@ update1
   -- ^ the position to update
   -> m String
 update1 _ "" _ = return ""
-update1 f s pos = (\ch' -> prefix ++ ch' : suffix) <$> f ch
-  where
-    (prefix, ch : suffix) = splitAt pos s
+update1 f s pos =
+  case splitAt pos s of
+    (prefix, ch : suffix) -> (\ch' -> prefix ++ ch' : suffix) <$> f ch
+    _ -> pure s
