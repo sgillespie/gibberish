@@ -27,3 +27,6 @@ dist-newstyle
 ### Nix
 result
 .direnv
+
+### Tests
+data/tests/gen/*.out.json

@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedLists #-}
 
 module Data.Elocrypt.Types
@@ -27,7 +26,7 @@ newtype Frequency = Frequency {unFequency :: Int}
   deriving stock (Eq, Show)
   deriving newtype (Num, FromJSON, ToJSON)
 
-newtype Frequencies = Frequencies {unFrequencies :: (Map Unigram Frequency)}
+newtype Frequencies = Frequencies {unFrequencies :: Map Unigram Frequency}
   deriving stock (Eq, Show)
   deriving newtype (FromJSON, ToJSON)
 

@@ -4,7 +4,7 @@ module Test.Elocrypt.UtilsTest where
 
 import Control.Monad.Random
 import Data.List (elem, find, sort)
-import qualified Data.Map as M
+import Data.Map qualified as M
 import Data.Maybe (isNothing)
 import Data.Ratio ((%))
 
@@ -55,7 +55,7 @@ prop_isSymbolAlphaNumReturnsFalse c =
   c `elem` (['a' .. 'z'] ++ ['A' .. 'Z'] ++ ['0' .. '9']) ==> not (isSymbol c)
 
 prop_isSymbolWhitespaceReturnsFalse :: Bool
-prop_isSymbolWhitespaceReturnsFalse = not $ any isSymbol " \n"
+prop_isSymbolWhitespaceReturnsFalse = not $ any isSymbol (" \n" :: String)
 
 -- | updateR always updates when prob = 1/0
 prop_updateRAlwaysUpdates :: String -> StdGen -> Bool

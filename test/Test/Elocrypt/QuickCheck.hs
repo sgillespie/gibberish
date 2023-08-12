@@ -17,7 +17,7 @@ import Data.List
 import Data.Maybe
 import System.Random
 import Test.Proctest hiding (run)
-import qualified Test.Proctest as Proctest
+import Test.Proctest qualified as Proctest
 import Test.Proctest.Assertions
 import Test.QuickCheck
 

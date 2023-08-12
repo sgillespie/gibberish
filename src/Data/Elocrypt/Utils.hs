@@ -9,7 +9,7 @@ module Data.Elocrypt.Utils
   ) where
 
 import Data.Char (isAlphaNum, isSpace)
-import qualified Data.Map as M
+import Data.Map qualified as M
 import Data.Maybe (fromMaybe)
 import Data.Ratio
 

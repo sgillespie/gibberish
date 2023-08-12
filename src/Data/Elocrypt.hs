@@ -30,7 +30,7 @@ import Control.Monad.Random hiding (next)
 import Data.Bool
 import Data.Char
 import Data.List (findIndices)
-import qualified Data.Map as M
+import Data.Map qualified as M
 import Data.Maybe
 import Data.Ratio
 import Prelude hiding (max, min)
