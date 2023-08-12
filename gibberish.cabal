@@ -23,7 +23,11 @@ common common-options
   ghc-options:
     -Wall
     -Wcompat
+    -- Not yet
+    -- -Werror
     -Widentities
+    -Wderiving-defaults
+    -Wmissing-deriving-strategies
     -Wincomplete-uni-patterns
     -Wredundant-constraints
     -Wnoncanonical-monad-instances
@@ -31,8 +35,14 @@ common common-options
     -Wmissing-export-lists
     -Wpartial-fields
   default-extensions:
+    DeriveAnyClass,
     DerivingStrategies,
+    LambdaCase,
+    OverloadedStrings,
     RecordWildCards
+  other-extensions:
+    OverloadedLists,
+    TemplateHaskell
   default-language: GHC2021
 
 library
@@ -40,12 +50,16 @@ library
   exposed-modules:
     Data.Elocrypt,
     Data.Elocrypt.Trigraph,
+    Data.Elocrypt.Types,
     Data.Elocrypt.Utils
   build-depends:
     base >=4.14 && <5,
     MonadRandom,
+    aeson,
     containers,
-    random
+    random,
+    text,
+    text-show
   hs-source-dirs:  src
 
 executable gibber
@@ -62,12 +76,15 @@ test-suite test
   build-depends:
     base >= 4.14 && <5,
     gibberish,
+    aeson,
     MonadRandom,
     proctest,
     QuickCheck,
     containers,
+    hedgehog,
     random,
     tasty,
+    tasty-hedgehog,
     tasty-quickcheck,
     tasty-th >= 0.1.7
   hs-source-dirs: test
@@ -76,6 +93,10 @@ test-suite test
     Test.Elocrypt.Instances,
     Test.Elocrypt.QuickCheck,
     Test.Elocrypt.TrigraphTest,
+    Test.Elocrypt.TypesTest,
     Test.Elocrypt.UtilsTest,
     Test.ElocryptTest
-  type:           exitcode-stdio-1.0
+  default-extensions:
+    TemplateHaskell
+  type:
+    exitcode-stdio-1.0

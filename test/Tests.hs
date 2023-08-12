@@ -1,11 +1,11 @@
 module Main where
 
-import Test.Tasty
-import qualified Test.Tasty.QuickCheck as QC
+import Test.Elocrypt.TrigraphTest qualified as TrigraphTest
+import Test.Elocrypt.TypesTest qualified as TypesTest
+import Test.Elocrypt.UtilsTest qualified as UtilsTest
+import Test.ElocryptTest qualified as PasswordTest
 
-import qualified Test.Elocrypt.TrigraphTest as TrigraphTest
-import qualified Test.Elocrypt.UtilsTest as UtilsTest
-import qualified Test.ElocryptTest as PasswordTest
+import Test.Tasty
 
 main :: IO ()
 main = defaultMain tests
@@ -16,5 +16,6 @@ tests =
     "Unit Tests"
     [ PasswordTest.tests,
       TrigraphTest.tests,
-      UtilsTest.tests
+      UtilsTest.tests,
+      TypesTest.tests
     ]
