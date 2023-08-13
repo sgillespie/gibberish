@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedLists #-}
 
-module Data.Elocrypt.Types
+module Data.Gibberish.Types
   ( Unigram (..),
     Digram (..),
     Frequency (..),

@@ -50,8 +50,8 @@ library
   exposed-modules:
     Data.Elocrypt,
     Data.Elocrypt.Trigraph,
-    Data.Elocrypt.Types,
-    Data.Elocrypt.Utils
+    Data.Elocrypt.Utils,
+    Data.Gibberish.Types
   build-depends:
     base >=4.14 && <5,
     MonadRandom,
@@ -104,9 +104,9 @@ test-suite test
     Test.Elocrypt.Instances,
     Test.Elocrypt.QuickCheck,
     Test.Elocrypt.TrigraphTest,
-    Test.Elocrypt.TypesTest,
     Test.Elocrypt.UtilsTest,
-    Test.ElocryptTest
+    Test.ElocryptTest,
+    Test.Gibberish.TypesTest
   default-extensions:
     TemplateHaskell
   type:

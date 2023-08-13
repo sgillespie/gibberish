@@ -1,9 +1,9 @@
-module Main where
+module Main (main) where
 
 import Test.Elocrypt.TrigraphTest qualified as TrigraphTest
-import Test.Elocrypt.TypesTest qualified as TypesTest
 import Test.Elocrypt.UtilsTest qualified as UtilsTest
 import Test.ElocryptTest qualified as PasswordTest
+import Test.Gibberish.TypesTest qualified as TypesTest
 
 import Test.Tasty
 

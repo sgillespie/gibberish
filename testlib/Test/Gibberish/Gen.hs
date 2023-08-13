@@ -6,7 +6,7 @@ module Test.Gibberish.Gen
     frequency,
   ) where
 
-import Data.Elocrypt.Types
+import Data.Gibberish.Types
 
 import Hedgehog
 import Hedgehog.Gen qualified as Gen
