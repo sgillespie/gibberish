@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedLists #-}
-module Data.Gibberish.GenTrigrams
-  (mapTrigrams) where
+
+module Data.Gibberish.GenTrigrams (mapTrigrams) where
 
 import Data.Gibberish.Types
 import Data.Map (Map ())
