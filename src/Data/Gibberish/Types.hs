@@ -24,7 +24,7 @@ data Digram = Digram Char Char
 
 newtype Frequency = Frequency {unFequency :: Int}
   deriving stock (Eq, Show)
-  deriving newtype (Num, FromJSON, ToJSON)
+  deriving newtype (FromJSON, ToJSON, Enum, Integral, Num, Ord, Real)
 
 newtype Frequencies = Frequencies {unFrequencies :: Map Unigram Frequency}
   deriving stock (Eq, Show)

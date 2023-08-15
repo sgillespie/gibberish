@@ -4,10 +4,12 @@ module Test.Gibberish.Gen
     unigram,
     frequencies,
     frequency,
+    word,
   ) where
 
 import Data.Gibberish.Types
 
+import Data.Text (Text ())
 import Hedgehog
 import Hedgehog.Gen qualified as Gen
 import Hedgehog.Range qualified as Range
@@ -33,3 +35,6 @@ frequencies =
 
 frequency :: Gen Frequency
 frequency = Frequency <$> Gen.int (Range.linear 0 maxBound)
+
+word :: Gen Text
+word = Gen.text (Range.linear 3 30) $ Gen.enum 'a' 'e'

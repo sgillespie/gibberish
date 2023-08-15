@@ -20,6 +20,11 @@ extra-source-files:
   test/Test/Elocrypt/*.hs
 
 common common-options
+  build-depends:
+    base >=4.14 && <5,
+    containers,
+    text,
+    text-show
   ghc-options:
     -Wall
     -Wcompat
@@ -51,15 +56,12 @@ library
     Data.Elocrypt,
     Data.Elocrypt.Trigraph,
     Data.Elocrypt.Utils,
+    Data.Gibberish.GenTrigrams,
     Data.Gibberish.Types
   build-depends:
-    base >=4.14 && <5,
     MonadRandom,
     aeson,
-    containers,
-    random,
-    text,
-    text-show
+    random
   hs-source-dirs:  src
 
 executable gibber
@@ -91,7 +93,6 @@ test-suite test
     MonadRandom,
     proctest,
     QuickCheck,
-    containers,
     hedgehog,
     random,
     tasty,
@@ -106,6 +107,7 @@ test-suite test
     Test.Elocrypt.TrigraphTest,
     Test.Elocrypt.UtilsTest,
     Test.ElocryptTest,
+    Test.Gibberish.GenTrigramsTest,
     Test.Gibberish.TypesTest
   default-extensions:
     TemplateHaskell
