@@ -30,3 +30,4 @@ result
 
 ### Tests
 data/tests/gen/*.out.json
+output.json

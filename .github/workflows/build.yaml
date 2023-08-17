@@ -29,3 +29,5 @@ jobs:
       run: nix build .#gibberish:test:test
     - name: Run static checks
       run: nix build .#fourmoluCheck .#hlintCheck
+    - name: Run benchmarks
+      run: nix build .#gibberish:bench:main

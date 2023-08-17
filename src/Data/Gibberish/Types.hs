@@ -8,31 +8,34 @@ module Data.Gibberish.Types
     Trigram (..),
   ) where
 
+import Control.DeepSeq (NFData)
 import Data.Aeson (FromJSON (..), FromJSONKey (..), ToJSON (..), ToJSONKey (..))
 import Data.Aeson qualified as Aeson
 import Data.Aeson.Types (FromJSONKeyFunction (..), Parser (), toJSONKeyText)
 import Data.Map (Map ())
 import Data.Text (Text ())
+import GHC.Generics (Generic ())
 import TextShow (TextShow (..), fromString)
 
 newtype Unigram = Unigram {unUnigram :: Char}
   deriving stock (Eq, Ord, Show)
-  deriving newtype (FromJSON, FromJSONKey, ToJSON, ToJSONKey)
+  deriving newtype (FromJSON, FromJSONKey, NFData, ToJSON, ToJSONKey)
 
 data Digram = Digram Char Char
-  deriving stock (Eq, Show)
+  deriving stock (Eq, Generic, Show)
+  deriving anyclass (NFData)
 
 newtype Frequency = Frequency {unFequency :: Int}
   deriving stock (Eq, Show)
-  deriving newtype (FromJSON, ToJSON, Enum, Integral, Num, Ord, Real)
+  deriving newtype (FromJSON, ToJSON, NFData, Enum, Integral, Num, Ord, Real)
 
 newtype Frequencies = Frequencies {unFrequencies :: Map Unigram Frequency}
   deriving stock (Eq, Show)
-  deriving newtype (FromJSON, ToJSON)
+  deriving newtype (FromJSON, ToJSON, NFData)
 
 newtype Trigram = Trigram {unTrigram :: Map Digram Frequencies}
   deriving stock (Eq, Show)
-  deriving newtype (FromJSON, ToJSON)
+  deriving newtype (FromJSON, ToJSON, NFData)
 
 instance TextShow Digram where
   showb (Digram c1 c2) = fromString [c1, c2]

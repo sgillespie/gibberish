@@ -19,6 +19,9 @@ extra-source-files:
   test/Test/*.hs,
   test/Test/Elocrypt/*.hs
 
+data-files:
+  dicts/*.txt
+
 common common-options
   build-depends:
     base >=4.14 && <5,
@@ -61,6 +64,7 @@ library
   build-depends:
     MonadRandom,
     aeson,
+    deepseq,
     random
   hs-source-dirs:  src
 
@@ -113,3 +117,17 @@ test-suite test
     TemplateHaskell
   type:
     exitcode-stdio-1.0
+
+benchmark main
+  import:         common-options
+  build-depends:
+    gibberish,
+    aeson,
+    criterion,
+    deepseq,
+    filepath
+  type:           exitcode-stdio-1.0
+  main-is:        Main.hs
+  hs-source-dirs: bench
+  other-modules:
+    Paths_gibberish
