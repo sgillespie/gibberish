@@ -17,8 +17,8 @@ mapTrigrams (x : xs) = Map.unionWith combine (mkTrigrams x) (mapTrigrams xs)
 mkTrigrams :: Text -> Map Digram Frequencies
 mkTrigrams word = foldr insert' Map.empty $ scanTrigrams word
   where
-    insert' (a, b, c) map' =
-      Map.insertWith combineFrequencies (Digram a b) (mkFrequencies c) map'
+    insert' (a, b, c) =
+      Map.insertWith combineFrequencies (Digram a b) (mkFrequencies c)
     combineFrequencies (Frequencies m1) (Frequencies m2) = Frequencies (Map.unionWith (+) m1 m2)
     mkFrequencies c = Frequencies $ Map.singleton (Unigram c) 1
 

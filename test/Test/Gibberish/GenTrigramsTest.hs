@@ -60,7 +60,7 @@ prop_trigrams_all = property $ do
       trigrams' = map (List.sort . trigrams) words'
 
   cover 10 "with duplicates" $ List.any hasDuplicates trigrams'
-  cover 10 "no duplicates" $ List.any (not . hasDuplicates) trigrams'
+  cover 10 "no duplicates" $ not (List.all hasDuplicates trigrams')
 
   concatNub trigrams' === List.sort (allTrigrams wordTrigrams)
   where
