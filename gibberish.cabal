@@ -20,7 +20,7 @@ extra-source-files:
   test/Test/Elocrypt/*.hs
 
 data-files:
-  dicts/*.txt
+  data/dicts/*.txt
 
 common common-options
   build-depends:
