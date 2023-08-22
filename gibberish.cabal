@@ -73,9 +73,26 @@ executable gibber
   build-depends:
     base >= 4.14 && <5,
     gibberish,
+    aeson,
+    aeson-pretty,
+    bytestring,
+    optparse-applicative,
     random
   hs-source-dirs: app
   main-is:        Main.hs
+
+executable gibber-gen-trigram
+  import:         common-options
+  build-depends:
+    base >= 4.14 && <5,
+    gibberish,
+    aeson,
+    aeson-pretty,
+    bytestring,
+    optparse-applicative,
+    random
+  hs-source-dirs: app
+  main-is:        gen-trigraph.hs
 
 library testlib
   import:         common-options
@@ -94,18 +111,23 @@ test-suite test
     base >= 4.14 && <5,
     gibberish:{gibberish,testlib},
     aeson,
+    aeson-pretty,
+    bytestring,
+    filepath,
     MonadRandom,
     proctest,
     QuickCheck,
     hedgehog,
     random,
     tasty,
+    tasty-golden,
     tasty-hedgehog,
     tasty-quickcheck,
     tasty-th >= 0.1.7
   hs-source-dirs: test
   main-is:        Tests.hs
   other-modules:
+    Paths_gibberish,
     Test.Elocrypt.Instances,
     Test.Elocrypt.QuickCheck,
     Test.Elocrypt.TrigraphTest,
@@ -113,6 +135,34 @@ test-suite test
     Test.ElocryptTest,
     Test.Gibberish.GenTrigramsTest,
     Test.Gibberish.TypesTest
+  default-extensions:
+    TemplateHaskell
+  type:
+    exitcode-stdio-1.0
+
+test-suite golden
+  import:         common-options
+  build-depends:
+    base >= 4.14 && <5,
+    gibberish:{gibberish,testlib},
+    aeson,
+    aeson-pretty,
+    bytestring,
+    filepath,
+    MonadRandom,
+    proctest,
+    QuickCheck,
+    hedgehog,
+    random,
+    tasty,
+    tasty-golden,
+    tasty-hedgehog,
+    tasty-quickcheck,
+    tasty-th >= 0.1.7
+  hs-source-dirs: test
+  main-is:        Golden.hs
+  other-modules:
+    Paths_gibberish,
   default-extensions:
     TemplateHaskell
   type:
