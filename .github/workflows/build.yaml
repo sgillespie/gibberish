@@ -27,9 +27,8 @@ jobs:
       run: nix build .
     - name: Run tests
       run: |
-        nix build .#gibberish:test:test
-        nix build .#gibberish:test:golden
+        nix build .#gibberish:test:test .#gibberish:test:golden
     - name: Run static checks
-      run: nix build .#fourmoluCheck .#hlintCheck
+      run: nix build .#checks.x86_64-linux.fourmoluCheck .#checks.x86_64-linux.hlintCheck
     - name: Run benchmarks
       run: nix build .#gibberish:bench:main
