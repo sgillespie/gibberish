@@ -11,9 +11,19 @@
       supportedSystems = [
         "x86_64-linux"
       ];
+
     in
       flakeUtils.lib.eachSystem supportedSystems (system:
         let
+          mkPkg = name: value:
+            with pkgs.lib; {
+              name = builtins.replaceStrings
+                [ "x86_64-w64-" "x86_64-unknown-linux-" ]
+                [ "" "" ]
+                name;
+              value = value;
+            };
+
           overlays = [
             haskellNix.overlay
             (final: prev: {
@@ -22,10 +32,18 @@
                 compiler-nix-name = "ghc962";
                 name = "gibberish";
 
+                flake.variants.profiled = {
+                  modules = [{
+                    enableLibraryProfiling = true;
+                    enableProfiling = true;
+                  }];
+                };
+
                 shell = {
                   tools = {
                     cabal = "latest";
                     haskell-language-server = "latest";
+                    hp2pretty = "latest";
                   };
 
                   nativeBuildInputs = with final; [fourmolu hlint];
@@ -85,24 +103,22 @@
                   [p.musl64]));
           };
         in
-          pkgs.lib.recursiveUpdate flake {
+          with pkgs.lib;
+          flake // {
+            apps = {
+              default = flake.apps."gibberish:exe:gibber";
+            } // mapAttrs' mkPkg flake.apps;
+
             checks = {
               inherit (pkgs) hlintCheck fourmoluCheck;
-            };
+            } //
+            filterAttrs (name: _: !hasPrefix "profiled" name)
+              (mapAttrs' mkPkg flake.checks);
 
-            packages =
-              let
-                inherit (pkgs.stdenv.hostPlatform) isx86_64 isLinux;
-              in {
-                inherit (pkgs) hlintCheck fourmoluCheck;
-                default = flake.packages."gibberish:exe:gibber";
-              } // pkgs.lib.optionals isx86_64 {
-                "cross/mingw64" = flake.packages."x86_64-w64-mingw32:gibberish:exe:gibber";
-              } // pkgs.lib.optionals (isx86_64 && isLinux) {
-                "cross/musl64" = flake.packages."x86_64-unknown-linux-musl:gibberish:exe:gibber";
-              };
+            packages = {
+              default = flake.packages."gibberish:exe:gibber";
+            } // mapAttrs' mkPkg flake.packages;
           });
-
 
   nixConfig = {
     trusted-public-keys = [
