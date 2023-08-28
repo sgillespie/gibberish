@@ -3,8 +3,8 @@
 module Data.Gibberish.GenTrigrams (mapTrigrams) where
 
 import Data.Gibberish.Types
-import Data.Map (Map ())
-import Data.Map qualified as Map
+import Data.Map.Strict (Map ())
+import Data.Map.Strict qualified as Map
 import Data.Text (Text ())
 import Data.Text qualified as Text
 
