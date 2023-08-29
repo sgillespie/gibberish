@@ -1,7 +1,7 @@
 module Main (main) where
 
-import Data.Gibberish.GenTrigrams (mapTrigrams)
-import Data.Gibberish.Types (Digram (), Frequencies ())
+import Data.Gibberish.GenTrigraph (genTrigraph)
+import Data.Gibberish.Types (Trigraph (..))
 import Paths_gibberish (getDataDir)
 
 import Criterion.Main
@@ -19,13 +19,13 @@ dictionary = map Text.toLower . filter (Text.all isAlpha) . Text.lines <$> conte
     contents = Text.readFile =<< dataDir
     dataDir = (</> "data" </> "dicts" </> "wamerican.txt") <$> getDataDir
 
-trigrams :: IO (Map Digram Frequencies)
-trigrams = mapTrigrams <$> dictionary
+trigraph :: IO Trigraph
+trigraph = genTrigraph <$> dictionary
 
 main :: IO ()
 main =
   defaultMain
     [ bench "load dictionary file" $ nfIO dictionary,
-      env dictionary $ bench "generate trigrams" . nf mapTrigrams,
-      env trigrams $ bench "serialize to JSON" . nf encode
+      env dictionary $ bench "generate trigraph" . nf genTrigraph,
+      env trigraph $ bench "serialize to JSON" . nf encode
     ]
