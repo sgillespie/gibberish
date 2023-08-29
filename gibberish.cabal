@@ -59,7 +59,7 @@ library
     Data.Elocrypt,
     Data.Elocrypt.Trigraph,
     Data.Elocrypt.Utils,
-    Data.Gibberish.GenTrigrams,
+    Data.Gibberish.GenTrigraph,
     Data.Gibberish.Types
   build-depends:
     MonadRandom,
@@ -81,7 +81,7 @@ executable gibber
   hs-source-dirs: app
   main-is:        Main.hs
 
-executable gibber-gen-trigram
+executable gibber-gen-trigraph
   import:         common-options
   build-depends:
     base >= 4.14 && <5,
@@ -133,7 +133,7 @@ test-suite test
     Test.Elocrypt.TrigraphTest,
     Test.Elocrypt.UtilsTest,
     Test.ElocryptTest,
-    Test.Gibberish.GenTrigramsTest,
+    Test.Gibberish.GenTrigraphTest,
     Test.Gibberish.TypesTest
   default-extensions:
     TemplateHaskell

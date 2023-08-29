@@ -1,6 +1,6 @@
 module Main (main) where
 
-import Data.Gibberish.GenTrigrams (mapTrigrams)
+import Data.Gibberish.GenTrigraph (genTrigraph)
 
 import Data.Aeson.Encode.Pretty (encodePretty)
 import Data.ByteString.Lazy (ByteString ())
@@ -28,7 +28,7 @@ main = execParser opts >>= run
 run :: Options -> IO ()
 run Options {..} = writeOutput' . genTrigrams =<< readInputFile
   where
-    genTrigrams = encodePretty . mapTrigrams . Text.lines
+    genTrigrams = encodePretty . genTrigraph . Text.lines
     writeOutput' = writeOutput optOutput
     readInputFile = Text.readFile optInputFile
 

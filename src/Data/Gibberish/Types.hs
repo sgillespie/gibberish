@@ -3,9 +3,10 @@
 module Data.Gibberish.Types
   ( Unigram (..),
     Digram (..),
+    Trigram (..),
     Frequency (..),
     Frequencies (..),
-    Trigram (..),
+    Trigraph (..),
   ) where
 
 import Control.DeepSeq (NFData)
@@ -17,23 +18,35 @@ import Data.Text (Text ())
 import GHC.Generics (Generic ())
 import TextShow (TextShow (..), fromString)
 
+-- | A unigram is a single letter
 newtype Unigram = Unigram {unUnigram :: Char}
   deriving stock (Eq, Ord, Show)
   deriving newtype (FromJSON, FromJSONKey, NFData, ToJSON, ToJSONKey)
 
+-- | A digram is a sequence of two letters
 data Digram = Digram Char Char
   deriving stock (Eq, Generic, Show)
   deriving anyclass (NFData)
 
+-- | A trigrams is a sequence of three letters
+data Trigram = Trigram Char Char Char
+  deriving stock (Eq, Generic, Show)
+  deriving anyclass (NFData)
+
+-- | A frequency represents the number of times a given trigram occurs
+--   in a language
 newtype Frequency = Frequency {unFequency :: Int}
   deriving stock (Eq, Show)
   deriving newtype (FromJSON, ToJSON, NFData, Enum, Integral, Num, Ord, Real)
 
+-- | Frequencies maps a unigram to a frequency
 newtype Frequencies = Frequencies {unFrequencies :: Map Unigram Frequency}
   deriving stock (Eq, Show)
   deriving newtype (FromJSON, ToJSON, NFData)
 
-newtype Trigram = Trigram {unTrigram :: Map Digram Frequencies}
+-- | A trigraph is a mapping of all digrams to frequencies. That is, for a set of
+--   digrams, it contains the frequencies of all possible trigram candidates.
+newtype Trigraph = Trigraph {unTrigraph :: Map Digram Frequencies}
   deriving stock (Eq, Show)
   deriving newtype (FromJSON, ToJSON, NFData)
 
@@ -57,9 +70,11 @@ instance FromJSONKey Digram where
 
 instance Ord Digram where
   (Digram a1 b1) `compare` (Digram a2 b2) =
-    case a1 `compare` a2 of
-      EQ -> b1 `compare` b2
-      c -> c
+    (a1, b1) `compare` (a2, b2)
+
+instance Ord Trigram where
+  (Trigram a1 b1 c1) `compare` (Trigram a2 b2 c2) =
+    (a1, b1, c1) `compare` (a2, b2, c2)
 
 parseDigram :: Text -> Parser Digram
 parseDigram = (uncurry Digram <$>) . fromText

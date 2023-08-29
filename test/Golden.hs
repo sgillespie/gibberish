@@ -1,6 +1,6 @@
 module Main (main) where
 
-import Data.Gibberish.GenTrigrams (mapTrigrams)
+import Data.Gibberish.GenTrigraph (genTrigraph)
 
 import Data.Aeson.Encode.Pretty (encodePretty)
 import Data.ByteString.Lazy (ByteString ())
@@ -15,8 +15,8 @@ import Prelude hiding (writeFile)
 dictsDir :: IO FilePath
 dictsDir = (</> "data" </> "dicts") <$> getDataDir
 
-trigramsDir :: IO FilePath
-trigramsDir = (</> "data" </> "trigrams") <$> getDataDir
+trigraphsDir :: IO FilePath
+trigraphsDir = (</> "data" </> "trigraphs") <$> getDataDir
 
 main :: IO ()
 main = defaultMain =<< tests
@@ -28,10 +28,10 @@ tests = testGroup "Golden Tests" <$> tests'
 
 createTest :: FilePath -> IO TestTree
 createTest dict = do
-  goldenFile <- (</> replaceExtension (takeBaseName dict) "json") <$> trigramsDir
+  goldenFile <- (</> replaceExtension (takeBaseName dict) "json") <$> trigraphsDir
   pure $ goldenVsString (takeBaseName dict) goldenFile (runTest dict)
 
 runTest :: FilePath -> IO ByteString
 runTest f = genTrigrams <$> Text.readFile f
   where
-    genTrigrams = encodePretty . mapTrigrams . Text.lines
+    genTrigrams = encodePretty . genTrigraph . Text.lines

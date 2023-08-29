@@ -14,9 +14,9 @@ import Hedgehog
 import Hedgehog.Gen qualified as Gen
 import Hedgehog.Range qualified as Range
 
-trigram :: Gen Trigram
+trigram :: Gen Trigraph
 trigram = do
-  Trigram <$> Gen.map (Range.linear 0 250) kv
+  Trigraph <$> Gen.map (Range.linear 0 250) kv
   where
     kv = (,) <$> digram <*> frequencies
 

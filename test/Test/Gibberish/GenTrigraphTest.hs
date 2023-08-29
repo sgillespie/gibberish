@@ -1,8 +1,8 @@
 {-# LANGUAGE OverloadedLists #-}
 
-module Test.Gibberish.GenTrigramsTest (tests) where
+module Test.Gibberish.GenTrigraphTest (tests) where
 
-import Data.Gibberish.GenTrigrams
+import Data.Gibberish.GenTrigraph
 import Data.Gibberish.Types
 import Test.Gibberish.Gen qualified as Gen
 
@@ -35,7 +35,7 @@ prop_len_trigrams = property $ do
   cover 10 "no duplicates" $ not (hasDuplicates trigrams')
 
   assert $
-    length (mapTrigrams [word]) <= max 0 (Text.length word - 2)
+    length (unTrigraph $ genTrigraph [word]) <= max 0 (Text.length word - 2)
 
 prop_len_frequencies :: Property
 prop_len_frequencies = property $ do
@@ -49,14 +49,15 @@ prop_len_frequencies = property $ do
         sum
           . concatMap (Map.elems . unFrequencies)
           . Map.elems
-          . mapTrigrams
+          . unTrigraph
+          . genTrigraph
           $ [word]
   length wordTrigrams' === fromIntegral totalTrigrams
 
 prop_trigrams_all :: Property
 prop_trigrams_all = property $ do
   words' <- forAll $ Gen.list (Range.linear 0 10) Gen.word
-  let wordTrigrams = mapTrigrams words'
+  let wordTrigrams = unTrigraph $ genTrigraph words'
       trigrams' = map (List.sort . trigrams) words'
 
   cover 10 "with duplicates" $ List.any hasDuplicates trigrams'
@@ -67,16 +68,16 @@ prop_trigrams_all = property $ do
     concatNub :: Ord a => [[a]] -> [a]
     concatNub = List.nub . List.sort . List.concat
 
-trigrams :: Text -> [(Char, Char, Char)]
+trigrams :: Text -> [Trigram]
 trigrams ts = case Text.take 3 ts of
-  [a, b, c] -> (a, b, c) : trigrams (Text.tail ts)
+  [a, b, c] -> Trigram a b c : trigrams (Text.tail ts)
   _ -> []
 
-allTrigrams :: Map Digram Frequencies -> [(Char, Char, Char)]
+allTrigrams :: Map Digram Frequencies -> [Trigram]
 allTrigrams tris = concatMap (uncurry mapFrequencies) $ Map.toList tris
   where
     mapFrequencies (Digram c1 c2) (Frequencies freqs) =
-      map (\(Unigram c3) -> (c1, c2, c3)) $ Map.keys freqs
+      map (\(Unigram c3) -> Trigram c1 c2 c3) $ Map.keys freqs
 
 hasDuplicates :: Ord a => [a] -> Bool
 hasDuplicates ls = ls /= List.nub ls
