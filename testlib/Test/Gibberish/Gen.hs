@@ -1,5 +1,5 @@
 module Test.Gibberish.Gen
-  ( trigram,
+  ( trigraph,
     digram,
     unigram,
     frequencies,
@@ -14,8 +14,8 @@ import Hedgehog
 import Hedgehog.Gen qualified as Gen
 import Hedgehog.Range qualified as Range
 
-trigram :: Gen Trigraph
-trigram = do
+trigraph :: Gen Trigraph
+trigraph = do
   Trigraph <$> Gen.map (Range.linear 0 250) kv
   where
     kv = (,) <$> digram <*> frequencies

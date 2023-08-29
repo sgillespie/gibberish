@@ -7,7 +7,6 @@ import Data.Gibberish.Types
 import Test.Gibberish.Gen qualified as Gen
 
 import Data.List qualified as List
-import Data.Map (Map ())
 import Data.Map qualified as Map
 import Data.Text (Text ())
 import Data.Text qualified as Text
@@ -20,14 +19,14 @@ import Test.Tasty.Hedgehog (testPropertyNamed)
 tests :: TestTree
 tests =
   testGroup
-    "Test.Gibberish.GenTrigrams"
-    [ testPropertyNamed "length trigrams" "prop_len_trigrams" prop_len_trigrams,
+    "Test.Gibberish.GenTrigraph"
+    [ testPropertyNamed "length trigraph" "prop_len_trigraph" prop_len_trigraph,
       testPropertyNamed "length frequencies" "prop_len_frequencies" prop_len_frequencies,
       testPropertyNamed "contains all trigrams" "prop_trigrams_all" prop_trigrams_all
     ]
 
-prop_len_trigrams :: Property
-prop_len_trigrams = property $ do
+prop_len_trigraph :: Property
+prop_len_trigraph = property $ do
   word <- forAll Gen.word
   let trigrams' = List.sort $ trigrams word
 
@@ -40,10 +39,10 @@ prop_len_trigrams = property $ do
 prop_len_frequencies :: Property
 prop_len_frequencies = property $ do
   word <- forAll Gen.word
-  let wordTrigrams' = List.sort $ trigrams word
+  let trigrams' = List.sort $ trigrams word
 
-  cover 10 "with duplicates" $ hasDuplicates wordTrigrams'
-  cover 10 "no duplicates" $ not (hasDuplicates wordTrigrams')
+  cover 10 "with duplicates" $ hasDuplicates trigrams'
+  cover 10 "no duplicates" $ not (hasDuplicates trigrams')
 
   let totalTrigrams =
         sum
@@ -52,18 +51,18 @@ prop_len_frequencies = property $ do
           . unTrigraph
           . genTrigraph
           $ [word]
-  length wordTrigrams' === fromIntegral totalTrigrams
+  length trigrams' === fromIntegral totalTrigrams
 
 prop_trigrams_all :: Property
 prop_trigrams_all = property $ do
   words' <- forAll $ Gen.list (Range.linear 0 10) Gen.word
-  let wordTrigrams = unTrigraph $ genTrigraph words'
+  let trigraphs = genTrigraph words'
       trigrams' = map (List.sort . trigrams) words'
 
   cover 10 "with duplicates" $ List.any hasDuplicates trigrams'
   cover 10 "no duplicates" $ not (List.all hasDuplicates trigrams')
 
-  concatNub trigrams' === List.sort (allTrigrams wordTrigrams)
+  concatNub trigrams' === List.sort (allTrigrams trigraphs)
   where
     concatNub :: Ord a => [[a]] -> [a]
     concatNub = List.nub . List.sort . List.concat
@@ -73,8 +72,9 @@ trigrams ts = case Text.take 3 ts of
   [a, b, c] -> Trigram a b c : trigrams (Text.tail ts)
   _ -> []
 
-allTrigrams :: Map Digram Frequencies -> [Trigram]
-allTrigrams tris = concatMap (uncurry mapFrequencies) $ Map.toList tris
+allTrigrams :: Trigraph -> [Trigram]
+allTrigrams (Trigraph tris) =
+  concatMap (uncurry mapFrequencies) (Map.toList tris)
   where
     mapFrequencies (Digram c1 c2) (Frequencies freqs) =
       map (\(Unigram c3) -> Trigram c1 c2 c3) $ Map.keys freqs

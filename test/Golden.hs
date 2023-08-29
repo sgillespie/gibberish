@@ -32,6 +32,6 @@ createTest dict = do
   pure $ goldenVsString (takeBaseName dict) goldenFile (runTest dict)
 
 runTest :: FilePath -> IO ByteString
-runTest f = genTrigrams <$> Text.readFile f
+runTest f = genTrigraph' <$> Text.readFile f
   where
-    genTrigrams = encodePretty . genTrigraph . Text.lines
+    genTrigraph' = encodePretty . genTrigraph . Text.lines

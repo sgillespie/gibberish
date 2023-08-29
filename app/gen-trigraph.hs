@@ -26,9 +26,9 @@ main = execParser opts >>= run
     mods = fullDesc <> progDesc "Generates a JSON trigraph from a dictionary"
 
 run :: Options -> IO ()
-run Options {..} = writeOutput' . genTrigrams =<< readInputFile
+run Options {..} = writeOutput' . genTrigraph' =<< readInputFile
   where
-    genTrigrams = encodePretty . genTrigraph . Text.lines
+    genTrigraph' = encodePretty . genTrigraph . Text.lines
     writeOutput' = writeOutput optOutput
     readInputFile = Text.readFile optInputFile
 

@@ -15,5 +15,5 @@ tests =
 
 prop_toJSON_roundtrip :: Property
 prop_toJSON_roundtrip = property $ do
-  unigram <- forAll Gen.trigram
-  tripping unigram toJSON fromJSON
+  trigraph <- forAll Gen.trigraph
+  tripping trigraph toJSON fromJSON
