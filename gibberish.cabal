@@ -21,6 +21,7 @@ extra-source-files:
 
 data-files:
   data/dicts/*.txt
+  data/trigraphs/*.json
 
 common common-options
   build-depends:
