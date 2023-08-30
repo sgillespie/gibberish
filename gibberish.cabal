@@ -53,6 +53,30 @@ common common-options
     TemplateHaskell
   default-language: GHC2021
 
+common common-test
+  import:         common-options
+  build-depends:
+    base,
+    gibberish:{gibberish,testlib},
+    MonadRandom,
+    QuickCheck,
+    aeson,
+    aeson-pretty,
+    bytestring,
+    filepath,
+    hedgehog,
+    hedgehog,
+    hspec,
+    hspec-hedgehog,
+    proctest,
+    random,
+    tasty,
+    tasty-golden,
+    tasty-hedgehog,
+    tasty-quickcheck,
+    tasty-th >= 0.1.7,
+  hs-source-dirs: test
+
 library
   import:          common-options
   exposed-modules:
@@ -106,25 +130,7 @@ library testlib
     testlib
 
 test-suite test
-  import:         common-options
-  build-depends:
-    base >= 4.14 && <5,
-    gibberish:{gibberish,testlib},
-    aeson,
-    aeson-pretty,
-    bytestring,
-    filepath,
-    MonadRandom,
-    proctest,
-    QuickCheck,
-    hedgehog,
-    random,
-    tasty,
-    tasty-golden,
-    tasty-hedgehog,
-    tasty-quickcheck,
-    tasty-th >= 0.1.7
-  hs-source-dirs: test
+  import:         common-test
   main-is:        Tests.hs
   other-modules:
     Paths_gibberish,
@@ -133,38 +139,28 @@ test-suite test
     Test.Elocrypt.TrigraphTest,
     Test.Elocrypt.UtilsTest,
     Test.ElocryptTest,
-    Test.Gibberish.GenTrigraphTest,
-    Test.Gibberish.TypesTest
   default-extensions:
     TemplateHaskell
   type:
     exitcode-stdio-1.0
 
+test-suite spec
+  import:         common-test
+  main-is:        Spec.hs
+  type:           exitcode-stdio-1.0
+  build-tool-depends:
+    hspec-discover:hspec-discover
+  other-modules:
+    Data.Gibberish.GenTrigraphSpec
+    Data.Gibberish.TypesSpec
+  other-extensions:
+    OverloadedLists
+
 test-suite golden
-  import:         common-options
-  build-depends:
-    base >= 4.14 && <5,
-    gibberish:{gibberish,testlib},
-    aeson,
-    aeson-pretty,
-    bytestring,
-    filepath,
-    MonadRandom,
-    proctest,
-    QuickCheck,
-    hedgehog,
-    random,
-    tasty,
-    tasty-golden,
-    tasty-hedgehog,
-    tasty-quickcheck,
-    tasty-th >= 0.1.7
-  hs-source-dirs: test
+  import:         common-test
   main-is:        Golden.hs
   other-modules:
     Paths_gibberish,
-  default-extensions:
-    TemplateHaskell
   type:
     exitcode-stdio-1.0
 
@@ -176,6 +172,7 @@ benchmark main
     criterion,
     deepseq,
     filepath
+
   type:           exitcode-stdio-1.0
   main-is:        Main.hs
   hs-source-dirs: bench
