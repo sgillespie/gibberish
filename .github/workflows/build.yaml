@@ -27,7 +27,10 @@ jobs:
       run: nix build .
     - name: Run tests
       run: |
-        nix build .#gibberish:test:test .#gibberish:test:golden
+        nix build \
+          .#checks.x86_64-linux."gibberish:test:spec" \
+          .#checks.x86_64-linux."gibberish:test:test" \
+          .#checks.x86_64-linux."gibberish:test:golden"
     - name: Run static checks
       run: nix build .#checks.x86_64-linux.fourmoluCheck .#checks.x86_64-linux.hlintCheck
     - name: Run benchmarks
