@@ -54,6 +54,18 @@ common common-options
     TemplateHaskell
   default-language: GHC2021
 
+common common-exe
+  import:         common-options
+  build-depends:
+    base,
+    gibberish,
+    aeson,
+    aeson-pretty,
+    bytestring,
+    optparse-applicative,
+    random
+  hs-source-dirs: app
+
 common common-test
   import:         common-options
   build-depends:
@@ -94,30 +106,17 @@ library
   hs-source-dirs:  src
 
 executable gibber
-  import:         common-options
-  build-depends:
-    base >= 4.14 && <5,
-    gibberish,
-    aeson,
-    aeson-pretty,
-    bytestring,
-    optparse-applicative,
-    random
-  hs-source-dirs: app
+  import:         common-exe
   main-is:        Main.hs
+  other-modules:
+    PackageInfo_gibberish
+    Paths_gibberish
+  hs-source-dirs: app
 
 executable gibber-gen-trigraph
-  import:         common-options
-  build-depends:
-    base >= 4.14 && <5,
-    gibberish,
-    aeson,
-    aeson-pretty,
-    bytestring,
-    optparse-applicative,
-    random
-  hs-source-dirs: app
+  import:         common-exe
   main-is:        gen-trigraph.hs
+  hs-source-dirs: app
 
 library testlib
   import:         common-options
