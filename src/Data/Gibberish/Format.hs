@@ -43,4 +43,4 @@ formatLine (MaxLen maxLen) (Separator sep) =
     concatLine len (t : ts)
       | len - Text.length t > 0 = t <> concatLine (len - Text.length t) ts
       | otherwise = ""
-    concatLine _ [] = error $ "Ran out of words"
+    concatLine _ [] = error "Ran out of words"
