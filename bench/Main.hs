@@ -1,5 +1,6 @@
 module Main (main) where
 
+import Data.Gibberish.Format
 import Data.Gibberish.GenTrigraph (genTrigraph)
 import Data.Gibberish.Types (Trigraph (..))
 import Paths_gibberish (getDataDir)
@@ -7,7 +8,6 @@ import Paths_gibberish (getDataDir)
 import Criterion.Main
 import Data.Aeson (encode)
 import Data.Char (isAlpha)
-import Data.Map (Map ())
 import Data.Text (Text ())
 import Data.Text qualified as Text
 import Data.Text.IO qualified as Text
@@ -25,7 +25,17 @@ trigraph = genTrigraph <$> dictionary
 main :: IO ()
 main =
   defaultMain
-    [ bench "load dictionary file" $ nfIO dictionary,
+    [ -- Trigraph generation
+      bench "load dictionary file" $ nfIO dictionary,
       env dictionary $ bench "generate trigraph" . nf genTrigraph,
-      env trigraph $ bench "serialize to JSON" . nf encode
+      env trigraph $ bench "serialize to JSON" . nf encode,
+      -- Formatting
+      env dictionary $ bench "format words" . nf formatWords'
     ]
+
+formatWords' :: [Text] -> Text
+formatWords' = formatWords maxLen maxHeight sep . map Word
+  where
+    maxLen = MaxLen 100
+    maxHeight = MaxHeight 1000
+    sep = Separator " "

@@ -96,6 +96,7 @@ library
     Data.Elocrypt,
     Data.Elocrypt.Trigraph,
     Data.Elocrypt.Utils,
+    Data.Gibberish.Format,
     Data.Gibberish.GenTrigraph,
     Data.Gibberish.Types
   build-depends:
@@ -151,6 +152,7 @@ test-suite spec
   build-tool-depends:
     hspec-discover:hspec-discover
   other-modules:
+    Data.Gibberish.FormatSpec
     Data.Gibberish.GenTrigraphSpec
     Data.Gibberish.TypesSpec
   other-extensions:
