@@ -19,86 +19,61 @@ spec = do
   describe "formatWords" $ do
     describe "variable length" $ do
       it "minLen <= length formatWords <= maxLen" $ hedgehog $ do
-        maxLen <- forAll genMaxLen
-        maxHeight <- forAll genMaxHeight
-        output <-
-          forAll $
-            genFormattedLine (Range.linear 3 10) maxLen maxHeight
-        let lines' = Text.lines output
+        opts@FormatOpts {..} <- forAll $ genFormatOpts
+        lines' <- forAll $ genFormattedLines (Range.linear 3 10) opts
 
-        annotateShow $
-          lines' <&> \line ->
-            line <> "(length=" <> showt (Text.length line) <> ")"
+        annotateLines lines'
 
-        let minLen = maxLen - 10
         forM_ lines' $ \line ->
           assert $
-            Text.length line <= fromIntegral maxLen
-              && Text.length line >= fromIntegral minLen
+            Text.length line <= fromIntegral optMaxLen
+              && Text.length line >= minLen 10 optSeparator optMaxLen
 
       it "length (lines (formatWords)) == maxHeight" $ hedgehog $ do
-        maxLen <- forAll genMaxLen
-        maxHeight <- forAll genMaxHeight
-        output <-
-          forAll $
-            genFormattedLine (Range.linear 3 10) maxLen maxHeight
-        let lines' = Text.lines output
+        opts@FormatOpts {..} <- forAll $ genFormatOpts
+        lines' <- forAll $ genFormattedLines (Range.linear 3 10) opts
 
-        length lines' === fromIntegral maxHeight
+        length lines' === fromIntegral optMaxHeight
+
+      it "prints exact" $ hedgehog $ do
+        exact <- forAll genExactWords
+        opts <- forAll $ genFormatOpts' (pure $ Just exact)
+        lines' <- forAll $ genFormattedLines (Range.linear 3 10) opts
+
+        let words' = Text.words (Text.unlines lines')
+        length words' === unExactWords exact
+        pure ()
 
     describe "constant length" $ do
       it "minLen <= length formatWords <= maxLen" $ hedgehog $ do
-        maxLen <- forAll genMaxLen
-        maxHeight <- forAll genMaxHeight
         wordLen <- forAll $ Gen.int (Range.linear 3 10)
-        output <-
-          forAll $
-            genFormattedLine (Range.singleton wordLen) maxLen maxHeight
-        let lines' = Text.lines output
+        opts@FormatOpts {..} <- forAll $ genFormatOpts
+        lines' <- forAll $ genFormattedLines (Range.singleton wordLen) opts
 
-        annotateShow $
-          lines' <&> \line ->
-            line <> "(length=" <> showt (Text.length line) <> ")"
+        annotateLines lines'
 
-        let minLen = maxLen - 10
         forM_ lines' $ \line ->
           assert $
-            Text.length line <= fromIntegral maxLen
-              && Text.length line >= fromIntegral minLen
+            Text.length line <= fromIntegral optMaxLen
+              && Text.length line >= minLen wordLen optSeparator optMaxLen
 
-    it "length (lines (formatWords)) == maxHeight" $ hedgehog $ do
-      maxLen <- forAll genMaxLen
-      maxHeight <- forAll genMaxHeight
-      wordLen <- forAll $ Gen.int (Range.linear 3 10)
-      output <-
-        forAll $
-          genFormattedLine (Range.singleton wordLen) maxLen maxHeight
-      let lines' = Text.lines output
+      it "length (lines (formatWords)) == maxHeight" $ hedgehog $ do
+        wordLen <- forAll $ Gen.int (Range.linear 3 10)
+        opts@FormatOpts {..} <- forAll $ genFormatOpts
+        lines' <- forAll $ genFormattedLines (Range.singleton wordLen) opts
 
-      length lines' === fromIntegral maxHeight
+        length lines' === fromIntegral optMaxHeight
 
-genFormattedLine :: Range Int -> MaxLen -> MaxHeight -> Gen Text
-genFormattedLine wordLen lineLen lineHeight = do
-  separator <- genSeparator
-  words' <- genWords wordLen (fromIntegral lineLen * fromIntegral lineHeight)
+genFormatOpts :: Gen FormatOpts
+genFormatOpts = genFormatOpts' $ pure Nothing
 
-  let opts =
-        FormatOpts
-          { optMaxLen = lineLen,
-            optMaxHeight = lineHeight,
-            optSeparator = separator,
-            optExactWords = Nothing
-          }
-
-  pure $ formatWords opts words'
-
-genWords :: Range Int -> Int -> Gen [Word]
-genWords wordLen maxLen = Gen.list (Range.singleton minWords) (genWord wordLen)
-  where
-    minWords = maxLen `div` 2
-
-genWord :: Range Int -> Gen Word
-genWord len = Word <$> Gen.text len (Gen.enum 'a' 'e')
+genFormatOpts' :: Gen (Maybe ExactNumberWords) -> Gen FormatOpts
+genFormatOpts' exact =
+  FormatOpts
+    <$> genMaxLen
+    <*> genMaxHeight
+    <*> genSeparator
+    <*> exact
 
 genMaxLen :: Gen MaxLen
 genMaxLen = MaxLen <$> Gen.integral (Range.linear 50 100)
@@ -108,3 +83,32 @@ genMaxHeight = MaxHeight <$> Gen.integral (Range.linear 3 50)
 
 genSeparator :: Gen Separator
 genSeparator = Separator <$> Gen.text (Range.linear 1 3) (pure ' ')
+
+genExactWords :: Gen ExactNumberWords
+genExactWords = ExactNumberWords <$> Gen.integral (Range.linear 0 100)
+
+minLen :: Int -> Separator -> MaxLen -> Int
+minLen maxWordSize (Separator sep) (MaxLen maxLen) =
+  maxLen - (maxWordSize + Text.length sep)
+
+genFormattedLines
+  :: Range Int
+  -> FormatOpts
+  -> Gen [Text]
+genFormattedLines wordLen opts@FormatOpts {..} = do
+  words' <- genWords wordLen (fromIntegral optMaxLen * fromIntegral optMaxHeight)
+  pure $ Text.lines (formatWords opts words')
+
+genWords :: Range Int -> Int -> Gen [Word]
+genWords wordLen maxLen = Gen.list (Range.singleton minWords) (genWord wordLen)
+  where
+    minWords = maxLen `div` 2
+
+genWord :: Range Int -> Gen Word
+genWord len = Word <$> Gen.text len (Gen.enum 'a' 'e')
+
+annotateLines :: (MonadTest m, HasCallStack) => [Text] -> m ()
+annotateLines lines' =
+  annotateShow $
+    lines' <&> \line ->
+      line <> "(length=" <> showt (Text.length line) <> ")"
