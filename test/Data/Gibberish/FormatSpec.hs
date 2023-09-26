@@ -82,7 +82,15 @@ genFormattedLine wordLen lineLen lineHeight = do
   separator <- genSeparator
   words' <- genWords wordLen (fromIntegral lineLen * fromIntegral lineHeight)
 
-  pure $ formatWords lineLen lineHeight separator words'
+  let opts =
+        FormatOpts
+          { optMaxLen = lineLen,
+            optMaxHeight = lineHeight,
+            optSeparator = separator,
+            optExactWords = Nothing
+          }
+
+  pure $ formatWords opts words'
 
 genWords :: Range Int -> Int -> Gen [Word]
 genWords wordLen maxLen = Gen.list (Range.singleton minWords) (genWord wordLen)

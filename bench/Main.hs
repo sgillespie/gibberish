@@ -34,8 +34,12 @@ main =
     ]
 
 formatWords' :: [Text] -> Text
-formatWords' = formatWords maxLen maxHeight sep . map Word
+formatWords' = formatWords opts . map Word
   where
-    maxLen = MaxLen 100
-    maxHeight = MaxHeight 1000
-    sep = Separator " "
+    opts =
+      FormatOpts
+        { optMaxLen = MaxLen 100,
+          optMaxHeight = MaxHeight 1000,
+          optSeparator = Separator " ",
+          optExactWords = Nothing
+        }

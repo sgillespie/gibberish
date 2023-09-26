@@ -1,7 +1,9 @@
 module Data.Gibberish.Format
-  ( MaxLen (..),
+  ( FormatOpts (..),
+    MaxLen (..),
     MaxHeight (..),
     Separator (..),
+    ExactNumberWords (..),
     Word (..),
     formatWords,
     formatLine,
@@ -11,6 +13,13 @@ import Data.List (intersperse)
 import Data.Text (Text ())
 import Data.Text qualified as Text
 import Prelude hiding (Word ())
+
+data FormatOpts = FormatOpts
+  { optMaxLen :: MaxLen,
+    optMaxHeight :: MaxHeight,
+    optSeparator :: Separator,
+    optExactWords :: Maybe ExactNumberWords
+  }
 
 newtype MaxLen = MaxLen {unMaxLen :: Int}
   deriving stock (Eq, Show)
@@ -23,21 +32,26 @@ newtype MaxHeight = MaxHeight {unMaxHeight :: Int}
 newtype Separator = Separator {unSeparator :: Text}
   deriving stock (Eq, Show)
 
+newtype ExactNumberWords = ExactNumberWords {unExactWords :: Int}
+  deriving stock (Eq, Show)
+
 newtype Word = Word {unWord :: Text}
   deriving stock (Eq, Show)
 
 -- | Format a list of words to a text blob
-formatWords :: MaxLen -> MaxHeight -> Separator -> [Word] -> Text
-formatWords maxLen height sep words' =
-  case height of
+formatWords :: FormatOpts -> [Word] -> Text
+formatWords opts@FormatOpts {..} words' =
+  case optMaxHeight of
     1 -> line
-    _ -> line <> "\n" <> formatWords maxLen (height - 1) sep words'
+    _ -> line <> "\n" <> formatWords (opts {optMaxHeight = optMaxHeight - 1}) words'
   where
-    line = formatLine maxLen sep words'
+    line = formatLine opts words'
 
-formatLine :: MaxLen -> Separator -> [Word] -> Text
-formatLine (MaxLen maxLen) (Separator sep) =
-  concatLine maxLen . intersperse sep . map unWord
+formatLine :: FormatOpts -> [Word] -> Text
+formatLine FormatOpts {..} =
+  concatLine (unMaxLen optMaxLen)
+    . intersperse (unSeparator optSeparator)
+    . map unWord
   where
     concatLine :: Int -> [Text] -> Text
     concatLine len (t : ts)
