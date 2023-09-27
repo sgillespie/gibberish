@@ -40,23 +40,36 @@ newtype ExactNumberWords = ExactNumberWords {unExactWords :: Int}
 newtype Word = Word {unWord :: Text}
   deriving stock (Eq, Show)
 
-newtype FormatText = FormatText [FormatLine]
-data FormatLine = FormatLine Separator [Word]
+newtype FormatText = FormatText {fmtLines :: [FormatLine]}
+  deriving stock (Eq, Show)
+
+data FormatLine = FormatLine
+  { fmtSeparator :: Separator,
+    fmtWords :: [Word]
+  }
+  deriving stock (Eq, Show)
 
 -- | Format a list of words to a text blob
 formatWords :: FormatOpts -> [Word] -> Text
-formatWords opts words' = renderFormatText (formatWords' opts words')
+formatWords opts@FormatOpts {..} =
+  renderFormatText . take' . formatWords' opts
+  where
+    take' :: FormatText -> FormatText
+    take' =
+      case optExactWords of
+        Just (ExactNumberWords exact) -> takeWords exact
+        Nothing -> takeLines (unMaxHeight optMaxHeight)
 
+-- | Turn a list of words into a Format description. Note that we completely
+-- ignore maxHeight and exactWords, resulting in a potentially infinite list
 formatWords' :: FormatOpts -> [Word] -> FormatText
-formatWords' opts@FormatOpts {..} words' =
-  case optMaxHeight of
-    1 -> FormatText [line]
-    _ ->
-      let (FormatText t) = formatWords' (opts {optMaxHeight = optMaxHeight - 1}) words'
-      in FormatText $ line : t
+formatWords' opts words' =
+  FormatText $
+    line : fmtLines (formatWords' opts words')
   where
     line = formatLine opts words'
 
+-- | Format a single line of words, up to maxLen characters
 formatLine :: FormatOpts -> [Word] -> FormatLine
 formatLine FormatOpts {..} =
   FormatLine optSeparator
@@ -72,11 +85,24 @@ formatLine FormatOpts {..} =
       | otherwise = []
     concatLine _ [] = error "Ran out of words"
 
+-- | Render a Format description into a Text blob
 renderFormatText :: FormatText -> Text
-renderFormatText (FormatText (l : ls)) =
-  renderFormatLine l <> "\n" <> renderFormatText (FormatText ls)
+renderFormatText (FormatText fmt) =
+  case fmt of
+    [] -> ""
+    l : ls -> renderFormatLine l <> "\n" <> renderFormatText' ls
   where
-    renderFormatLine :: FormatLine -> Text
-    renderFormatLine (FormatLine (Separator sep) (ws)) =
-      Text.concat $ intersperse sep (map unWord ws)
-renderFormatText (FormatText []) = ""
+    renderFormatLine (FormatLine (Separator sep) ws) =
+      Text.concat . intersperse sep . map unWord $ ws
+    renderFormatText' ls = renderFormatText (FormatText ls)
+
+takeLines :: Int -> FormatText -> FormatText
+takeLines n (FormatText ls) = FormatText $ take n ls
+
+takeWords :: Int -> FormatText -> FormatText
+takeWords _ (FormatText []) = error "Ran out of words"
+takeWords n (FormatText (l@(FormatLine sep ws) : ls))
+  | n >= length ws = FormatText $ l : ls'
+  | otherwise = FormatText [FormatLine sep (take n ws)]
+  where
+    (FormatText ls') = takeWords (n - length ws) (FormatText ls)

@@ -42,7 +42,6 @@ spec = do
 
         let words' = Text.words (Text.unlines lines')
         length words' === unExactWords exact
-        pure ()
 
     describe "constant length" $ do
       it "minLen <= length formatWords <= maxLen" $ hedgehog $ do
