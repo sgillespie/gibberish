@@ -65,9 +65,11 @@ formatWords opts@FormatOpts {..} =
 formatWords' :: FormatOpts -> [Word] -> FormatText
 formatWords' opts words' =
   FormatText $
-    line : fmtLines (formatWords' opts words')
+    line : fmtLines (formatWords' opts restWords)
   where
     line = formatLine opts words'
+    -- TODO[sgillespie]: Benchmark this vs splitting
+    restWords = drop (length $ fmtWords line) words'
 
 -- | Format a single line of words, up to maxLen characters
 formatLine :: FormatOpts -> [Word] -> FormatLine

@@ -4,6 +4,7 @@ import Data.Gibberish.Format
 
 import Control.Monad (forM_)
 import Data.Functor ((<&>))
+import Data.List (isPrefixOf)
 import Data.Text (Text ())
 import Data.Text qualified as Text
 import Hedgehog
@@ -18,6 +19,21 @@ spec :: Spec
 spec = do
   describe "formatWords" $ do
     describe "variable length" $ do
+      it "words (formatWords w) `isPrefixOf` w" $ hedgehog $ do
+        opts@FormatOpts {..} <- forAll $ genFormatOpts
+        words' <-
+          forAll $
+            genWords
+              (Range.linear 3 10)
+              (fromIntegral optMaxLen * fromIntegral optMaxHeight)
+
+        let formatted = formatWords opts words'
+            res = map Word (Text.words formatted)
+
+        annotateShow res
+
+        assert $ res `isPrefixOf` words'
+
       it "minLen <= length formatWords <= maxLen" $ hedgehog $ do
         opts@FormatOpts {..} <- forAll $ genFormatOpts
         lines' <- forAll $ genFormattedLines (Range.linear 3 10) opts
@@ -44,6 +60,22 @@ spec = do
         length words' === unExactWords exact
 
     describe "constant length" $ do
+      it "words (formatWords w) `isPrefixOf` w" $ hedgehog $ do
+        wordLen <- forAll $ Gen.int (Range.linear 3 10)
+        opts@FormatOpts {..} <- forAll $ genFormatOpts
+        words' <-
+          forAll $
+            genWords
+              (Range.singleton wordLen)
+              (fromIntegral optMaxLen * fromIntegral optMaxHeight)
+
+        let formatted = formatWords opts words'
+            res = map Word (Text.words formatted)
+
+        annotateShow res
+
+        assert $ res `isPrefixOf` words'
+
       it "minLen <= length formatWords <= maxLen" $ hedgehog $ do
         wordLen <- forAll $ Gen.int (Range.linear 3 10)
         opts@FormatOpts {..} <- forAll $ genFormatOpts

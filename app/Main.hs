@@ -1,6 +1,7 @@
 module Main (main) where
 
 import Data.Elocrypt
+import Data.Gibberish.Format qualified as Fmt
 
 import Data.Maybe (fromMaybe)
 import Data.Text (Text ())
@@ -69,10 +70,20 @@ run (Options {..}) = Text.putStrLn . run' optType =<< getStdGen
 
 passwords :: RandomGen gen => CommonOpts -> WordOpts -> gen -> Text
 passwords opts@(CommonOpts {..}) (WordOpts {..}) gen =
-  Text.intercalate " " $ map Text.pack passwords'
+  Fmt.formatWords formatOpts (map (Fmt.Word . Text.pack) passwords')
   where
     passwords' = newPasswords optLength num (getGenOptions opts) gen
-    num = fromMaybe termLen optNumber
+    num = fromMaybe (numFitWords + 1) optNumber
+    numFitWords = wordsPerLine * termHeight
+    wordsPerLine = termLen + Text.length sep' `div` optLength + Text.length sep'
+    sep' = "  "
+    formatOpts =
+      Fmt.FormatOpts
+        { optMaxLen = Fmt.MaxLen termLen,
+          optMaxHeight = Fmt.MaxHeight termHeight,
+          optSeparator = Fmt.Separator "  ",
+          optExactWords = Fmt.ExactNumberWords <$> optNumber
+        }
 
 passphrases :: RandomGen gen => CommonOpts -> PhraseOpts -> gen -> Text
 passphrases opts@(CommonOpts {..}) (PhraseOpts {..}) gen =
