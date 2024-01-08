@@ -20,7 +20,7 @@ spec = do
   describe "formatWords" $ do
     describe "variable length" $ do
       it "words (formatWords w) `isPrefixOf` w" $ hedgehog $ do
-        opts@FormatOpts {..} <- forAll $ genFormatOpts
+        opts@FormatOpts {..} <- forAll genFormatOpts
         words' <-
           forAll $
             genWords
@@ -35,7 +35,7 @@ spec = do
         assert $ res `isPrefixOf` words'
 
       it "minLen <= length formatWords <= maxLen" $ hedgehog $ do
-        opts@FormatOpts {..} <- forAll $ genFormatOpts
+        opts@FormatOpts {..} <- forAll genFormatOpts
         lines' <- forAll $ genFormattedLines (Range.linear 3 10) opts
 
         annotateLines lines'
@@ -46,7 +46,7 @@ spec = do
               && Text.length line >= minLen 10 optSeparator optMaxLen
 
       it "length (lines (formatWords)) == maxHeight" $ hedgehog $ do
-        opts@FormatOpts {..} <- forAll $ genFormatOpts
+        opts@FormatOpts {..} <- forAll genFormatOpts
         lines' <- forAll $ genFormattedLines (Range.linear 3 10) opts
 
         length lines' === fromIntegral optMaxHeight
@@ -62,7 +62,7 @@ spec = do
     describe "constant length" $ do
       it "words (formatWords w) `isPrefixOf` w" $ hedgehog $ do
         wordLen <- forAll $ Gen.int (Range.linear 3 10)
-        opts@FormatOpts {..} <- forAll $ genFormatOpts
+        opts@FormatOpts {..} <- forAll genFormatOpts
         words' <-
           forAll $
             genWords
@@ -78,7 +78,7 @@ spec = do
 
       it "minLen <= length formatWords <= maxLen" $ hedgehog $ do
         wordLen <- forAll $ Gen.int (Range.linear 3 10)
-        opts@FormatOpts {..} <- forAll $ genFormatOpts
+        opts@FormatOpts {..} <- forAll genFormatOpts
         lines' <- forAll $ genFormattedLines (Range.singleton wordLen) opts
 
         annotateLines lines'
@@ -90,7 +90,7 @@ spec = do
 
       it "length (lines (formatWords)) == maxHeight" $ hedgehog $ do
         wordLen <- forAll $ Gen.int (Range.linear 3 10)
-        opts@FormatOpts {..} <- forAll $ genFormatOpts
+        opts@FormatOpts {..} <- forAll genFormatOpts
         lines' <- forAll $ genFormattedLines (Range.singleton wordLen) opts
 
         length lines' === fromIntegral optMaxHeight
