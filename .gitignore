@@ -24,6 +24,9 @@ dist-newstyle
 .idea
 *.iml
 
+### Emacs
+.dir-locals.el
+
 ### Nix
 result
 .direnv
