@@ -1,7 +1,8 @@
 {-# LANGUAGE OverloadedLists #-}
 
 module Data.Gibberish.Types
-  ( Unigram (..),
+  ( GenPassOptions (..),
+    Unigram (..),
     Digram (..),
     Trigram (..),
     Frequency (..),
@@ -17,6 +18,17 @@ import Data.Map (Map ())
 import Data.Text (Text ())
 import GHC.Generics (Generic ())
 import TextShow (TextShow (..), fromString)
+
+-- | Password/Passphrase generation options
+data GenPassOptions = GenPassOptions
+  { -- | Include capitals?
+    genCapitals :: !Bool,
+    -- | Include numerals?
+    genDigits :: !Bool,
+    -- | Include special characters?
+    genSpecials :: !Bool
+  }
+  deriving stock (Eq, Show)
 
 -- | A unigram is a single letter
 newtype Unigram = Unigram {unUnigram :: Char}

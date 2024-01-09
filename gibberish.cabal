@@ -27,6 +27,7 @@ common common-options
   build-depends:
     base >=4.14 && <5,
     containers,
+    mtl,
     text,
     text-show
   ghc-options:
@@ -98,6 +99,7 @@ library
     Data.Elocrypt.Utils,
     Data.Gibberish.Format,
     Data.Gibberish.GenTrigraph,
+    Data.Gibberish.MonadPass,
     Data.Gibberish.Types
   build-depends:
     MonadRandom,
