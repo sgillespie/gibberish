@@ -2,6 +2,7 @@ module Main (main) where
 
 import Data.Elocrypt
 import Data.Gibberish.Format qualified as Fmt
+import Data.Gibberish.Types (Word (..))
 
 import Data.Maybe (fromMaybe)
 import Data.Text (Text ())
@@ -13,6 +14,7 @@ import Options.Applicative.Help.Pretty
 import PackageInfo_gibberish (name, version)
 import System.Environment (getArgs)
 import System.Random (RandomGen (..), getStdGen)
+import Prelude hiding (Word ())
 
 termLen :: Int
 termLen = 80
@@ -50,7 +52,7 @@ data PhraseOpts = PhraseOpts
   }
   deriving stock (Eq, Show)
 
-data PassType = Phrase | Word
+data PassType = Passphrase | Password
   deriving stock (Eq, Show)
 
 main :: IO ()
@@ -70,7 +72,7 @@ run (Options {..}) = Text.putStrLn . run' optType =<< getStdGen
 
 passwords :: RandomGen gen => CommonOpts -> WordOpts -> gen -> Text
 passwords opts@(CommonOpts {..}) (WordOpts {..}) gen =
-  Fmt.formatWords formatOpts (map (Fmt.Word . Text.pack) passwords')
+  Fmt.formatWords formatOpts (map (Word . Text.pack) passwords')
   where
     passwords' = newPasswords optLength num (getGenOptions opts) gen
     num = fromMaybe (numFitWords + 1) optNumber
@@ -179,7 +181,7 @@ parsePhraseOpts =
 
 parseTypePhrase :: Parser PassType
 parseTypePhrase =
-  flag' Phrase $
+  flag' Passphrase $
     long "passphrase"
       <> short 'p'
       <> help "Generate passphrases instead of passwords"
