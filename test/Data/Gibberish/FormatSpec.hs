@@ -1,6 +1,7 @@
 module Data.Gibberish.FormatSpec (spec) where
 
 import Data.Gibberish.Format
+import Data.Gibberish.Types
 
 import Control.Monad (forM_)
 import Data.Functor ((<&>))
