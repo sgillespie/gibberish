@@ -2,7 +2,7 @@ module Main (main) where
 
 import Data.Gibberish.Format
 import Data.Gibberish.GenTrigraph (genTrigraph)
-import Data.Gibberish.Types (Trigraph (..))
+import Data.Gibberish.Types (Trigraph (..), Word (..))
 import Paths_gibberish (getDataDir)
 
 import Criterion.Main
