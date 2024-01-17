@@ -98,6 +98,7 @@ library
     Data.Elocrypt.Trigraph,
     Data.Elocrypt.Utils,
     Data.Gibberish.Format,
+    Data.Gibberish.GenPass,
     Data.Gibberish.GenTrigraph,
     Data.Gibberish.MonadPass,
     Data.Gibberish.Types

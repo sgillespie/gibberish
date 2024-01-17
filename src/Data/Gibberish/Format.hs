@@ -4,10 +4,11 @@ module Data.Gibberish.Format
     MaxHeight (..),
     Separator (..),
     ExactNumberWords (..),
-    Word (..),
     formatWords,
     formatLine,
   ) where
+
+import Data.Gibberish.Types
 
 import Data.List (intersperse)
 import Data.Text (Text ())
@@ -36,9 +37,6 @@ newtype Separator = Separator {unSeparator :: Text}
 newtype ExactNumberWords = ExactNumberWords {unExactWords :: Int}
   deriving stock (Eq, Show)
   deriving newtype (Enum, Integral, Num, Ord, Real)
-
-newtype Word = Word {unWord :: Text}
-  deriving stock (Eq, Show)
 
 newtype FormatText = FormatText {fmtLines :: [FormatLine]}
   deriving stock (Eq, Show)

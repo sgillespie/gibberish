@@ -8,6 +8,7 @@ module Data.Gibberish.Types
     Frequency (..),
     Frequencies (..),
     Trigraph (..),
+    Word (..),
   ) where
 
 import Control.DeepSeq (NFData)
@@ -18,15 +19,18 @@ import Data.Map (Map ())
 import Data.Text (Text ())
 import GHC.Generics (Generic ())
 import TextShow (TextShow (..), fromString)
+import Prelude hiding (Word ())
 
 -- | Password/Passphrase generation options
 data GenPassOptions = GenPassOptions
   { -- | Include capitals?
-    genCapitals :: !Bool,
+    optsCapitals :: !Bool,
     -- | Include numerals?
-    genDigits :: !Bool,
+    optsDigits :: !Bool,
     -- | Include special characters?
-    genSpecials :: !Bool
+    optsSpecials :: !Bool,
+    -- | The trigraph to use
+    optsTrigraph :: Trigraph
   }
   deriving stock (Eq, Show)
 
@@ -61,6 +65,10 @@ newtype Frequencies = Frequencies {unFrequencies :: Map Unigram Frequency}
 newtype Trigraph = Trigraph {unTrigraph :: Map Digram Frequencies}
   deriving stock (Eq, Show)
   deriving newtype (FromJSON, ToJSON, NFData)
+
+-- | A natural language word
+newtype Word = Word {unWord :: Text}
+  deriving stock (Eq, Show)
 
 instance TextShow Digram where
   showb (Digram c1 c2) = fromString [c1, c2]
