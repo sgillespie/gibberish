@@ -98,13 +98,17 @@ library
     Data.Elocrypt.Trigraph,
     Data.Elocrypt.Utils,
     Data.Gibberish.Format,
-    Data.Gibberish.GenTrigraph,
     Data.Gibberish.MonadPass,
+    Data.Gibberish.Trigraph,
     Data.Gibberish.Types
+  other-modules:
+    Paths_gibberish
   build-depends:
     MonadRandom,
     aeson,
     deepseq,
+    directory,
+    filepath,
     random
   hs-source-dirs:  src
 
@@ -155,8 +159,9 @@ test-suite spec
     hspec-discover:hspec-discover
   other-modules:
     Data.Gibberish.FormatSpec
-    Data.Gibberish.GenTrigraphSpec
+    Data.Gibberish.TrigraphSpec
     Data.Gibberish.TypesSpec
+    Paths_gibberish
   other-extensions:
     OverloadedLists
 
