@@ -97,6 +97,7 @@ library
     Data.Elocrypt,
     Data.Elocrypt.Trigraph,
     Data.Elocrypt.Utils,
+    Data.Gibberish.Errors,
     Data.Gibberish.Format,
     Data.Gibberish.MonadPass,
     Data.Gibberish.Trigraph,

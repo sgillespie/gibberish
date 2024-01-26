@@ -70,7 +70,7 @@ spec = do
 
     it "handles load failure" $ do
       loadTrigraph (CustomTrigraph $ TrigraphConfig "doesnotexist.json")
-        `shouldThrow` (== TrigraphNotFound "doesnotexist.json")
+        `shouldThrow` isTrigraphNotFound
 
 trigrams :: Text -> [Trigram]
 trigrams ts = case Text.take 3 ts of

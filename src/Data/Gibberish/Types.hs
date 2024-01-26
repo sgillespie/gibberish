@@ -2,7 +2,6 @@
 
 module Data.Gibberish.Types
   ( GenPassOptions (..),
-    Error (..),
     Unigram (..),
     Digram (..),
     Trigram (..),
@@ -10,16 +9,17 @@ module Data.Gibberish.Types
     Frequencies (..),
     Trigraph (..),
     Word (..),
+    module Data.Gibberish.Errors,
   ) where
 
+import Data.Gibberish.Errors
+
 import Control.DeepSeq (NFData)
-import Control.Exception (Exception ())
 import Data.Aeson (FromJSON (..), FromJSONKey (..), ToJSON (..), ToJSONKey (..))
 import Data.Aeson qualified as Aeson
 import Data.Aeson.Types (FromJSONKeyFunction (..), Parser (), toJSONKeyText)
 import Data.Map (Map ())
 import Data.Text (Text ())
-import Data.Typeable (Typeable ())
 import GHC.Generics (Generic ())
 import TextShow (TextShow (..), fromString)
 import Prelude hiding (Word ())
@@ -36,12 +36,6 @@ data GenPassOptions = GenPassOptions
     optsTrigraph :: Trigraph
   }
   deriving stock (Eq, Show)
-
--- | Exceptions that can occur at runtime
-data Error
-  = TrigraphNotFound FilePath
-  | ImpossibleError
-  deriving stock (Eq, Typeable)
 
 -- | A unigram is a single letter
 newtype Unigram = Unigram {unUnigram :: Char}
@@ -78,12 +72,6 @@ newtype Trigraph = Trigraph {unTrigraph :: Map Digram Frequencies}
 -- | A natural language word
 newtype Word = Word {unWord :: Text}
   deriving stock (Eq, Show)
-
-instance Exception Error
-
-instance Show Error where
-  show (TrigraphNotFound path) = "Trigraph file " <> show path <> " does not exist!"
-  show ImpossibleError = "The impossible happened! Please file a bug report."
 
 instance TextShow Digram where
   showb (Digram c1 c2) = fromString [c1, c2]
