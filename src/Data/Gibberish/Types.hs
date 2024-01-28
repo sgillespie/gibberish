@@ -33,7 +33,9 @@ data GenPassOptions = GenPassOptions
     -- | Include special characters?
     optsSpecials :: !Bool,
     -- | The trigraph to use
-    optsTrigraph :: Trigraph
+    optsTrigraph :: Trigraph,
+    -- | The length of the password
+    optsLength :: !Int
   }
   deriving stock (Eq, Show)
 

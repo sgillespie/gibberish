@@ -1,6 +1,7 @@
 module Data.Gibberish.MonadPass
   ( Pass (),
     PassT (..),
+    MonadRandom (..),
     runPass,
     evalPass,
     usingPass,
@@ -9,7 +10,8 @@ module Data.Gibberish.MonadPass
     usingPassT,
   ) where
 
-import Control.Monad.Random.Class (MonadRandom ())
+import Control.Monad.IO.Class (MonadIO ())
+import Control.Monad.Random (MonadRandom (..))
 import Control.Monad.Trans.Random (RandT (), evalRandT, runRandT)
 import Data.Functor.Identity (Identity (..))
 
@@ -40,7 +42,8 @@ newtype PassT gen m a = PassT {unPass :: RandT gen m a}
       Functor,
       Monad,
       MonadFail,
-      MonadRandom
+      MonadRandom,
+      MonadIO
     )
 
 -- | Run a generation computation with the given options and initial generator

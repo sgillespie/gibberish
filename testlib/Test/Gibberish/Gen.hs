@@ -5,10 +5,13 @@ module Test.Gibberish.Gen
     frequencies,
     frequency,
     word,
+    genPassOptions,
+    stdGen,
   ) where
 
 import Data.Gibberish.Types
 
+import Control.Monad.Random (StdGen (), mkStdGen)
 import Data.Text (Text ())
 import Hedgehog
 import Hedgehog.Gen qualified as Gen
@@ -38,3 +41,15 @@ frequency = Frequency <$> Gen.int (Range.linear 0 maxBound)
 
 word :: Gen Text
 word = Gen.text (Range.linear 3 30) $ Gen.enum 'a' 'e'
+
+genPassOptions :: Gen GenPassOptions
+genPassOptions =
+  GenPassOptions
+    <$> Gen.bool
+    <*> Gen.bool
+    <*> Gen.bool
+    <*> trigraph
+    <*> Gen.int (Range.linear 0 15)
+
+stdGen :: Gen StdGen
+stdGen = mkStdGen <$> Gen.integral (Range.linear minBound maxBound)

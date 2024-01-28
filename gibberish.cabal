@@ -99,6 +99,7 @@ library
     Data.Elocrypt.Utils,
     Data.Gibberish.Errors,
     Data.Gibberish.Format,
+    Data.Gibberish.GenPass,
     Data.Gibberish.MonadPass,
     Data.Gibberish.Trigraph,
     Data.Gibberish.Types
@@ -133,6 +134,7 @@ library testlib
   build-depends:
     base >= 4.14 && < 5,
     gibberish,
+    MonadRandom,
     hedgehog
   hs-source-dirs:
     testlib
@@ -160,6 +162,7 @@ test-suite spec
     hspec-discover:hspec-discover
   other-modules:
     Data.Gibberish.FormatSpec
+    Data.Gibberish.GenPassSpec
     Data.Gibberish.TrigraphSpec
     Data.Gibberish.TypesSpec
     Paths_gibberish
