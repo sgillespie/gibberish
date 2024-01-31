@@ -16,10 +16,7 @@ import Prelude hiding (Word)
 
 -- | Generate a password with the given options
 genPassword :: MonadRandom m => GenPassOptions -> m Word
-genPassword opts = mkPassword opts
-
-mkPassword :: MonadRandom m => GenPassOptions -> m Word
-mkPassword opts@GenPassOptions {..} = do
+genPassword opts@GenPassOptions {..} = do
   f2 <- first2 opts
   let f2' = Text.reverse f2
 
