@@ -1,9 +1,13 @@
 module Main (main) where
 
-import Data.Elocrypt
+import Data.Elocrypt hiding (genPassword, genPasswords)
 import Data.Gibberish.Format qualified as Fmt
-import Data.Gibberish.Types (Word (..))
+import Data.Gibberish.GenPass (genPassword)
+import Data.Gibberish.MonadPass (Pass (), usingPass)
+import Data.Gibberish.Trigraph (Language (..), loadTrigraph)
+import Data.Gibberish.Types (GenPassOptions (..))
 
+import Control.Monad.IO.Class (MonadIO (..))
 import Data.Maybe (fromMaybe)
 import Data.Text (Text ())
 import Data.Text qualified as Text
@@ -65,31 +69,43 @@ main = run =<< execParser' opts
       \ hard-to-guess."
 
 run :: Options -> IO ()
-run (Options {..}) = Text.putStrLn . run' optType =<< getStdGen
+run (Options {..}) = Text.putStrLn =<< run' optType =<< getStdGen
   where
     run' (Left w) = passwords optCommon w
     run' (Right p) = passphrases optCommon p
 
-passwords :: RandomGen gen => CommonOpts -> WordOpts -> gen -> Text
-passwords opts@(CommonOpts {..}) (WordOpts {..}) gen =
-  Fmt.formatWords formatOpts (map (Word . Text.pack) passwords')
-  where
-    passwords' = newPasswords optLength num (getGenOptions opts) gen
-    num = fromMaybe (numFitWords + 1) optNumber
-    numFitWords = wordsPerLine * termHeight
-    wordsPerLine = termLen + Text.length sep' `div` optLength + Text.length sep'
-    sep' = "  "
-    formatOpts =
-      Fmt.FormatOpts
-        { optMaxLen = Fmt.MaxLen termLen,
-          optMaxHeight = Fmt.MaxHeight termHeight,
-          optSeparator = Fmt.Separator "  ",
-          optExactWords = Fmt.ExactNumberWords <$> optNumber
-        }
+passwords :: RandomGen gen => CommonOpts -> WordOpts -> gen -> IO Text
+passwords (CommonOpts {..}) (WordOpts {..}) gen = do
+  trigraph <- liftIO $ loadTrigraph English
 
-passphrases :: RandomGen gen => CommonOpts -> PhraseOpts -> gen -> Text
+  let genOpts =
+        GenPassOptions
+          { optsCapitals = optCapitals,
+            optsDigits = optDigits,
+            optsSpecials = optSpecials,
+            optsTrigraph = trigraph,
+            optsLength = optLength
+          }
+      formatOpts =
+        Fmt.FormatOpts
+          { optMaxLen = Fmt.MaxLen termLen,
+            optMaxHeight = Fmt.MaxHeight termHeight,
+            optSeparator = Fmt.Separator "  ",
+            optExactWords = Fmt.ExactNumberWords <$> optNumber
+          }
+
+  pure $
+    fst $
+      usingPass gen (genPasswords genOpts formatOpts)
+
+genPasswords :: RandomGen gen => GenPassOptions -> Fmt.FormatOpts -> Pass gen Text
+genPasswords genOpts formatOpts = do
+  res <- sequence $ repeat (genPassword genOpts)
+  pure (Fmt.formatWords formatOpts res)
+
+passphrases :: RandomGen gen => CommonOpts -> PhraseOpts -> gen -> IO Text
 passphrases opts@(CommonOpts {..}) (PhraseOpts {..}) gen =
-  Text.intercalate " " $ map Text.pack passphrases'
+  pure $ Text.intercalate " " $ map Text.pack passphrases'
   where
     passphrases' = newPassphrase num optMinLength optMaxLength (getGenOptions opts) gen
     num = fromMaybe termLen optNumber
