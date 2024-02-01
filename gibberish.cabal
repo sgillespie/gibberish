@@ -29,7 +29,8 @@ common common-options
     containers,
     mtl,
     text,
-    text-show
+    text-show,
+    transformers
   ghc-options:
     -Wall
     -Wcompat

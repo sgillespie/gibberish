@@ -56,7 +56,7 @@ data Trigram = Trigram Char Char Char
 
 -- | A frequency represents the number of times a given trigram occurs
 --   in a language
-newtype Frequency = Frequency {unFequency :: Int}
+newtype Frequency = Frequency {unFrequency :: Int}
   deriving stock (Eq, Show)
   deriving newtype (FromJSON, ToJSON, NFData, Enum, Integral, Num, Ord, Real)
 
