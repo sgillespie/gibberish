@@ -17,16 +17,22 @@ import Prelude hiding (Word)
 
 -- | Generate a password with the given options
 genPassword :: MonadRandom m => GenPassOptions -> m Word
-genPassword opts@GenPassOptions {..} = do
-  (Digram f1 f2) <- first2 opts
+genPassword opts@GenPassOptions {..}
+  | optsLength <= 2 = Word . Text.take optsLength . digramToText <$> first2 opts
+  | otherwise = genPassword' opts
 
-  pass <-
-    if optsLength > 2
-      then
-        lastN opts (optsLength - 2) (Digram f1 f2) >>= \l -> pure $ f1 `Text.cons` f2 `Text.cons` Text.reverse l
-      else pure (Text.take optsLength [f1, f2])
+-- | Generates a password with the given options. Assumes optsLength is at least 3.
+genPassword' :: MonadRandom m => GenPassOptions -> m Word
+genPassword' opts@(GenPassOptions {..}) = do
+  f2 <- first2 opts
+  rest <- lastN opts (optsLength - 2) f2
+
+  let pass = digramToText f2 `Text.append` Text.reverse rest
 
   pure (Word pass)
+
+digramToText :: Digram -> Text
+digramToText (Digram a b) = [a, b]
 
 first2 :: MonadRandom m => GenPassOptions -> m Digram
 first2 GenPassOptions {optsTrigraph = Trigraph trigraph} =
@@ -40,11 +46,12 @@ first2 GenPassOptions {optsTrigraph = Trigraph trigraph} =
       Map.foldr (\a b -> fromIntegral a + b) 0 freqs
 
 lastN :: MonadRandom m => GenPassOptions -> Int -> Digram -> m Text
-lastN _ 0 _ = pure []
-lastN opts len di@(Digram _ b) = do
-  c <- next opts di
-  rs <- lastN opts (len - 1) (Digram b c)
-  pure (c `Text.cons` rs)
+lastN opts len di@(Digram _ b)
+  | len <= 0 = pure []
+  | otherwise = do
+      c <- next opts di
+      rs <- lastN opts (len - 1) (Digram b c)
+      pure (c `Text.cons` rs)
 
 next :: MonadRandom m => GenPassOptions -> Digram -> m Char
 next GenPassOptions {..} digram = do
