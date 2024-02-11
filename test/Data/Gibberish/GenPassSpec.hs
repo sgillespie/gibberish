@@ -1,14 +1,14 @@
 module Data.Gibberish.GenPassSpec (spec) where
 
-import Data.Gibberish.GenPass (genPassword, numeralConversions)
+import Data.Gibberish.GenPass (genPassword)
 import Data.Gibberish.MonadPass (usingPass)
 import Data.Gibberish.Trigraph (Language (..), loadTrigraph)
 import Data.Gibberish.Types (GenPassOptions (..), Word (..))
+import Data.Gibberish.Utils (numeralConversions)
 import Test.Gibberish.Gen qualified as Gen
 
 import Control.Monad.IO.Class (liftIO)
 import Data.Char
-import Data.Map (Map ())
 import Data.Map qualified as Map
 import Data.Text qualified as Text
 import Hedgehog
@@ -89,5 +89,5 @@ spec = do
       annotateShow pass
 
       assert $
-        Text.any (\c -> isNumber c) pass
+        Text.any isNumber pass
           || Text.all (`Map.notMember` numeralConversions) pass

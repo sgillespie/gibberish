@@ -3,11 +3,11 @@
 
 module Data.Gibberish.GenPass
   ( genPassword,
-    numeralConversions,
   ) where
 
 import Data.Gibberish.MonadPass (MonadRandom ())
 import Data.Gibberish.Types
+import Data.Gibberish.Utils
 
 import Control.Arrow ((>>>))
 import Control.Monad ((>=>))
@@ -107,69 +107,12 @@ digitize1 _ t
   | null candidates = pure t
   | otherwise = digitize1' =<< uniform candidates
   where
-    candidates :: [Int]
     candidates = findIndices (`elem` Map.keys numeralConversions) t
-    digitize1' :: MonadRandom m => Int -> m Text
-    digitize1' pos = update1 (uniform . toDigit) t pos
+    digitize1' = update1 (uniform . toDigit) t
 
 digitizeR :: MonadRandom m => Text -> m Text
 digitizeR = updateR (uniform . toDigit) (1 % 6)
 
--- | A mapping from letters to numbers that look like them
-numeralConversions :: Map Char [Char]
-numeralConversions =
-  Map.fromList
-    [ ('o', ['0']),
-      ('l', ['1']),
-      ('z', ['2']),
-      ('e', ['3']),
-      ('a', ['4']),
-      ('s', ['5']),
-      ('g', ['6', '9']),
-      ('t', ['7']),
-      ('b', ['8'])
-    ]
-
 -- | Map a letter to one or more digits, if possible
 toDigit :: Char -> [Char]
 toDigit c = fromMaybe [c] (numeralConversions Map.!? c)
-
--- | /O(n)/ The 'findIndices' function extends 'findIndex', by returning the
--- indices of all elements satisfying the predicate, in ascending order.
-findIndices :: (Char -> Bool) -> Text -> [Int]
-findIndices p = loop 0
-  where
-    loop !n !qs = case Text.findIndex p qs of
-      Just !i ->
-        let !j = n + i
-        in j : loop (j + 1) (Text.drop (i + 1) qs)
-      Nothing -> []
-{-# INLINE [1] findIndices #-}
-
-update1 :: Monad m => (Char -> m Char) -> Text -> Int -> m Text
-update1 f t pos =
-  case Text.splitAt pos t of
-    (prefix, suffix) ->
-      case Text.uncons suffix of
-        Nothing -> pure t
-        Just (ch, suffix') -> do
-          ch' <- f ch
-          pure $ prefix `Text.append` (ch' `Text.cons` suffix')
-
-updateR :: MonadRandom m => (Char -> m Char) -> Rational -> Text -> m Text
-updateR f prob t = textTraverse updateR' t
-  where
-    updateR' ch = do
-      ch' <- f ch
-      fromList
-        [ (ch, toRational $ denominator prob),
-          (ch', toRational $ numerator prob)
-        ]
-
-textTraverse :: Monad m => (Char -> m Char) -> Text -> m Text
-textTraverse f = Text.foldr folder (pure Text.empty)
-  where
-    folder c accum = do
-      accum' <- accum
-      c' <- f c
-      pure $ Text.cons c' accum'

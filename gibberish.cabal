@@ -103,7 +103,8 @@ library
     Data.Gibberish.GenPass,
     Data.Gibberish.MonadPass,
     Data.Gibberish.Trigraph,
-    Data.Gibberish.Types
+    Data.Gibberish.Types,
+    Data.Gibberish.Utils
   other-modules:
     Paths_gibberish
   build-depends:
@@ -166,6 +167,7 @@ test-suite spec
     Data.Gibberish.GenPassSpec
     Data.Gibberish.TrigraphSpec
     Data.Gibberish.TypesSpec
+    Data.Gibberish.UtilsSpec
     Paths_gibberish
   other-extensions:
     OverloadedLists
