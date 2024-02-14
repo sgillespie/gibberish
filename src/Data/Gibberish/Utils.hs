@@ -1,5 +1,6 @@
 module Data.Gibberish.Utils
   ( numeralConversions,
+    symbolConversions,
     update1,
     updateR,
     findIndices,
@@ -26,6 +27,15 @@ numeralConversions =
       ('g', ['6', '9']),
       ('t', ['7']),
       ('b', ['8'])
+    ]
+
+-- | A mapping from letters to symbols that look like them
+symbolConversions :: Map Char [Char]
+symbolConversions =
+  Map.fromList
+    [ ('a', ['@']),
+      ('l', ['!']),
+      ('s', ['$'])
     ]
 
 update1 :: Monad m => (Char -> m Char) -> Text -> Int -> m Text

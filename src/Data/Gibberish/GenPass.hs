@@ -44,6 +44,7 @@ genPassword' opts@(GenPassOptions {..}) = do
         Text.map toLower
           >>> capitalize opts
           >=> digitize opts
+          >=> specialize opts
 
   Word <$> transform pass
 
@@ -113,6 +114,25 @@ digitize1 _ t
 digitizeR :: MonadRandom m => Text -> m Text
 digitizeR = updateR (uniform . toDigit) (1 % 6)
 
+specialize :: MonadRandom m => GenPassOptions -> Text -> m Text
+specialize opts t
+  | optsSpecials opts = specializeR =<< specialize1 opts t
+  | otherwise = pure t
+
+specialize1 :: MonadRandom m => GenPassOptions -> Text -> m Text
+specialize1 _ t
+  | null candidates = pure t
+  | otherwise = specialize1' =<< uniform candidates
+  where
+    candidates = findIndices (`elem` Map.keys symbolConversions) t
+    specialize1' = update1 (uniform . toSymbol) t
+
+specializeR :: MonadRandom m => Text -> m Text
+specializeR = updateR (uniform . toSymbol) (1 % 6)
+
 -- | Map a letter to one or more digits, if possible
 toDigit :: Char -> [Char]
 toDigit c = fromMaybe [c] (numeralConversions Map.!? c)
+
+toSymbol :: Char -> [Char]
+toSymbol c = fromMaybe [c] (symbolConversions Map.!? c)
