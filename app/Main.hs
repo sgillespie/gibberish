@@ -5,7 +5,7 @@ import Data.Gibberish.Format qualified as Fmt
 import Data.Gibberish.GenPass (genPassword)
 import Data.Gibberish.MonadPass (Pass (), usingPass)
 import Data.Gibberish.Trigraph (Language (..), loadTrigraph)
-import Data.Gibberish.Types (GenPassOptions (..))
+import Data.Gibberish.Types (GenPasswordOpts (..))
 
 import Control.Monad.IO.Class (MonadIO (..))
 import Data.Maybe (fromMaybe)
@@ -79,12 +79,12 @@ passwords (CommonOpts {..}) (WordOpts {..}) gen = do
   trigraph <- liftIO $ loadTrigraph English
 
   let genOpts =
-        GenPassOptions
-          { optsCapitals = optCapitals,
-            optsDigits = optDigits,
-            optsSpecials = optSpecials,
-            optsTrigraph = trigraph,
-            optsLength = optLength
+        GenPasswordOpts
+          { woptsCapitals = optCapitals,
+            woptsDigits = optDigits,
+            woptsSpecials = optSpecials,
+            woptsTrigraph = trigraph,
+            woptsLength = optLength
           }
       formatOpts =
         Fmt.FormatOpts
@@ -98,7 +98,7 @@ passwords (CommonOpts {..}) (WordOpts {..}) gen = do
     fst $
       usingPass gen (genPasswords genOpts formatOpts)
 
-genPasswords :: RandomGen gen => GenPassOptions -> Fmt.FormatOpts -> Pass gen Text
+genPasswords :: RandomGen gen => GenPasswordOpts -> Fmt.FormatOpts -> Pass gen Text
 genPasswords genOpts formatOpts = do
   res <- sequence $ repeat (genPassword genOpts)
   pure (Fmt.formatWords formatOpts res)

@@ -1,7 +1,8 @@
 {-# LANGUAGE OverloadedLists #-}
 
 module Data.Gibberish.Types
-  ( GenPassOptions (..),
+  ( GenPasswordOpts (..),
+    GenPassphraseOpts (..),
     Unigram (..),
     Digram (..),
     Trigram (..),
@@ -24,18 +25,35 @@ import GHC.Generics (Generic ())
 import TextShow (TextShow (..), fromString)
 import Prelude hiding (Word ())
 
--- | Password/Passphrase generation options
-data GenPassOptions = GenPassOptions
+-- | Password generation options
+data GenPasswordOpts = GenPasswordOpts
   { -- | Include capitals?
-    optsCapitals :: !Bool,
+    woptsCapitals :: !Bool,
     -- | Include numerals?
-    optsDigits :: !Bool,
+    woptsDigits :: !Bool,
     -- | Include special characters?
-    optsSpecials :: !Bool,
+    woptsSpecials :: !Bool,
     -- | The trigraph to use
-    optsTrigraph :: Trigraph,
+    woptsTrigraph :: Trigraph,
     -- | The length of the password
-    optsLength :: !Int
+    woptsLength :: !Int
+  }
+  deriving stock (Eq, Show)
+
+-- | Passphrase generation options
+data GenPassphraseOpts = GenPassphraseOpts
+  { -- | Include capitals?
+    poptsCapitals :: !Bool,
+    -- | Include numerals?
+    poptsDigits :: !Bool,
+    -- | Include special characters?
+    poptsSpecials :: !Bool,
+    -- | The trigraph to use
+    poptsTrigraph :: Trigraph,
+    -- | The mininum length of each word
+    poptsMinLength :: !Int,
+    -- | The maximum length of each word
+    poptsMaxLength :: !Int
   }
   deriving stock (Eq, Show)
 

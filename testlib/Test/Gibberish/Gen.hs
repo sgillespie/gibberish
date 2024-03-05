@@ -5,7 +5,8 @@ module Test.Gibberish.Gen
     frequencies,
     frequency,
     word,
-    genPassOptions,
+    genPasswordOpts,
+    genPassphraseOpts,
     stdGen,
   ) where
 
@@ -42,14 +43,27 @@ frequency = Frequency <$> Gen.int (Range.linear 0 maxBound)
 word :: Gen Text
 word = Gen.text (Range.linear 3 30) $ Gen.enum 'a' 'e'
 
-genPassOptions :: Gen GenPassOptions
-genPassOptions =
-  GenPassOptions
+genPasswordOpts :: Gen GenPasswordOpts
+genPasswordOpts =
+  GenPasswordOpts
     <$> Gen.bool
     <*> Gen.bool
     <*> Gen.bool
     <*> trigraph
     <*> Gen.int (Range.linear 0 15)
+
+genPassphraseOpts :: Gen GenPassphraseOpts
+genPassphraseOpts = do
+  minLen <- Gen.int (Range.linear 0 10)
+  maxLen <- Gen.int (Range.linear minLen 15)
+
+  GenPassphraseOpts
+    <$> Gen.bool
+    <*> Gen.bool
+    <*> Gen.bool
+    <*> trigraph
+    <*> pure minLen
+    <*> pure maxLen
 
 stdGen :: Gen StdGen
 stdGen = mkStdGen <$> Gen.integral (Range.linear minBound maxBound)
