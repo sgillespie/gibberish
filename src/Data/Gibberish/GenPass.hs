@@ -4,6 +4,7 @@
 module Data.Gibberish.GenPass
   ( genPassword,
     genPassphrase,
+    genPassphrase',
   ) where
 
 import Data.Gibberish.MonadPass (MonadRandom ())
@@ -11,7 +12,7 @@ import Data.Gibberish.Types
 import Data.Gibberish.Utils
 
 import Control.Arrow ((>>>))
-import Control.Monad ((>=>))
+import Control.Monad (replicateM, (>=>))
 import Control.Monad.Random (MonadRandom (..), fromList, fromListMay, uniform)
 import Control.Monad.Trans.Maybe (MaybeT (..), hoistMaybe)
 import Data.Bifunctor (bimap, second)
@@ -28,24 +29,6 @@ genPassword :: MonadRandom m => GenPasswordOpts -> m Word
 genPassword opts@GenPasswordOpts {..}
   | woptsLength <= 2 = Word . Text.take woptsLength . digramToText <$> first2 opts
   | otherwise = genPassword' opts
-
-genPassphrase :: MonadRandom m => GenPassphraseOpts -> m [Word]
-genPassphrase (GenPassphraseOpts {..}) =
-  sequence $ repeat genWord
-  where
-    genWord = do
-      len <- getRandomR (poptsMinLength, poptsMaxLength)
-
-      let genPasswordOpts =
-            GenPasswordOpts
-              { woptsCapitals = poptsCapitals,
-                woptsDigits = poptsDigits,
-                woptsSpecials = poptsSpecials,
-                woptsTrigraph = poptsTrigraph,
-                woptsLength = len
-              }
-
-      genPassword genPasswordOpts
 
 -- | Generates a password with the given options. Assumes optsLength is at least 3.
 genPassword' :: MonadRandom m => GenPasswordOpts -> m Word
@@ -65,6 +48,31 @@ genPassword' opts@(GenPasswordOpts {..}) = do
           >=> specialize opts
 
   Word <$> transform pass
+
+-- | Generate a passphrase with the given options. /Warning:/ Do not use with the IO monad,
+-- instead use `genPassphrash'`
+genPassphrase :: MonadRandom m => GenPassphraseOpts -> m [Word]
+genPassphrase = sequence . repeat . genPassphraseWord
+
+-- | Generate a passphrase with the given options and the given number of words.
+genPassphrase' :: MonadRandom m => GenPassphraseOpts -> Int -> m [Word]
+genPassphrase' = flip replicateM . genPassphraseWord
+
+-- | Generate a single word for a passphrase
+genPassphraseWord :: MonadRandom m => GenPassphraseOpts -> m Word
+genPassphraseWord (GenPassphraseOpts {..}) = do
+  len <- getRandomR (poptsMinLength, poptsMaxLength)
+
+  let genPasswordOpts =
+        GenPasswordOpts
+          { woptsCapitals = poptsCapitals,
+            woptsDigits = poptsDigits,
+            woptsSpecials = poptsSpecials,
+            woptsTrigraph = poptsTrigraph,
+            woptsLength = len
+          }
+
+  genPassword genPasswordOpts
 
 digramToText :: Digram -> Text
 digramToText (Digram a b) = [a, b]

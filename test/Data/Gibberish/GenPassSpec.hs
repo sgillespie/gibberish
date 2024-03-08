@@ -1,7 +1,7 @@
 module Data.Gibberish.GenPassSpec (spec) where
 
-import Data.Gibberish.GenPass (genPassphrase, genPassword)
-import Data.Gibberish.MonadPass (usingPass)
+import Data.Gibberish.GenPass (genPassphrase, genPassphrase', genPassword)
+import Data.Gibberish.MonadPass (usingPass, usingPassT)
 import Data.Gibberish.Trigraph (Language (..), loadTrigraph)
 import Data.Gibberish.Types
 import Data.Gibberish.Utils (numeralConversions, symbolConversions)
@@ -20,9 +20,10 @@ import Prelude hiding (Word)
 
 spec :: Spec
 spec = do
+  trigraph <- runIO $ loadTrigraph English
+
   describe "genPassword" $ do
     it "has correct length" $ hedgehog $ do
-      trigraph <- liftIO $ loadTrigraph English
       opts <- forAll Gen.genPasswordOpts
       randomGen <- forAll Gen.stdGen
 
@@ -34,7 +35,6 @@ spec = do
       Text.length pass === woptsLength opts
 
     it "has only lowercase when capitals is false" $ hedgehog $ do
-      trigraph <- liftIO $ loadTrigraph English
       opts <- forAll Gen.genPasswordOpts
       randomGen <- forAll Gen.stdGen
       -- Only consider passwords of sufficient (>=3) length
@@ -53,7 +53,6 @@ spec = do
       assert $ Text.all (not . isUpperCase) pass
 
     it "has at least one capital when enabled" $ hedgehog $ do
-      trigraph <- liftIO $ loadTrigraph English
       opts <- forAll Gen.genPasswordOpts
       randomGen <- forAll Gen.stdGen
       -- Only consider passwords of sufficient (>=3) length
@@ -72,7 +71,6 @@ spec = do
       assert $ Text.any (\c -> isUpperCase c || isPunctuation c) pass
 
     it "sometimes has multiple capitals when enabled" $ hedgehog $ do
-      trigraph <- liftIO $ loadTrigraph English
       opts <- forAll Gen.genPasswordOpts
       randomGen <- forAll Gen.stdGen
       -- Only consider passwords of sufficient (>=10) length
@@ -92,7 +90,6 @@ spec = do
         Text.length (Text.filter isUpperCase pass) > 1
 
     it "has at least one digit when enabled" $ hedgehog $ do
-      trigraph <- liftIO $ loadTrigraph English
       opts <- forAll Gen.genPasswordOpts
       randomGen <- forAll Gen.stdGen
       -- Only consider passwords of sufficient (>=3) length
@@ -113,7 +110,6 @@ spec = do
           || Text.all (`Map.notMember` numeralConversions) pass
 
     it "sometimes has multiple digits when enabled" $ hedgehog $ do
-      trigraph <- liftIO $ loadTrigraph English
       opts <- forAll Gen.genPasswordOpts
       randomGen <- forAll Gen.stdGen
       -- Only consider passwords of sufficient (>=10) length
@@ -133,7 +129,6 @@ spec = do
         Text.length (Text.filter isNumber pass) > 1
 
     it "usually has at least one special when enabled" $ hedgehog $ do
-      trigraph <- liftIO $ loadTrigraph English
       opts <- forAll Gen.genPasswordOpts
       randomGen <- forAll Gen.stdGen
       -- Only consider passwords of sufficient (>=3) length
@@ -155,7 +150,6 @@ spec = do
         Text.any (`elem` allSymbols) pass
 
     it "sometimes has at multiple specials when enabled" $ hedgehog $ do
-      trigraph <- liftIO $ loadTrigraph English
       opts <- forAll Gen.genPasswordOpts
       randomGen <- forAll Gen.stdGen
       -- Only consider passwords of sufficient (>=10) length
@@ -178,7 +172,6 @@ spec = do
 
   describe "genPassphrase" $ do
     it "words have correct length" $ hedgehog $ do
-      trigraph <- liftIO $ loadTrigraph English
       opts <- forAll Gen.genPassphraseOpts
       randomGen <- forAll Gen.stdGen
 
@@ -196,3 +189,33 @@ spec = do
       assert $
         not (null phrase)
           && all (isInRange . unWord) (take listSize phrase)
+
+  describe "genPassphrase'" $ do
+    it "has the correct number of words" $ hedgehog $ do
+      opts <- forAll Gen.genPassphraseOpts
+      numberWords <- forAll $ Gen.int (Range.linear 0 100)
+      randomGen <- forAll Gen.stdGen
+
+      let opts' = opts {poptsTrigraph = trigraph}
+
+      (phrase, _) <- usingPassT randomGen (genPassphrase' opts' numberWords)
+      annotateShow phrase
+
+      length phrase === numberWords
+
+    it "words have correct length" $ hedgehog $ do
+      opts <- forAll Gen.genPassphraseOpts
+      numberWords <- forAll $ Gen.int (Range.linear 1 100)
+      randomGen <- forAll Gen.stdGen
+
+      let opts' = opts {poptsTrigraph = trigraph}
+
+      (phrase, _) <- liftIO $ usingPassT randomGen (genPassphrase' opts' numberWords)
+      annotateShow phrase
+
+      let minLen = poptsMinLength opts'
+          maxLen = poptsMaxLength opts'
+          isInRange w = Text.length w >= minLen && Text.length w <= maxLen
+
+      assert $
+        not (null phrase) && all (isInRange . unWord) phrase
