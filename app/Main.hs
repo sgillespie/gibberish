@@ -1,14 +1,12 @@
 module Main (main) where
 
-import Data.Elocrypt hiding (genPassword, genPasswords)
 import Data.Gibberish.Format qualified as Fmt
-import Data.Gibberish.GenPass (genPassword)
+import Data.Gibberish.GenPass (genPassphrase, genPassword)
 import Data.Gibberish.MonadPass (Pass (), usingPass)
 import Data.Gibberish.Trigraph (Language (..), loadTrigraph)
-import Data.Gibberish.Types (GenPasswordOpts (..))
+import Data.Gibberish.Types (GenPassphraseOpts (..), GenPasswordOpts (..))
 
 import Control.Monad.IO.Class (MonadIO (..))
-import Data.Maybe (fromMaybe)
 import Data.Text (Text ())
 import Data.Text qualified as Text
 import Data.Text.IO qualified as Text
@@ -94,9 +92,7 @@ passwords (CommonOpts {..}) (WordOpts {..}) gen = do
             optExactWords = Fmt.ExactNumberWords <$> optNumber
           }
 
-  pure $
-    fst $
-      usingPass gen (genPasswords genOpts formatOpts)
+  pure $ fst $ usingPass gen (genPasswords genOpts formatOpts)
 
 genPasswords :: RandomGen gen => GenPasswordOpts -> Fmt.FormatOpts -> Pass gen Text
 genPasswords genOpts formatOpts = do
@@ -104,19 +100,31 @@ genPasswords genOpts formatOpts = do
   pure (Fmt.formatWords formatOpts res)
 
 passphrases :: RandomGen gen => CommonOpts -> PhraseOpts -> gen -> IO Text
-passphrases opts@(CommonOpts {..}) (PhraseOpts {..}) gen =
-  pure $ Text.intercalate " " $ map Text.pack passphrases'
-  where
-    passphrases' = newPassphrase num optMinLength optMaxLength (getGenOptions opts) gen
-    num = fromMaybe termLen optNumber
+passphrases (CommonOpts {..}) (PhraseOpts {..}) gen = do
+  trigraph <- liftIO $ loadTrigraph English
 
-getGenOptions :: CommonOpts -> GenOptions
-getGenOptions CommonOpts {..} =
-  genOptions
-    { genCapitals = optCapitals,
-      genDigits = optDigits,
-      genSpecials = optSpecials
-    }
+  let genOpts =
+        GenPassphraseOpts
+          { poptsCapitals = optCapitals,
+            poptsDigits = optDigits,
+            poptsSpecials = optSpecials,
+            poptsTrigraph = trigraph,
+            poptsMinLength = optMinLength,
+            poptsMaxLength = optMaxLength
+          }
+      formatOpts =
+        Fmt.FormatOpts
+          { optMaxLen = Fmt.MaxLen termLen,
+            optMaxHeight = Fmt.MaxHeight termHeight,
+            optSeparator = Fmt.Separator " ",
+            optExactWords = Fmt.ExactNumberWords <$> optNumber
+          }
+
+  let (res, _) = usingPass gen $ do
+        words' <- genPassphrase genOpts
+        pure (Fmt.formatWords formatOpts words')
+
+  pure res
 
 execParser' :: ParserInfo a -> IO a
 execParser' info' =
