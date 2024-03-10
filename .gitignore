@@ -30,6 +30,7 @@ dist-newstyle
 
 ### Nix
 result
+result-*
 .direnv
 
 ### Tests
