@@ -20,10 +20,16 @@ import Prelude hiding (Word)
 
 spec :: Spec
 spec = do
-  trigraph <- runIO $ loadTrigraph English
+  trigraphs <-
+    sequence
+      [ runIO (loadTrigraph English),
+        runIO (loadTrigraph Spanish)
+      ]
+  let genTrigraph = Gen.element trigraphs
 
   describe "genPassword" $ do
     it "has correct length" $ hedgehog $ do
+      trigraph <- forAll genTrigraph
       opts <- forAll Gen.genPasswordOpts
       randomGen <- forAll Gen.stdGen
 
@@ -35,6 +41,7 @@ spec = do
       Text.length pass === woptsLength opts
 
     it "has only lowercase when capitals is false" $ hedgehog $ do
+      trigraph <- forAll genTrigraph
       opts <- forAll Gen.genPasswordOpts
       randomGen <- forAll Gen.stdGen
       -- Only consider passwords of sufficient (>=3) length
@@ -53,6 +60,7 @@ spec = do
       assert $ Text.all (not . isUpperCase) pass
 
     it "has at least one capital when enabled" $ hedgehog $ do
+      trigraph <- forAll genTrigraph
       opts <- forAll Gen.genPasswordOpts
       randomGen <- forAll Gen.stdGen
       -- Only consider passwords of sufficient (>=3) length
@@ -71,6 +79,7 @@ spec = do
       assert $ Text.any (\c -> isUpperCase c || isPunctuation c) pass
 
     it "sometimes has multiple capitals when enabled" $ hedgehog $ do
+      trigraph <- forAll genTrigraph
       opts <- forAll Gen.genPasswordOpts
       randomGen <- forAll Gen.stdGen
       -- Only consider passwords of sufficient (>=10) length
@@ -90,6 +99,7 @@ spec = do
         Text.length (Text.filter isUpperCase pass) > 1
 
     it "has at least one digit when enabled" $ hedgehog $ do
+      trigraph <- forAll genTrigraph
       opts <- forAll Gen.genPasswordOpts
       randomGen <- forAll Gen.stdGen
       -- Only consider passwords of sufficient (>=3) length
@@ -110,6 +120,7 @@ spec = do
           || Text.all (`Map.notMember` numeralConversions) pass
 
     it "sometimes has multiple digits when enabled" $ hedgehog $ do
+      trigraph <- forAll genTrigraph
       opts <- forAll Gen.genPasswordOpts
       randomGen <- forAll Gen.stdGen
       -- Only consider passwords of sufficient (>=10) length
@@ -129,6 +140,7 @@ spec = do
         Text.length (Text.filter isNumber pass) > 1
 
     it "usually has at least one special when enabled" $ hedgehog $ do
+      trigraph <- forAll genTrigraph
       opts <- forAll Gen.genPasswordOpts
       randomGen <- forAll Gen.stdGen
       -- Only consider passwords of sufficient (>=3) length
@@ -150,6 +162,7 @@ spec = do
         Text.any (`elem` allSymbols) pass
 
     it "sometimes has at multiple specials when enabled" $ hedgehog $ do
+      trigraph <- forAll genTrigraph
       opts <- forAll Gen.genPasswordOpts
       randomGen <- forAll Gen.stdGen
       -- Only consider passwords of sufficient (>=10) length
@@ -172,6 +185,7 @@ spec = do
 
   describe "genPassphrase" $ do
     it "words have correct length" $ hedgehog $ do
+      trigraph <- forAll genTrigraph
       opts <- forAll Gen.genPassphraseOpts
       randomGen <- forAll Gen.stdGen
 
@@ -192,6 +206,7 @@ spec = do
 
   describe "genPassphrase'" $ do
     it "has the correct number of words" $ hedgehog $ do
+      trigraph <- forAll genTrigraph
       opts <- forAll Gen.genPassphraseOpts
       numberWords <- forAll $ Gen.int (Range.linear 0 100)
       randomGen <- forAll Gen.stdGen
@@ -204,6 +219,7 @@ spec = do
       length phrase === numberWords
 
     it "words have correct length" $ hedgehog $ do
+      trigraph <- forAll genTrigraph
       opts <- forAll Gen.genPassphraseOpts
       numberWords <- forAll $ Gen.int (Range.linear 1 100)
       randomGen <- forAll Gen.stdGen
