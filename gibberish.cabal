@@ -95,9 +95,6 @@ common common-test
 library
   import:          common-options
   exposed-modules:
-    Data.Elocrypt,
-    Data.Elocrypt.Trigraph,
-    Data.Elocrypt.Utils,
     Data.Gibberish.Errors,
     Data.Gibberish.Format,
     Data.Gibberish.GenPass,
@@ -140,21 +137,6 @@ library testlib
     hedgehog
   hs-source-dirs:
     testlib
-
-test-suite test
-  import:         common-test
-  main-is:        Tests.hs
-  other-modules:
-    Paths_gibberish,
-    Test.Elocrypt.Instances,
-    Test.Elocrypt.QuickCheck,
-    Test.Elocrypt.TrigraphTest,
-    Test.Elocrypt.UtilsTest,
-    Test.ElocryptTest,
-  default-extensions:
-    TemplateHaskell
-  type:
-    exitcode-stdio-1.0
 
 test-suite spec
   import:         common-test
