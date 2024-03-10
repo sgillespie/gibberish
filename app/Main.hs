@@ -3,7 +3,7 @@ module Main (main) where
 import Data.Gibberish.Format qualified as Fmt
 import Data.Gibberish.GenPass (genPassphrase, genPassword)
 import Data.Gibberish.MonadPass (Pass (), usingPass)
-import Data.Gibberish.Trigraph (Language (..), loadTrigraph)
+import Data.Gibberish.Trigraph (Language (..), TrigraphConfig (..), loadTrigraph)
 import Data.Gibberish.Types (GenPassphraseOpts (..), GenPasswordOpts (..))
 
 import Control.Monad.IO.Class (MonadIO (..))
@@ -40,7 +40,9 @@ data CommonOpts = CommonOpts
     -- | Include special characters?
     optSpecials :: !Bool,
     -- | How many passwords/phrases to generate
-    optNumber :: !(Maybe Int)
+    optNumber :: !(Maybe Int),
+    -- | The dictionary to use
+    optLanguage :: !LanguageOpt
   }
   deriving stock (Eq, Show)
 
@@ -52,6 +54,12 @@ data PhraseOpts = PhraseOpts
   { optMinLength :: Int,
     optMaxLength :: Int
   }
+  deriving stock (Eq, Show)
+
+data LanguageOpt
+  = OptEnglish
+  | OptSpanish
+  | OptLangCustom !TrigraphConfig
   deriving stock (Eq, Show)
 
 data PassType = Passphrase | Password
@@ -74,7 +82,7 @@ run (Options {..}) = Text.putStrLn =<< run' optType =<< getStdGen
 
 passwords :: RandomGen gen => CommonOpts -> WordOpts -> gen -> IO Text
 passwords (CommonOpts {..}) (WordOpts {..}) gen = do
-  trigraph <- liftIO $ loadTrigraph English
+  trigraph <- liftIO $ loadTrigraph (toLanguage optLanguage)
 
   let genOpts =
         GenPasswordOpts
@@ -160,6 +168,7 @@ parseCommonOpts =
     <*> parseDigits
     <*> parseSpecials
     <*> parseNumber
+    <*> parseLanguage
 
 parseCapitals :: Parser Bool
 parseCapitals =
@@ -190,6 +199,29 @@ parseNumber =
         <> short 'n'
         <> metavar "NUMBER"
         <> help "The number of passwords to generate"
+
+parseLanguage :: Parser LanguageOpt
+parseLanguage =
+  (OptLangCustom . TrigraphConfig <$> parseTrigraph)
+    <|> parseSpanish
+    <|> parseEnglish
+  where
+    parseTrigraph =
+      option str $
+        long "trigraph"
+          <> short 't'
+          <> help "Use a custom trigraph config"
+    parseSpanish =
+      flag' OptSpanish $
+        long "spanish"
+          <> short 'a'
+          <> help "Use spanish dictionary"
+
+    parseEnglish =
+      flag OptEnglish OptEnglish $
+        long "english"
+          <> short 'e'
+          <> help "Use english dictionary [default]"
 
 parseTypeOpts :: Parser (Either WordOpts PhraseOpts)
 parseTypeOpts =
@@ -234,3 +266,8 @@ showVersion' = name' <> " version " <> version'
   where
     version' = Text.pack (showVersion version)
     name' = Text.toTitle (Text.pack name)
+
+toLanguage :: LanguageOpt -> Language
+toLanguage OptEnglish = English
+toLanguage OptSpanish = Spanish
+toLanguage (OptLangCustom file) = CustomTrigraph file

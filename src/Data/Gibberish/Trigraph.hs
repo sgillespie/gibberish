@@ -23,6 +23,7 @@ import System.FilePath ((</>))
 
 data Language
   = English
+  | Spanish
   | CustomTrigraph TrigraphConfig
   deriving stock (Eq, Show)
 
@@ -54,6 +55,7 @@ scanTrigrams word = case Text.take 3 word of
 
 loadTrigraph :: Language -> IO Trigraph
 loadTrigraph English = loadBuiltinTrigraph "wamerican.json"
+loadTrigraph Spanish = loadBuiltinTrigraph "wspanish.json"
 loadTrigraph (CustomTrigraph cfg) = loadTrigraphFromFile (unTrigraphConfig cfg)
 
 loadBuiltinTrigraph :: FilePath -> IO Trigraph
