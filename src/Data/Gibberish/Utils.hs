@@ -5,6 +5,8 @@ module Data.Gibberish.Utils
     updateR,
     findIndices,
     textTraverse,
+    toQwertyKey,
+    qwertyKeys,
   ) where
 
 import Control.Monad.Random (MonadRandom (), fromList)
@@ -77,3 +79,32 @@ textTraverse f = Text.foldr folder (pure Text.empty)
       accum' <- accum
       c' <- f c
       pure $ Text.cons c' accum'
+
+-- | Transform a letter-type character to something that's easy to type on a
+-- QWERTY keyboard
+toQwertyKey :: Char -> Char
+toQwertyKey 'à' = 'a'
+toQwertyKey 'á' = 'a'
+toQwertyKey 'â' = 'a'
+toQwertyKey 'ä' = 'a'
+toQwertyKey 'å' = 'a'
+toQwertyKey 'ç' = 'c'
+toQwertyKey 'è' = 'e'
+toQwertyKey 'é' = 'e'
+toQwertyKey 'ê' = 'e'
+toQwertyKey 'ë' = 'e'
+toQwertyKey 'í' = 'i'
+toQwertyKey 'ï' = 'i'
+toQwertyKey 'ñ' = 'n'
+toQwertyKey 'ó' = 'o'
+toQwertyKey 'ô' = 'o'
+toQwertyKey 'ö' = 'o'
+toQwertyKey 'û' = 'u'
+toQwertyKey 'ü' = 'u'
+toQwertyKey 'ú' = 'u'
+toQwertyKey c = c
+
+-- | All the characters that are easy to type on a QWERTY keyboard
+qwertyKeys :: [Char]
+qwertyKeys =
+  "1234567890-=qwertyuiop[]\\asdfghjkl;'zxcvbnm,./!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:'\"ZXCVBNM<>?"

@@ -7,11 +7,13 @@ module Data.Gibberish.Trigraph
     loadTrigraph,
   ) where
 
+import Data.Gibberish.Utils (toQwertyKey)
 import Paths_gibberish (getDataFileName)
 
 import Control.Exception (throwIO)
 import Control.Monad (unless)
 import Data.Aeson qualified as Aeson
+import Data.Char (isPunctuation, toLower)
 import Data.Gibberish.Types
 import Data.Map.Strict (Map ())
 import Data.Map.Strict qualified as Map
@@ -33,10 +35,14 @@ newtype TrigraphConfig = TrigraphConfig
 
 -- | Generate trigraphs from a list of words
 genTrigraph :: [Text] -> Trigraph
-genTrigraph = Trigraph . foldr foldWord Map.empty
+genTrigraph = Trigraph . foldr (foldWord . transform) Map.empty
   where
     foldWord = Map.unionWith combine . mkTrigraph
     combine (Frequencies f1) (Frequencies f2) = Frequencies $ Map.unionWith (+) f1 f2
+
+    transform word' =
+      Text.map (toQwertyKey . toLower) $
+        Text.filter (not . isPunctuation) word'
 
 -- | Generate a trigraph from a single word
 mkTrigraph :: Text -> Map Digram Frequencies

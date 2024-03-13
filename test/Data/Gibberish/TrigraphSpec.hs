@@ -4,12 +4,15 @@ module Data.Gibberish.TrigraphSpec (spec) where
 
 import Data.Gibberish.Trigraph
 import Data.Gibberish.Types
+import Data.Gibberish.Utils (qwertyKeys)
 import Paths_gibberish (getDataFileName)
 import Test.Gibberish.Gen qualified as Gen
 
 import Control.Monad (void)
 import Data.List qualified as List
 import Data.Map qualified as Map
+import Data.Set (Set ())
+import Data.Set qualified as Set
 import Data.Text (Text ())
 import Data.Text qualified as Text
 import Hedgehog
@@ -63,6 +66,10 @@ spec = do
       void $
         loadTrigraph English
 
+    it "loads spanish" $
+      void $
+        loadTrigraph Spanish
+
     it "loads custom" $ do
       tri <- getDataFileName ("data" </> "trigraphs" </> "wamerican.json")
       void $
@@ -71,6 +78,14 @@ spec = do
     it "handles load failure" $ do
       loadTrigraph (CustomTrigraph $ TrigraphConfig "doesnotexist.json")
         `shouldThrow` isTrigraphNotFound
+
+    it "contains only qwerty keys" $ do
+      -- concatMap of Sets
+      let concatMap' f = foldr (\x xs -> f x `Set.union` xs) Set.empty
+      -- Find all trigraphs
+      trigraphs <- sequence [loadTrigraph English, loadTrigraph Spanish] :: IO [Trigraph]
+      -- Neither trigraph should have non-qwertys
+      concatMap' allChars trigraphs `shouldSatisfy` all (`elem` qwertyKeys)
 
 trigrams :: Text -> [Trigram]
 trigrams ts = case Text.take 3 ts of
@@ -83,6 +98,16 @@ allTrigrams (Trigraph tris) =
   where
     mapFrequencies (Digram c1 c2) (Frequencies freqs) =
       map (\(Unigram c3) -> Trigram c1 c2 c3) $ Map.keys freqs
+
+allChars :: Trigraph -> Set Char
+allChars = Map.foldrWithKey foldTrigraph Set.empty . unTrigraph
+  where
+    foldTrigraph (Digram c1 c2) (Frequencies freqs) cs =
+      Set.insert c1 $
+        Set.insert c2 $
+          foldFrequencies freqs `Set.union` cs
+
+    foldFrequencies = Map.foldrWithKey (const . Set.insert . unUnigram) Set.empty
 
 hasDuplicates :: Ord a => [a] -> Bool
 hasDuplicates ls = ls /= List.nub ls
