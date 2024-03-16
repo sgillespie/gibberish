@@ -35,14 +35,10 @@ newtype TrigraphConfig = TrigraphConfig
 
 -- | Generate trigraphs from a list of words
 genTrigraph :: [Text] -> Trigraph
-genTrigraph = Trigraph . foldr (foldWord . transform) Map.empty
+genTrigraph = Trigraph . foldr (foldWord . normalizeWord) Map.empty
   where
     foldWord = Map.unionWith combine . mkTrigraph
     combine (Frequencies f1) (Frequencies f2) = Frequencies $ Map.unionWith (+) f1 f2
-
-    transform word' =
-      Text.map (toQwertyKey . toLower) $
-        Text.filter (not . isPunctuation) word'
 
 -- | Generate a trigraph from a single word
 mkTrigraph :: Text -> Map Digram Frequencies
@@ -53,6 +49,20 @@ mkTrigraph word = foldr insert' Map.empty $ scanTrigrams word
     combineFrequencies (Frequencies m1) (Frequencies m2) =
       Frequencies (Map.unionWith (+) m1 m2)
     mkFrequencies c = Frequencies $ Map.singleton (Unigram c) 1
+
+-- | Normalize a word before calculating the trigraph:
+--
+--  1. Remove punctuation (quotes, dashes, and so on)
+--  2. Lower case all letters
+--  3. Translate non-qwerty chars to qwerty keys (eg, à -> a)
+normalizeWord :: Text -> Text
+normalizeWord = Text.map transformChar . Text.filter filterChar
+  where
+    transformChar :: Char -> Char
+    transformChar = toQwertyKey . toLower
+
+    filterChar :: Char -> Bool
+    filterChar = not . isPunctuation
 
 scanTrigrams :: Text -> [Trigram]
 scanTrigrams word = case Text.take 3 word of
