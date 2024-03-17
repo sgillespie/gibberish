@@ -1,6 +1,6 @@
 module Main (main) where
 
-import Data.Gibberish.Trigraph (genTrigraph)
+import Data.Gibberish (genTrigraph)
 
 import Data.Aeson.Encode.Pretty (encodePretty)
 import Data.ByteString.Lazy (ByteString ())

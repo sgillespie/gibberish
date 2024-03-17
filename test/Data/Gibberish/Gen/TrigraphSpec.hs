@@ -1,8 +1,9 @@
 {-# LANGUAGE OverloadedLists #-}
 
-module Data.Gibberish.TrigraphSpec (spec) where
+module Data.Gibberish.Gen.TrigraphSpec (spec) where
 
-import Data.Gibberish.Trigraph
+import Data.Gibberish.Errors (isTrigraphNotFound)
+import Data.Gibberish.Gen.Trigraph
 import Data.Gibberish.Types
 import Data.Gibberish.Utils (qwertyKeys)
 import Paths_gibberish (getDataFileName)

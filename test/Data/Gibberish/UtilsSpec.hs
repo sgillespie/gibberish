@@ -1,6 +1,6 @@
 module Data.Gibberish.UtilsSpec (spec) where
 
-import Data.Gibberish.MonadPass (usingPass)
+import Data.Gibberish.Monad.Pass (usingPass)
 import Data.Gibberish.Utils
 import Test.Gibberish.Gen qualified as Gen
 

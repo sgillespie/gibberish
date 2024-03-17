@@ -95,11 +95,13 @@ common common-test
 library
   import:          common-options
   exposed-modules:
+    Data.Gibberish,
     Data.Gibberish.Errors,
-    Data.Gibberish.Format,
-    Data.Gibberish.GenPass,
-    Data.Gibberish.MonadPass,
-    Data.Gibberish.Trigraph,
+    Data.Gibberish.Formatting,
+    Data.Gibberish.Gen,
+    Data.Gibberish.Gen.Pass,
+    Data.Gibberish.Gen.Trigraph,
+    Data.Gibberish.Monad.Pass,
     Data.Gibberish.Types,
     Data.Gibberish.Utils
   other-modules:
@@ -145,9 +147,9 @@ test-suite spec
   build-tool-depends:
     hspec-discover:hspec-discover
   other-modules:
-    Data.Gibberish.FormatSpec
-    Data.Gibberish.GenPassSpec
-    Data.Gibberish.TrigraphSpec
+    Data.Gibberish.FormattingSpec
+    Data.Gibberish.Gen.PassSpec
+    Data.Gibberish.Gen.TrigraphSpec
     Data.Gibberish.TypesSpec
     Data.Gibberish.UtilsSpec
     Paths_gibberish

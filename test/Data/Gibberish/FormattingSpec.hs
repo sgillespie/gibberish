@@ -1,6 +1,6 @@
-module Data.Gibberish.FormatSpec (spec) where
+module Data.Gibberish.FormattingSpec (spec) where
 
-import Data.Gibberish.Format
+import Data.Gibberish.Formatting
 import Data.Gibberish.Types
 
 import Control.Monad (forM_)

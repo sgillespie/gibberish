@@ -1,12 +1,13 @@
 {-# LANGUAGE OverloadedLists #-}
 
-module Data.Gibberish.Trigraph
+module Data.Gibberish.Gen.Trigraph
   ( Language (..),
     TrigraphConfig (..),
     genTrigraph,
     loadTrigraph,
   ) where
 
+import Data.Gibberish.Errors (GibberishErr (..))
 import Data.Gibberish.Utils (toQwertyKey)
 import Paths_gibberish (getDataFileName)
 

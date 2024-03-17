@@ -1,13 +1,13 @@
 {-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Data.Gibberish.GenPass
+module Data.Gibberish.Gen.Pass
   ( genPassword,
     genPassphrase,
     genPassphrase',
   ) where
 
-import Data.Gibberish.MonadPass (MonadRandom ())
+import Data.Gibberish.Monad.Pass (MonadRandom ())
 import Data.Gibberish.Types
 import Data.Gibberish.Utils
 

@@ -1,4 +1,4 @@
-module Data.Gibberish.Format
+module Data.Gibberish.Formatting
   ( FormatOpts (..),
     MaxLen (..),
     MaxHeight (..),

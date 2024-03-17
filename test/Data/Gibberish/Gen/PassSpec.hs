@@ -1,8 +1,8 @@
-module Data.Gibberish.GenPassSpec (spec) where
+module Data.Gibberish.Gen.PassSpec (spec) where
 
-import Data.Gibberish.GenPass (genPassphrase, genPassphrase', genPassword)
-import Data.Gibberish.MonadPass (usingPass, usingPassT)
-import Data.Gibberish.Trigraph (Language (..), loadTrigraph)
+import Data.Gibberish.Gen.Pass (genPassphrase, genPassphrase', genPassword)
+import Data.Gibberish.Gen.Trigraph (Language (..), loadTrigraph)
+import Data.Gibberish.Monad.Pass (usingPass, usingPassT)
 import Data.Gibberish.Types
 import Data.Gibberish.Utils (numeralConversions, symbolConversions)
 import Test.Gibberish.Gen qualified as Gen

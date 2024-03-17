@@ -10,10 +10,7 @@ module Data.Gibberish.Types
     Frequencies (..),
     Trigraph (..),
     Word (..),
-    module Data.Gibberish.Errors,
   ) where
-
-import Data.Gibberish.Errors
 
 import Control.DeepSeq (NFData)
 import Data.Aeson (FromJSON (..), FromJSONKey (..), ToJSON (..), ToJSONKey (..))

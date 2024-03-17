@@ -1,10 +1,7 @@
 module Main (main) where
 
-import Data.Gibberish.Format qualified as Fmt
-import Data.Gibberish.GenPass (genPassphrase, genPassword)
-import Data.Gibberish.MonadPass (Pass (), usingPass)
-import Data.Gibberish.Trigraph (Language (..), TrigraphConfig (..), loadTrigraph)
-import Data.Gibberish.Types (GenPassphraseOpts (..), GenPasswordOpts (..))
+import Data.Gibberish
+import Data.Gibberish.Formatting qualified as Fmt
 
 import Control.Monad.IO.Class (MonadIO (..))
 import Data.Text (Text ())

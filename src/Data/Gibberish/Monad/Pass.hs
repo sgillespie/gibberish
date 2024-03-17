@@ -1,4 +1,4 @@
-module Data.Gibberish.MonadPass
+module Data.Gibberish.Monad.Pass
   ( Pass (),
     PassT (..),
     MonadRandom (..),
