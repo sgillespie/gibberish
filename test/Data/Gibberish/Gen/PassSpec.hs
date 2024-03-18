@@ -1,7 +1,7 @@
 module Data.Gibberish.Gen.PassSpec (spec) where
 
 import Data.Gibberish.Gen.Pass
-import Data.Gibberish.Gen.Trigraph (Language (..), loadTrigraph)
+import Data.Gibberish.Gen.Trigraph (loadTrigraph)
 import Data.Gibberish.Monad.Pass (usingPass, usingPassT)
 import Data.Gibberish.Types
 import Data.Gibberish.Utils (numeralConversions, symbolConversions)

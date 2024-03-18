@@ -1,13 +1,12 @@
 {-# LANGUAGE OverloadedLists #-}
 
 module Data.Gibberish.Gen.Trigraph
-  ( Language (..),
-    TrigraphConfig (..),
-    genTrigraph,
+  ( genTrigraph,
     loadTrigraph,
   ) where
 
 import Data.Gibberish.Errors (GibberishErr (..))
+import Data.Gibberish.Types
 import Data.Gibberish.Utils (toQwertyKey)
 import Paths_gibberish (getDataFileName)
 
@@ -15,7 +14,6 @@ import Control.Exception (throwIO)
 import Control.Monad (unless)
 import Data.Aeson qualified as Aeson
 import Data.Char (isPunctuation, toLower)
-import Data.Gibberish.Types
 import Data.Map.Strict (Map ())
 import Data.Map.Strict qualified as Map
 import Data.Maybe (fromJust)
@@ -23,16 +21,6 @@ import Data.Text (Text ())
 import Data.Text qualified as Text
 import System.Directory (doesFileExist)
 import System.FilePath ((</>))
-
-data Language
-  = English
-  | Spanish
-  | CustomTrigraph TrigraphConfig
-  deriving stock (Eq, Show)
-
-newtype TrigraphConfig = TrigraphConfig
-  {unTrigraphConfig :: FilePath}
-  deriving stock (Eq, Show)
 
 -- | Generate trigraphs from a list of words
 genTrigraph :: [Text] -> Trigraph

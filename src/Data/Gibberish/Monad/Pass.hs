@@ -1,18 +1,16 @@
 module Data.Gibberish.Monad.Pass
   ( Pass (),
     PassT (..),
-    MonadRandom (..),
     runPass,
     evalPass,
     usingPass,
     runPassT,
     evalPassT,
     usingPassT,
+    module Control.Monad.Random,
   ) where
 
-import Control.Monad.IO.Class (MonadIO ())
-import Control.Monad.Random (MonadRandom (..))
-import Control.Monad.Trans.Random (RandT (), evalRandT, runRandT)
+import Control.Monad.Random
 import Data.Functor.Identity (Identity (..))
 
 -- | Password/Passphrase generation monad parameterized by the type @gen@ of the generator

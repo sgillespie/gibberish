@@ -3,7 +3,6 @@ module Main (main) where
 import Data.Gibberish
 import Data.Gibberish.Formatting qualified as Fmt
 
-import Control.Monad.IO.Class (MonadIO (..))
 import Data.Text (Text ())
 import Data.Text qualified as Text
 import Data.Text.IO qualified as Text
@@ -12,7 +11,6 @@ import Options.Applicative hiding (columns)
 import Options.Applicative.Help.Pretty
 import PackageInfo_gibberish (name, version)
 import System.Environment (getArgs)
-import System.Random (RandomGen (..), getStdGen)
 import Prelude hiding (Word ())
 
 termLen :: Int

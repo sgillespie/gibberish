@@ -3,6 +3,8 @@
 module Data.Gibberish.Types
   ( GenPasswordOpts (..),
     GenPassphraseOpts (..),
+    Language (..),
+    TrigraphConfig (..),
     Unigram (..),
     Digram (..),
     Trigram (..),
@@ -52,6 +54,18 @@ data GenPassphraseOpts = GenPassphraseOpts
     -- | The maximum length of each word
     poptsMaxLength :: !Int
   }
+  deriving stock (Eq, Show)
+
+-- | A language indicating the dictionary that generated a trigraph
+data Language
+  = English
+  | Spanish
+  | CustomTrigraph TrigraphConfig
+  deriving stock (Eq, Show)
+
+-- | A path to a trigraph json config file
+newtype TrigraphConfig = TrigraphConfig
+  {unTrigraphConfig :: FilePath}
   deriving stock (Eq, Show)
 
 -- | A unigram is a single letter
