@@ -3,6 +3,8 @@
 
 module Data.Gibberish.Gen.Pass
   ( genPassword,
+    genPasswords,
+    genPasswords',
     genPassphrase,
     genPassphrase',
   ) where
@@ -48,6 +50,14 @@ genPassword' opts@(GenPasswordOpts {..}) = do
           >=> specialize opts
 
   Word <$> transform pass
+
+-- | Generate passwords with the given options. /Warning:/ Do not use with the IO monad,
+-- instead use `genPasswords'`
+genPasswords :: MonadRandom m => GenPasswordOpts -> m [Word]
+genPasswords = sequence . repeat . genPassword
+
+genPasswords' :: MonadRandom m => GenPasswordOpts -> Int -> m [Word]
+genPasswords' = flip replicateM . genPassword
 
 -- | Generate a passphrase with the given options. /Warning:/ Do not use with the IO monad,
 -- instead use `genPassphrash'`

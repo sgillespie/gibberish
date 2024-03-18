@@ -97,11 +97,8 @@ passwords (CommonOpts {..}) (WordOpts {..}) gen = do
             optExactWords = Fmt.ExactNumberWords <$> optNumber
           }
 
-  pure $ fst $ usingPass gen (genPasswords genOpts formatOpts)
+      (res, _) = usingPass gen (genPasswords genOpts)
 
-genPasswords :: RandomGen gen => GenPasswordOpts -> Fmt.FormatOpts -> Pass gen Text
-genPasswords genOpts formatOpts = do
-  res <- sequence $ repeat (genPassword genOpts)
   pure (Fmt.formatWords formatOpts res)
 
 passphrases :: RandomGen gen => CommonOpts -> PhraseOpts -> gen -> IO Text
@@ -125,11 +122,9 @@ passphrases (CommonOpts {..}) (PhraseOpts {..}) gen = do
             optExactWords = Fmt.ExactNumberWords <$> optNumber
           }
 
-  let (res, _) = usingPass gen $ do
-        words' <- genPassphrase genOpts
-        pure (Fmt.formatWords formatOpts words')
+      (res, _) = usingPass gen (genPassphrase genOpts)
 
-  pure res
+  pure (Fmt.formatWords formatOpts res)
 
 execParser' :: ParserInfo a -> IO a
 execParser' info' =

@@ -1,6 +1,6 @@
 module Data.Gibberish.Gen.PassSpec (spec) where
 
-import Data.Gibberish.Gen.Pass (genPassphrase, genPassphrase', genPassword)
+import Data.Gibberish.Gen.Pass
 import Data.Gibberish.Gen.Trigraph (Language (..), loadTrigraph)
 import Data.Gibberish.Monad.Pass (usingPass, usingPassT)
 import Data.Gibberish.Types
@@ -182,6 +182,56 @@ spec = do
 
       cover 10 "has at least one special" $
         Text.length (Text.filter (`elem` allSymbols) pass) > 1
+
+  describe "genPasswords" $ do
+    it "passwords have the correct length" $ hedgehog $ do
+      trigraph <- forAll genTrigraph
+      opts <- forAll Gen.genPasswordOpts
+      randomGen <- forAll Gen.stdGen
+
+      let opts' = opts {woptsTrigraph = trigraph}
+
+      let (passes, _) = usingPass randomGen (genPasswords opts')
+      annotateShow passes
+
+      listSize <- forAll $ Gen.int (Range.linear 1 50)
+
+      let shouldHaveLength (Word w) = (Text.length w ==)
+
+      assert $
+        not (null passes)
+          && all (`shouldHaveLength` woptsLength opts') (take listSize passes)
+
+  describe "genPasswords'" $ do
+    it "passwords have the correct length" $ hedgehog $ do
+      trigraph <- forAll genTrigraph
+      opts <- forAll Gen.genPasswordOpts
+      numberWords <- forAll $ Gen.int (Range.linear 1 100)
+      randomGen <- forAll Gen.stdGen
+
+      let opts' = opts {woptsTrigraph = trigraph}
+
+      (passes, _) <- liftIO $ usingPassT randomGen (genPasswords' opts' numberWords)
+      annotateShow passes
+
+      let shouldHaveLength (Word w) = (Text.length w ==)
+
+      assert $
+        not (null passes)
+          && all (`shouldHaveLength` woptsLength opts') passes
+
+    it "has the correct number of passwords" $ hedgehog $ do
+      trigraph <- forAll genTrigraph
+      opts <- forAll Gen.genPasswordOpts
+      numberWords <- forAll $ Gen.int (Range.linear 1 100)
+      randomGen <- forAll Gen.stdGen
+
+      let opts' = opts {woptsTrigraph = trigraph}
+
+      (passes, _) <- liftIO $ usingPassT randomGen (genPasswords' opts' numberWords)
+      annotateShow passes
+
+      length passes === numberWords
 
   describe "genPassphrase" $ do
     it "words have correct length" $ hedgehog $ do

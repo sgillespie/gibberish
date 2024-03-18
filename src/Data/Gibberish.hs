@@ -12,6 +12,8 @@ module Data.Gibberish
 
     -- * Password/phrase generation
     genPassword,
+    genPasswords,
+    genPasswords',
     genPassphrase,
     genPassphrase',
 
