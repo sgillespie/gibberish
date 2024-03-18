@@ -196,8 +196,6 @@ spec = do
 
       listSize <- forAll $ Gen.int (Range.linear 1 50)
 
-      let shouldHaveLength (Word w) = (Text.length w ==)
-
       assert $
         not (null passes)
           && all (`shouldHaveLength` woptsLength opts') (take listSize passes)
@@ -213,8 +211,6 @@ spec = do
 
       (passes, _) <- liftIO $ usingPassT randomGen (genPasswords' opts' numberWords)
       annotateShow passes
-
-      let shouldHaveLength (Word w) = (Text.length w ==)
 
       assert $
         not (null passes)
@@ -285,3 +281,6 @@ spec = do
 
       assert $
         not (null phrase) && all (isInRange . unWord) phrase
+
+shouldHaveLength :: Word -> Int -> Bool
+shouldHaveLength (Word w) = (Text.length w ==)
