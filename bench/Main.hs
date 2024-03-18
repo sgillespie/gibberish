@@ -1,8 +1,7 @@
 module Main (main) where
 
-import Data.Gibberish.Format
-import Data.Gibberish.Trigraph (genTrigraph)
-import Data.Gibberish.Types (Trigraph (..), Word (..))
+import Data.Gibberish (Trigraph (..), Word (..), genTrigraph)
+import Data.Gibberish.Formatting qualified as Fmt
 import Paths_gibberish (getDataDir)
 
 import Criterion.Main
@@ -34,12 +33,12 @@ main =
     ]
 
 formatWords' :: [Text] -> Text
-formatWords' = formatWords opts . map Word
+formatWords' = Fmt.formatWords opts . map Word
   where
     opts =
-      FormatOpts
-        { optMaxLen = MaxLen 100,
-          optMaxHeight = MaxHeight 1000,
-          optSeparator = Separator " ",
+      Fmt.FormatOpts
+        { optMaxLen = Fmt.MaxLen 100,
+          optMaxHeight = Fmt.MaxHeight 1000,
+          optSeparator = Fmt.Separator " ",
           optExactWords = Nothing
         }
