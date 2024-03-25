@@ -16,8 +16,6 @@ description:
 extra-source-files:
   README.md,
   test/*.hs,
-  test/Test/*.hs,
-  test/Test/Elocrypt/*.hs
 
 data-files:
   data/dicts/*.txt
