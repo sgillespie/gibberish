@@ -5,87 +5,76 @@ Gibberish generates pronounceable passwords that are easy-to-remember and hard-t
 can also generate pseudo english passphrases.
 
 ## Prerequisites
-In order to build or install you will need
- * GHC (tested on 8.6.5)
- * Stack (tested on 2.1.3.1)
+
+In order to build Gibberish, you will need
+
+ * [GHC](https://www.haskell.org/downloads/) (tested on 9.6.2), _or_
+ * [Nix](https://nixos.org/download/) (tested on 2.18.1)
 
 ## Installing
-Gibberish is on [Hackage](https://hackage.haskell.org/package/elocrypt).  Installation is as easy as:
-```
-cabal install elocrypt
-```
 
-Binaries are also available:
- * [elocrypt-2.1.0-linux-bin.tar.gz](https://github.com/sgillespie/elocrypt/releases/download/v2.1.0/elocrypt-v2.1.0-linux-bin.tar.gz)
- * [elocrypt-2.1.0-osx-bin.exe](https://github.com/sgillespie/elocrypt/releases/download/v2.1.0/elocrypt-v2.1.0-osx-bin.tar.gz)
+Gibberish is on [Hackage](https://hackage.haskell.org/package/gibberish). The `gibber`
+executable can be installed with _cabal-install_:
 
-## Running
-Generate a list passwords:
-```
-elocrypt [length]
-```
-
-You can also generate random phrases (1 per line):
-```
-elocrypt --passphrases [min-length] [max-length]
-```
-
-## Obtaining the source
-
-Gibberish sources can be found 
- * https://github.com/sgillespie/gibberish
- * https://hackage.haskell.org/package/elocrypt
+    cabal install gibberish
 
 ## Building
 
-In order to build or install you will need
- * [GHC](https://www.haskell.org/ghc) (tested on 8.6.5)
- * [Haskell Stack](https://haskellstack.org) (tested on 2.1.3.1)
+The `gibber` executable can be built with _cabal-install_:
 
-Build gibberish:
-```
-stack setup
-stack build
-```
-Then, install (if desired):
-```
-stack install
-```
+    cabal build
+
+On Nix, the it can be built with:
+
+    nix build
+
+## Running
+
+Genarate a list of passwords:
+
+    gibber <length>
+
+Generate random phrases (1 per line):
+
+    gibber --passphrases <min-length> <max-length>
+
+To see all available options:
+
+    gibber --help
 
 ## API Documentation
 
-The full API documentation is on hackage @
-https://hackage.haskell.org/package/elocrypt/docs. To build the documentation yourself,
-run
+The full API documentation is on hackage at
+https://hackage.haskell.org/package/gibberish/docs. The documentation can also be built with:
 
-```
-stack haddock
-```
+    cabal haddock
 
-### API Examples
+## API Example
 
-You can use gibberish to generate words in any Haskell code, so long as you have installed
-gibberish. Generate a word by using Data.Elocrypt.newPassword
+Gibberish can be used to generate words or phrases in Haskell code. For example: generate
+a word by using `Data.Gibberish`:
 
-```
-import Data.Elocrypt
-...
--- Generate a word of length 10
-fooGen :: IO String
-fooGen = newPassword 10 `liftM` getStdGen
-```
 
-Alternatively, you can use Data.Elocrypt.mkPassword if you want to complete control of the
-random monad
+    import Data.Gibberish
+    import Data.Text (Text ())
+    ...
+    -- Generate a word of length 10
+    fooGen :: IO Text
+    fooGen = do
+      gen <- getStdGen
+      trigraph <- loadTrigraph English
 
-```
-import Data.Elocrypt
-import Control.Monad.Random
-...
--- Generate a word of length 10
-fooGen' :: IO String
-fooGen' = evalRand (mkPassword 10) `liftM` getStdGen
-```
+    let opts =
+          GenPasswordOpts
+            { woptsCapitals = False,
+              woptsDigits = False,
+              woptsSpecials = False,
+              woptsTrigraph = trigraph,
+              woptsLength = 10
+            }
+
+    let (word, _) = usingPass gen (genPassword opts)
+    pure (unWord word)
 
 ## Authors
 Sean Gillespie <sean@mistersg.net>
