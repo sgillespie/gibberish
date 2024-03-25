@@ -119,6 +119,8 @@ executable gibber
   other-modules:
     PackageInfo_gibberish
     Paths_gibberish
+  autogen-modules:
+    Paths_gibberish
   hs-source-dirs: app
 
 executable gibber-gen-trigraph
@@ -151,6 +153,8 @@ test-suite spec
     Data.Gibberish.TypesSpec
     Data.Gibberish.UtilsSpec
     Paths_gibberish
+  autogen-modules:
+    Paths_gibberish
   other-extensions:
     OverloadedLists
 
@@ -159,6 +163,8 @@ test-suite golden
   main-is:        Golden.hs
   other-modules:
     Paths_gibberish,
+  autogen-modules:
+    Paths_gibberish
   type:
     exitcode-stdio-1.0
 
@@ -175,4 +181,6 @@ benchmark main
   main-is:        Main.hs
   hs-source-dirs: bench
   other-modules:
+    Paths_gibberish
+  autogen-modules:
     Paths_gibberish
