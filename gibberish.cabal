@@ -117,7 +117,6 @@ executable gibber
   import:         common-exe
   main-is:        Main.hs
   other-modules:
-    PackageInfo_gibberish
     Paths_gibberish
   autogen-modules:
     Paths_gibberish

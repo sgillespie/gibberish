@@ -9,7 +9,7 @@ import Data.Text.IO qualified as Text
 import Data.Version (showVersion)
 import Options.Applicative hiding (columns)
 import Options.Applicative.Help.Pretty
-import PackageInfo_gibberish (name, version)
+import Paths_gibberish (version)
 import System.Environment (getArgs)
 import Prelude hiding (Word ())
 
@@ -255,7 +255,7 @@ showVersion' :: Text
 showVersion' = name' <> " version " <> version'
   where
     version' = Text.pack (showVersion version)
-    name' = Text.toTitle (Text.pack name)
+    name' = "Gibberish"
 
 toLanguage :: LanguageOpt -> Language
 toLanguage OptEnglish = English
