@@ -28,7 +28,7 @@ common common-options
     mtl,
     text,
     text-show,
-    transformers
+    transformers >= 0.6
   ghc-options:
     -Wall
     -Wcompat

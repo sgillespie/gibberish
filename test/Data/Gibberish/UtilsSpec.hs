@@ -4,7 +4,7 @@ import Data.Gibberish.Monad.Pass (usingPass)
 import Data.Gibberish.Utils
 import Test.Gibberish.Gen qualified as Gen
 
-import Data.Char (isLowerCase, isUpperCase, toUpper)
+import Data.Char (isLower, isUpper, toUpper)
 import Data.Maybe (listToMaybe)
 import Data.Ratio ((%))
 import Data.Text qualified as Text
@@ -22,7 +22,7 @@ spec = do
       ix <- forAll $ Gen.int (Range.linear 0 (Text.length t - 1))
       res <- update1 (pure . toUpper) t ix
 
-      assert $ isUpperCase (Text.index res ix)
+      assert $ isUpper (Text.index res ix)
 
   describe "updateR" $ do
     it "updates everything when ratio is infinity" $ hedgehog $ do
@@ -34,7 +34,7 @@ spec = do
           (res, _) = usingPass randomGen (updateR (pure . toUpper) prob t)
       annotateShow res
 
-      assert $ Text.all isUpperCase res
+      assert $ Text.all isUpper res
 
     it "updates nothing when ratio is zero" $ hedgehog $ do
       t <- forAll $ Gen.text (Range.linear 1 250) Gen.lower
@@ -43,7 +43,7 @@ spec = do
       let (res, _) = usingPass randomGen (updateR (pure . toUpper) (0 % 1) t)
       annotateShow res
 
-      assert $ Text.all isLowerCase res
+      assert $ Text.all isLower res
 
   describe "findIndices" $ do
     it "agrees with findIndex" $ hedgehog $ do

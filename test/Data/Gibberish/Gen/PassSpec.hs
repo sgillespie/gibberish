@@ -57,7 +57,7 @@ spec = do
       let (Word pass, _) = usingPass randomGen (genPassword opts')
       annotateShow pass
 
-      assert $ Text.all (not . isUpperCase) pass
+      assert $ Text.all (not . isUpper) pass
 
     it "has at least one capital when enabled" $ hedgehog $ do
       trigraph <- forAll genTrigraph
@@ -76,7 +76,7 @@ spec = do
       let (Word pass, _) = usingPass randomGen (genPassword opts')
       annotateShow pass
 
-      assert $ Text.any (\c -> isUpperCase c || isPunctuation c) pass
+      assert $ Text.any (\c -> isUpper c || isPunctuation c) pass
 
     it "sometimes has multiple capitals when enabled" $ hedgehog $ do
       trigraph <- forAll genTrigraph
@@ -96,7 +96,7 @@ spec = do
       annotateShow pass
 
       cover 10 "has multiple capitals" $
-        Text.length (Text.filter isUpperCase pass) > 1
+        Text.length (Text.filter isUpper pass) > 1
 
     it "has at least one digit when enabled" $ hedgehog $ do
       trigraph <- forAll genTrigraph
