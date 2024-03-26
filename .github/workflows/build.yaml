@@ -24,13 +24,13 @@ jobs:
         name: sgillespie
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - name: Build executable
-      run: nix build .
+      run: nix build -L .
     - name: Run tests
       run: |
-        nix build \
+        nix build -L \
           .#checks.x86_64-linux."gibberish:test:spec" \
           .#checks.x86_64-linux."gibberish:test:golden"
     - name: Run static checks
-      run: nix build .#checks.x86_64-linux.fourmoluCheck .#checks.x86_64-linux.hlintCheck
+      run: nix build -L .#checks.x86_64-linux.fourmoluCheck .#checks.x86_64-linux.hlintCheck
     - name: Run benchmarks
-      run: nix build .#gibberish:bench:main
+      run: nix build -L .#gibberish:bench:main
