@@ -29,7 +29,7 @@
             (final: prev: {
               gibberishProject = final.haskell-nix.cabalProject' {
                 src = ./.;
-                compiler-nix-name = "ghc962";
+                compiler-nix-name = "ghc964";
                 name = "gibberish";
 
                 flake.variants.profiled = {
