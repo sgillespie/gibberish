@@ -18,6 +18,14 @@ executable can be installed with _cabal-install_:
 
     cabal install gibberish
 
+Alternatively, binary distributions are available for x86_64 linux and windows:
+
+ * [gibberish-3.0.0.0-x86_64-linux.tar.gz](https://github.com/sgillespie/gibberish/releases/download/v3.0.0.0/gibberish-3.0.0.0-x86_64-linux.tar.gz)
+ * [gibberish-3.0.0.0-x86_64-windows.zip](https://github.com/sgillespie/gibberish/releases/download/v3.0.0.0/gibberish-3.0.0.0-x86_64-windows.zip)
+
+Unfortunately I don't have access to macOS or aarch64. If you can help me build binaries
+for those platforms, please open an issue!
+
 ## Building
 
 The `gibber` executable can be built with _cabal-install_:
