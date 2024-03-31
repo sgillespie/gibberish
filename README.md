@@ -72,7 +72,7 @@ a word by using `Data.Gibberish`:
       gen <- getStdGen
       trigraph <- loadTrigraph English
 
-    let opts =
+      let opts =
           GenPasswordOpts
             { woptsCapitals = False,
               woptsDigits = False,
@@ -81,8 +81,8 @@ a word by using `Data.Gibberish`:
               woptsLength = 10
             }
 
-    let (word, _) = usingPass gen (genPassword opts)
-    pure (unWord word)
+      let (word, _) = usingPass gen (genPassword opts)
+      pure (unWord word)
 
 ## Authors
 Sean Gillespie <sean@mistersg.net>
