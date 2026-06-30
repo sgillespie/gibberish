@@ -23,12 +23,12 @@ data-files:
 
 common common-options
   build-depends:
-    base >=4.16 && <4.20,
-    containers ^>=0.6,
-    mtl ^>=2.3,
-    text >=1.2 && <2.2,
+    base >=4.16 && <5,
+    containers,
+    mtl,
+    text,
     text-show ^>=3.10,
-    transformers ^>=0.6.1
+    transformers,
   ghc-options:
     -Wall
     -Wcompat

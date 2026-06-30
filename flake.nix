@@ -31,7 +31,7 @@
               let
                 project = final.haskell-nix.cabalProject' {
                   src = ./.;
-                  compiler-nix-name = "ghc964";
+                  compiler-nix-name = "ghc910";
                   name = "gibberish";
 
                   flake.variants.profiled = {
@@ -67,7 +67,7 @@
                 final.haskell-nix.tool
                   final.gibberishProject.args.compiler-nix-name
                   "fourmolu"
-                  "0.13.1.0";
+                  "0.19.0.1";
 
               hlint =
                 final.haskell-nix.tool
