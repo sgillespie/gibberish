@@ -2,194 +2,198 @@
   inputs = {
     haskellNix.url = "github:input-output-hk/haskell.nix";
     nixpkgs.follows = "haskellNix/nixpkgs-unstable";
+    flakeParts.url = "github:hercules-ci/flake-parts";
     flakeUtils.url = "github:numtide/flake-utils";
-    feedback.url = "github:NorfairKing/feedback";
+    treefmt.url = "github:numtide/treefmt-nix";
   };
 
-  outputs = { self, nixpkgs, haskellNix, flakeUtils, feedback }:
-    let
-      supportedSystems = [
-        "x86_64-linux"
+  outputs = { haskellNix, nixpkgs, flakeParts, flakeUtils, treefmt, ... }@inputs:
+    flakeParts.lib.mkFlake { inherit inputs; } ({
+      config,
+      withSystem,
+      moduleWithSystem,
+      ...
+    }@top: {
+      imports = [
+        treefmt.flakeModule
+
+        ({
+          perSystem = { system, ... }: {
+            _module.args.pkgs = import inputs.nixpkgs {
+              inherit system;
+              overlays = [ haskellNix.overlay ];
+            };
+          };
+        })
       ];
 
-    in
-      flakeUtils.lib.eachSystem supportedSystems (system:
-        let
-          mkPkg = name: value:
-            with pkgs.lib; {
-              name = builtins.replaceStrings
-                [ "x86_64-w64-" "x86_64-unknown-linux-" ]
-                [ "" "" ]
-                name;
-              value = value;
+      systems = flakeUtils.lib.defaultSystems;
+
+      flake = {
+      };
+
+      perSystem = {
+        system,
+        config,
+        pkgs,
+        ...
+      }: {
+        config = 
+          let
+            haskellProject = (pkgs.haskell-nix.cabalProject' {
+              src = ./.;
+              compiler-nix-name = "ghc910";
+              name = "gibberish";
+
+              flake.variants.profiled = {
+                modules = [{
+                  enableLibraryProfiling = true;
+                  enableProfiling = true;
+                }];
+              };
+
+              shell = {
+                tools = {
+                  cabal = "latest";
+                  haskell-language-server = "latest";
+                  hp2pretty = "latest";
+                };
+
+                nativeBuildInputs = [ hlint ];
+                withHoogle = true;
+
+                # We don't need cross platforms in the shell; should speed up evaluation
+                crossPlatforms = _: [];
+              };
+            }).appendOverlays [
+              pkgs.haskell-nix.haskellLib.projectOverlays.projectComponents
+            ];
+
+            haskellFlake = haskellProject.flake {
+              crossPlatforms = p:
+               pkgs.lib.optionals pkgs.stdenv.hostPlatform.isx86_64 (
+                 [p.mingwW64] ++
+                 (pkgs.lib.optionals pkgs.stdenv.hostPlatform.isLinux
+                   [p.musl64]));
             };
 
-          overlays = [
-            haskellNix.overlay
+            hlint = 
+              pkgs.haskell-nix.tool 
+                haskellProject.args.compiler-nix-name 
+                "hlint"
+                "latest";
 
-            (final: prev:
-              let
-                project = final.haskell-nix.cabalProject' {
-                  src = ./.;
-                  compiler-nix-name = "ghc910";
-                  name = "gibberish";
+           # Source filtered by .gitignore, for read-only static-analysis checks.
+           lintSrc = pkgs.nix-gitignore.gitignoreSource [ ] ./.;
 
-                  flake.variants.profiled = {
-                    modules = [{
-                    enableLibraryProfiling = true;
-                    enableProfiling = true;
-                    }];
-                  };
+           mkLintCheck = name: nativeBuildInputs: checkPhase:
+             pkgs.runCommandLocal "gibberish-${name}-check" { inherit nativeBuildInputs; } ''
+               cd ${lintSrc}
+               ${checkPhase}
+               touch $out
+             '';
 
-                  shell = {
-                    tools = {
-                      cabal = "latest";
-                      haskell-language-server = "latest";
-                      hp2pretty = "latest";
-                    };
+           cpExesCmd = project:
+             let
+               inherit (pkgs) lib;
+               exes = lib.collect lib.isDerivation project.exes;
+             in ''
+               # Create an intermediate dir
+               mkdir release
 
-                    nativeBuildInputs = with final; [fourmolu hlint];
-                    withHoogle = true;
+               # Copy exes to intermediate dir
+               ${lib.concatMapStringsSep
+                   "\n"
+                   (exe: "cp --verbose --remove-destination --update=none ${exe}/bin/* release")
+                   exes}
+             '';
 
-                    # No cross platforms should speed up evaluation
-                    crossPlatforms = _: [];
-                  };
-                };
-              in {
-                gibberishProject = project.appendOverlays [
-                  # Add exes
-                  final.haskell-nix.haskellLib.projectOverlays.projectComponents
-                ];
-              })
+           mkDistMusl =
+             let
+               project = haskellProject.projectCross.musl64;
+               name = "gibberish-${version}-x86_64-linux";
+               version = project.exes.gibber.identifier.version;
+             in
+               pkgs.runCommand
+                 "gibberish-musl64"
+                 {}
+                 ''
+                   mkdir -p $out
 
-            (final: prev: {
-              fourmolu =
-                final.haskell-nix.tool
-                  final.gibberishProject.args.compiler-nix-name
-                  "fourmolu"
-                  "0.19.0.1";
+                   # Copy exes to intermediate dir
+                   ${cpExesCmd project}
 
-              hlint =
-                final.haskell-nix.tool
-                  final.gibberishProject.args.compiler-nix-name
-                  "hlint"
-                  "latest";
+                   # Package distribution
+                   cd release
+                   dist_file=${name}.tar.gz
+                   tar -cvzf $out/$dist_file .
+                 '';
 
-              fourmoluCheck =
-                prev.runCommand
-                  "fourmolu-check"
-                  { buildInputs = [final.fourmolu]; }
-                  ''
-                    cd "${final.gibberishProject.args.src}"
-                    fourmolu --mode check src test
-                    [[ "$?" -eq "0" ]] && touch $out
-                  '';
+           mkDistWin64 =
+             let
+               inherit (pkgs) lib;
+               project = haskellProject.projectCross.mingwW64;
+               name = "gibberish-${version}-x86_64-windows";
+               version = project.exes.gibber.identifier.version;
+               env = {
+                 nativeBuildInputs = [pkgs.zip];
+               };
+             in
+               pkgs.runCommand
+                 "gibberish-win64"
+                 env
+                 ''
+                   mkdir -p $out
 
-              hlintCheck =
-                prev.runCommand
-                  "hlint-check"
-                  { buildInputs = [final.hlint]; }
-                  ''
-                    cd "${final.gibberishProject.args.src}"
-                    hlint src test
-                    [[ "$?" -eq "0" ]] && touch $out
-                  '';
-            })
-          ];
+                   # Copy exes to intermediate dir
+                   ${cpExesCmd project}
 
-          pkgs = import nixpkgs {
-            inherit system overlays;
-            inherit (haskellNix) config;
-          };
+                   # Package distribution
+                   cd release
+                   dist_file=${name}.zip
+                   find . -type f | xargs zip $out/$dist_file
+                 '';
 
-          flake = pkgs.gibberishProject.flake {
-            crossPlatforms = p:
-              pkgs.lib.optionals pkgs.stdenv.hostPlatform.isx86_64 (
-                [p.mingwW64] ++
-                (pkgs.lib.optionals pkgs.stdenv.hostPlatform.isLinux
-                  [p.musl64]));
-          };
+          in {
+            inherit (haskellFlake) devShells;
 
-          cpExesCmd = project:
-            let
-              inherit (pkgs) lib;
-              exes = lib.collect lib.isDerivation project.exes;
-            in ''
-              # Create an intermediate dir
-              mkdir release
+            # Static analysis as read-only checks (gated by `nix flake check`),
+            # deliberately kept out of treefmt so `nix fmt` only ever formats.
+            checks = haskellFlake.checks // {
+              statix = mkLintCheck "statix" [ pkgs.statix ] "statix check";
+              deadnix = mkLintCheck "deadnix" [ pkgs.deadnix ] "deadnix --fail .";
+              hlint = mkLintCheck "hlint" [ hlint ] "hlint .";
+            };
 
-              # Copy exes to intermediate dir
-              ${lib.concatMapStringsSep
-                  "\n"
-                  (exe: "cp --verbose --remove-destination --update=none ${exe}/bin/* release")
-                  exes}
-            '';
-
-          mkDistMusl =
-            let
-              project = pkgs.gibberishProject.projectCross.musl64;
-              name = "gibberish-${version}-x86_64-linux";
-              version = project.exes.gibber.identifier.version;
-            in
-              pkgs.runCommand
-                "gibberish-musl64"
-                {}
-                ''
-                  mkdir -p $out
-
-                  # Copy exes to intermediate dir
-                  ${cpExesCmd project}
-
-                  # Package distribution
-                  cd release
-                  dist_file=${name}.tar.gz
-                  tar -cvzf $out/$dist_file .
-                '';
-
-          mkDistWin64 =
-            let
-              inherit (pkgs) lib;
-              project = pkgs.gibberishProject.projectCross.mingwW64;
-              name = "gibberish-${version}-x86_64-windows";
-              version = project.exes.gibber.identifier.version;
-              env = {
-                nativeBuildInputs = [pkgs.zip];
-              };
-            in
-              pkgs.runCommand
-                "gibberish-win64"
-                env
-                ''
-                  mkdir -p $out
-
-                  # Copy exes to intermediate dir
-                  ${cpExesCmd project}
-
-                  # Package distribution
-                  cd release
-                  dist_file=${name}.zip
-                  find . -type f | xargs zip $out/$dist_file
-                '';
-        in
-          with pkgs.lib;
-          flake // {
-            apps = {
-              default = flake.apps."gibberish:exe:gibber";
-            } // mapAttrs' mkPkg flake.apps;
-
-            checks = {
-              inherit (pkgs) hlintCheck fourmoluCheck;
-            } //
-            filterAttrs (name: _: !hasPrefix "profiled" name)
-              (mapAttrs' mkPkg flake.checks);
-
-            packages = {
-              default = flake.packages."gibberish:exe:gibber";
-            } // pkgs.lib.optionalAttrs (system == "x86_64-linux") {
+            packages = haskellFlake.packages // pkgs.lib.optionalAttrs (system == "x86_64-linux") {
               dist-musl = mkDistMusl;
               dist-win64 = mkDistWin64;
-            } // mapAttrs' mkPkg flake.packages;
-          });
+            };
+
+            # Pure formatters only (`nix fmt`). Static analysis lives in checks.
+            treefmt = {
+              projectRootFile = "flake.nix";
+
+              programs = {
+                # Haskell — fourmolu picks up ./fourmolu.yaml automatically.
+                fourmolu.enable = true;
+                cabal-gild.enable = true; # *.cabal + cabal.project
+
+                # Nix
+                alejandra.enable = true;
+
+                # Markdown
+                mdformat = {
+                  enable = true;
+                  settings.wrap = "keep"; # don't re-wrap prose
+                  plugins = ps: [ ps.mdformat-gfm ]; # GitHub-flavored markdown
+                };
+              };
+            };
+          };
+      };
+    });
+
 
   nixConfig = {
     trusted-public-keys = [
