@@ -45,7 +45,6 @@
         };
 
         buildInputs = with pkgs; [
-          just # command runner
           statix # nix static analysis
           deadnix # nix dead-code detector
           hlint # Haskell static analysis
