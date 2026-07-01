@@ -1,4 +1,4 @@
-{...} @ top: {
+{
   perSystem = {pkgs, ...}: let
     # Source filtered by .gitignore, for read-only static-analysis checks.
     lintSrc = pkgs.nix-gitignore.gitignoreSource [] ./..;

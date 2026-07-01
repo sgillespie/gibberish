@@ -1,14 +1,11 @@
-{inputs, ...}: {
+{
   perSystem = {
     system,
-    config,
     haskellProject,
     lib,
     pkgs,
     ...
   }: let
-    inherit (pkgs.stdenv.hostPlatform) isx86_64 isLinux;
-
     cpExesCmd = project: let
       exes = lib.collect lib.isDerivation project.exes;
     in ''
@@ -23,9 +20,9 @@
     '';
 
     mkDistMusl = let
+      inherit (project.exes.gibber.identifier) version;
       project = haskellProject.projectCross.musl64;
       name = "gibberish-${version}-x86_64-linux";
-      version = project.exes.gibber.identifier.version;
     in
       pkgs.runCommand
       "gibberish-musl64"
@@ -43,9 +40,9 @@
       '';
 
     mkDistWin64 = let
+      inherit (project.exes.gibber.identifier) version;
       project = haskellProject.projectCross.mingwW64;
       name = "gibberish-${version}-x86_64-windows";
-      version = project.exes.gibber.identifier.version;
       env = {
         nativeBuildInputs = [pkgs.zip];
       };

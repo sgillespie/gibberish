@@ -8,19 +8,12 @@
   };
 
   outputs = {
-    haskellNix,
-    nixpkgs,
     flakeParts,
     flakeUtils,
     treefmt,
     ...
   } @ inputs:
-    flakeParts.lib.mkFlake {inherit inputs;} ({
-      config,
-      withSystem,
-      moduleWithSystem,
-      ...
-    }: {
+    flakeParts.lib.mkFlake {inherit inputs;} {
       imports = [
         treefmt.flakeModule
 
@@ -35,7 +28,7 @@
       ];
 
       systems = flakeUtils.lib.defaultSystems;
-    });
+    };
 
   nixConfig = {
     trusted-public-keys = [

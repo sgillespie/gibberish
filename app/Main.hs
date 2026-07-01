@@ -41,7 +41,7 @@ data CommonOpts = CommonOpts
   }
   deriving stock (Eq, Show)
 
-data WordOpts = WordOpts
+newtype WordOpts = WordOpts
   {optLength :: Int}
   deriving stock (Eq, Show)
 
@@ -126,8 +126,7 @@ passphrases (CommonOpts {..}) (PhraseOpts {..}) gen = do
 
 execParser' :: ParserInfo a -> IO a
 execParser' info' =
-  execParserPure defaultPrefs info' <$> getArgs
-    >>= handleParseResult . overFailure'
+  getArgs >>= (handleParseResult . overFailure') . execParserPure defaultPrefs info'
 
 overFailure' :: ParserResult a -> ParserResult a
 overFailure' = overFailure $ \help' -> help' {helpUsage = pure usage}
@@ -218,8 +217,7 @@ parseTypeOpts =
   (Left <$> parseWordOpts) <|> (Right <$> parsePhraseOpts)
 
 parseWordOpts :: Parser WordOpts
-parseWordOpts =
-  (WordOpts <$> parseLength)
+parseWordOpts = WordOpts <$> parseLength
 
 parsePhraseOpts :: Parser PhraseOpts
 parsePhraseOpts =

@@ -12,8 +12,6 @@
   ];
 
   perSystem = {
-    system,
-    config,
     lib,
     pkgs,
     ...
