@@ -10,7 +10,7 @@ default:
 
 # Build executables
 build:
-    nix build -v \
+    nix build \
       ".#gibberish:exe:gibber" \
       ".#gibberish:exe:gibber-gen-trigraph"
 
@@ -20,7 +20,7 @@ run *args:
 
 # Build release artifacts
 dist:
-    nix build -v \
+    nix build \
       ".#x86_64-linux-static-dist" \
       ".#x86_64-windows-dist"
 
@@ -28,28 +28,28 @@ dist:
 
 # Run the static analyzers (statix, deadnix, hlint)
 lint:
-    nix build -v \
+    nix build \
       ".#checks.{{ system }}.statix" \
       ".#checks.{{ system }}.deadnix" \
       ".#checks.{{ system }}.hlint"
 
 # Check formatting without writing changes
 fmt-check:
-    nix build -v ".#checks.{{ system }}.treefmt"
+    nix build ".#checks.{{ system }}.treefmt"
 
 # Run the test suites
 test:
-    nix build -v \
+    nix build \
       ".#checks.{{ system }}.gibberish:test:spec" \
       ".#checks.{{ system }}.gibberish:test:golden"
 
 # Run the benchmarks
 bench:
-    nix run -v ".#gibberish:bench:main"
+    nix run ".#gibberish:bench:main"
 
 # Run basic checks
 check-light:
-    nix build -v \
+    nix build \
       ".#checks.{{ system }}.statix" \
       ".#checks.{{ system }}.deadnix" \
       ".#checks.{{ system }}.hlint" \
@@ -59,7 +59,7 @@ check-light:
 
 # Run the full flake check (every check, all systems)
 check-full:
-    nix flake check -v
+    nix flake check
 
 ## Other development tools
 
