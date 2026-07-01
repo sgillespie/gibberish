@@ -12,6 +12,7 @@
   ];
 
   perSystem = {
+    config,
     lib,
     pkgs,
     ...
@@ -42,6 +43,14 @@
           haskell-language-server = "latest";
           hp2pretty = "latest";
         };
+
+        buildInputs = with pkgs; [
+          just # command runner
+          statix # nix static analysis
+          deadnix # nix dead-code detector
+          hlint # Haskell static analysis
+        ];
+        inputsFrom = [config.treefmt.build.devShell];
 
         withHoogle = true;
 

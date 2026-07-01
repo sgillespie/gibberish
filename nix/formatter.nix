@@ -5,18 +5,18 @@
       projectRootFile = "flake.nix";
 
       programs = {
-        # Haskell — fourmolu picks up ./fourmolu.yaml automatically.
-        fourmolu.enable = true;
-        cabal-gild.enable = true; # *.cabal + cabal.project
+        alejandra.enable = true; # Nix
+        just.enable = true; # Justfile
 
-        # Nix
-        alejandra.enable = true;
+        # Haskell
+        fourmolu.enable = true;
+        cabal-gild.enable = true;
 
         # Markdown
         mdformat = {
           enable = true;
-          settings.wrap = "keep"; # don't re-wrap prose
-          plugins = ps: [ps.mdformat-gfm]; # GitHub-flavored markdown
+          settings.wrap = "keep";
+          plugins = ps: [ps.mdformat-gfm];
         };
       };
     };
